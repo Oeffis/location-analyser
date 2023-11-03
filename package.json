@@ -1,0 +1,28 @@
+{
+  "name": "@oeffis/location-analyser",
+  "version": "0.0.1",
+  "description": "Analyses location data to detect proximity to public transit stops and trains. Can be used to learn from user behavior to predict enter/exit stops and trips.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oeffis/location-analyser.git"
+  },
+  "keywords": [
+    "public transit",
+    "transit",
+    "location",
+    "location services",
+    "gps",
+    "ble"
+  ],
+  "author": "Tim Vahlbrock",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Oeffis/location-analyser/issues"
+  },
+  "homepage": "https://github.com/Oeffis/location-analyser#readme"
+}
