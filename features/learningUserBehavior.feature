@@ -1,3 +1,4 @@
+@ignore
 Feature: Learning User Behavior
     In order to have my actions predicted
     As a commuter

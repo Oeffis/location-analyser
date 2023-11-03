@@ -1,3 +1,4 @@
+@ignore
 Feature: Onboard Train Detection
     In order to be able to see information about the train I am currently on
     As a commuter

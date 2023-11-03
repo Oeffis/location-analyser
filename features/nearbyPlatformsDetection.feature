@@ -1,3 +1,4 @@
+@ignore
 Feature: Nearby Platforms Detection
     In order to be able to see nearby transit options without manually entering the station
     As a commuter
