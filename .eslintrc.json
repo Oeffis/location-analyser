@@ -21,6 +21,10 @@
         "plugin:@typescript-eslint/strict-type-checked",
         "plugin:@typescript-eslint/stylistic-type-checked"
     ],
+    "ignorePatterns": [
+        "node_modules/",
+        "dist/"
+    ],
     "rules": {
         "@typescript-eslint/explicit-function-return-type": [
             "error",
