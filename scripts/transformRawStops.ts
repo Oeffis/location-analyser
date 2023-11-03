@@ -6,7 +6,7 @@ import { join } from "path";
 const parser = parse({ delimiter: ",", columns: true });
 parser.on("error", console.error);
 
-let newStops = "";
+let newStops = "id,parent,latitude,longitude\n";
 parser.on("readable", function () {
     let stop: RawStop | null;
     while ((stop = parser.read() as RawStop | null) !== null) {
@@ -17,7 +17,7 @@ parser.on("readable", function () {
 parser.on("end", function () {
     const compressed = deflate(newStops);
     fs.mkdirSync(join(__dirname, "../src/data"), { recursive: true });
-    fs.writeFileSync(join(__dirname, "../src/data/stops.pako"), compressed);
+    fs.writeFileSync(join(__dirname, "../src/data/stops.csv.pako"), compressed);
 });
 
 parser.write(fs.readFileSync(join(__dirname, "../raw/stops.txt")));
