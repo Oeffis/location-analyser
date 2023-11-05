@@ -7,6 +7,10 @@ Feature: Nearby Platforms Detection
         Given I am at 'GE Westfälische Hochschule'
         Then the id of the nearest platform is 'de:05513:6762:0:01'
 
+    Scenario: Detects no platforms when no location was set
+        Given No location was set
+        Then no nearby platforms are detected
+
     @ignore
     Scenario: Detects multiple nearby platforms
         Given I am near multiple platforms

@@ -6,3 +6,8 @@ Then<LocationAnalyzerWorld>("the id of the nearest platform is {string}", functi
     const status = this.locationAnalyzer.getStatus();
     assert.equal(status.stops[0].id, id);
 });
+
+Then<LocationAnalyzerWorld>("no nearby platforms are detected", function () {
+    const status = this.locationAnalyzer.getStatus();
+    assert.equal(status.stops.length, 0);
+});

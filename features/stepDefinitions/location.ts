@@ -11,3 +11,7 @@ const locationMap: Record<string, [number, number]> = {
 Given<LocationAnalyzerWorld>("I am at {string}", function (location: string) {
     this.locationAnalyzer.updateLocation(locationMap[location]);
 });
+
+Given<LocationAnalyzerWorld>("No location was set", function () {
+    this.locationAnalyzer.updateLocation(undefined);
+});
