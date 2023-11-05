@@ -3,9 +3,10 @@ Feature: Nearby Platforms Detection
     As a commuter
     I want to be able to detect nearby platforms
 
-    Scenario: Detects the platform when at exactly the right coordinates
+    Scenario: Detects the platform when exactly at the platform
         Given I am at 'GE Westfälische Hochschule'
         Then the id of the nearest platform is 'de:05513:6762:0:01'
+        And the distance to the nearest platform is 0.0m
 
     Scenario: Detects no platforms when no location was set
         Given No location was set
