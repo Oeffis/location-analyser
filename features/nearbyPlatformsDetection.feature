@@ -8,6 +8,12 @@ Feature: Nearby Platforms Detection
         Then the id of the nearest platform is 'de:05513:6762:0:01'
         And the distance to the nearest platform is 0.0m
 
+    @ignore
+    Scenario: Detects the platform when I am near the platform
+        Given I am 100.0 m west of 'GE Westfälische Hochschule'
+        Then the id of the nearest platform is 'de:05513:6762:0:01'
+        And the distance to the nearest platform is 10.0m
+
     Scenario: Detects no platforms when no location was set
         Given No location was set
         Then no nearby platforms are detected

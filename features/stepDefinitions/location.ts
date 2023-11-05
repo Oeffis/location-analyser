@@ -12,6 +12,28 @@ Given<LocationAnalyzerWorld>("I am at {string}", function (location: string) {
     this.locationAnalyzer.updateLocation(locationMap[location]);
 });
 
+Given<LocationAnalyzerWorld>("I am {double} m {word} of {string}", function (distance: number, direction: string, location: string) {
+    let [latitude, longitude] = locationMap[location];
+    switch (direction) {
+        case "north":
+            latitude += distance / 111111;
+            break;
+        case "east":
+            longitude += Math.cos(latitude) * distance / 111111;
+            break;
+        case "south":
+            latitude -= distance / 111111;
+            break;
+        case "west":
+            longitude -= Math.cos(latitude) * distance / 111111;
+            break;
+        default:
+            throw new Error(`Unknown direction: ${direction}`);
+    }
+    console.log(`I am at ${latitude}, ${longitude}`);
+    this.locationAnalyzer.updateLocation([latitude, longitude]);
+});
+
 Given<LocationAnalyzerWorld>("No location was set", function () {
     this.locationAnalyzer.updateLocation(undefined);
 });
