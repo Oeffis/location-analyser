@@ -3,10 +3,9 @@ Feature: Nearby Platforms Detection
     As a commuter
     I want to be able to detect nearby platforms
 
-    Scenario: Detects the current platform
-        Given I am on a platform
-        When I check for my current status
-        Then the current platform is detected
+    Scenario: Detects the platform when at exactly the right coordinates
+        Given I am at 'GE Westfälische Hochschule'
+        Then the id of the nearest platform is 'de:05513:6762:0:01'
 
     @ignore
     Scenario: Detects multiple nearby platforms

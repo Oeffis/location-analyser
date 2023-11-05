@@ -1,6 +1,13 @@
+
 import { Given } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
-Given<LocationAnalyzerWorld>("I am on a platform", function () {
-    this.location = [51.5747889, 7.0311586];
+const locationMap: Record<string, [number, number]> = {
+    /* eslint-disable @typescript-eslint/naming-convention */
+    "GE Westfälische Hochschule": [51.5747889, 7.0311586]
+    /* eslint-enable @typescript-eslint/naming-convention */
+};
+
+Given<LocationAnalyzerWorld>("I am at {string}", function (location: string) {
+    this.location = locationMap[location];
 });

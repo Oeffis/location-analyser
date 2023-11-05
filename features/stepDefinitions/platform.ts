@@ -1,8 +1,10 @@
 import { Then } from "@cucumber/cucumber";
 import assert from "assert";
+import { getStatus } from "../../src/index";
 import { LocationAnalyzerWorld } from "../world";
 
-Then<LocationAnalyzerWorld>("the current platform is detected", function () {
-    assert.ok(this.status, "Status is not set");
-    assert.equal(this.status.stops[0].id, "de:05513:6762:0:01");
+Then<LocationAnalyzerWorld>("the id of the nearest platform is {string}", function (id: string) {
+    assert.ok(this.location);
+    const status = getStatus(this.location);
+    assert.equal(status.stops[0].id, id);
 });
