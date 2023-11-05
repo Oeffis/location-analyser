@@ -9,5 +9,5 @@ const locationMap: Record<string, [number, number]> = {
 };
 
 Given<LocationAnalyzerWorld>("I am at {string}", function (location: string) {
-    this.location = locationMap[location];
+    this.locationAnalyzer.updateLocation(locationMap[location]);
 });

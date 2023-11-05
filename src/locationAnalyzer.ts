@@ -3,6 +3,8 @@ import { join } from "node:path";
 import pako from "pako";
 
 export class LocationAnalyzer {
+    private currentLocation?: [number, number];
+
     public constructor(
         private stops: Stop[]
     ) { }
@@ -13,11 +15,22 @@ export class LocationAnalyzer {
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
     }
 
-    public getStatus(location: [number, number]): Status {
+    public updateLocation(location: [number, number]): void {
+        this.currentLocation = location;
+    }
+
+    public getStatus(): Status {
+        const currentLocation = this.currentLocation;
+        if (!currentLocation) {
+            return {
+                stops: []
+            };
+        }
+
         const sortedStops = this.stops
             .map(stop => ({
                 id: stop.id,
-                distance: this.distance(location, stop.location)
+                distance: this.distance(currentLocation, stop.location)
             }))
             .sort((a, b) => a.distance - b.distance);
         return { stops: sortedStops };
