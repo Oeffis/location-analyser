@@ -30,7 +30,7 @@ jobs:
 
         - name: Test
           run: |
-            npm run test
+            npx stryker run
 
         - name: Build
           run: |
