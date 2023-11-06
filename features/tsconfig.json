@@ -2,7 +2,8 @@
     "extends": "../tsconfig.json",
     "include": [
         "**/*.ts",
-        "../cucumber.mjs"
+        "../cucumber.mjs",
+        "../stryker.config.mjs"
     ],
     "compilerOptions": {
         "esModuleInterop": true
