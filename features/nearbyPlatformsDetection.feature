@@ -23,9 +23,3 @@ Feature: Nearby Platforms Detection
         When I check for my current status
         Then the current platform is detected
         And nearby platforms are detected
-
-    @ignore
-    Scenario: Detects no platform
-        Given I am on a platform
-        When I check for my current status
-        Then no nearby platforms are detected
