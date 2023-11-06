@@ -10,12 +10,18 @@ const locationMap: Record<string, GeoLocation> = {
     "GE Westfälische Hochschule": {
         latitude: 51.5747889,
         longitude: 7.0311586
+    },
+    "Gelsenkirchen Hbf": {
+        latitude: 51.5049259,
+        longitude: 7.1022064
     }
     /* eslint-enable @typescript-eslint/naming-convention */
 };
 
 Given<LocationAnalyzerWorld>("I am at {string}", function (location: string) {
-    this.locationAnalyzer.updateLocation(locationMap[location]);
+    const locationCoords = locationMap[location];
+    assert.ok(locationCoords, `Location ${location} not found`);
+    this.locationAnalyzer.updateLocation(locationCoords);
 });
 
 Given<LocationAnalyzerWorld>("I am {double} m {word} of {string}", function (distance: number, direction: Direction, location: string) {

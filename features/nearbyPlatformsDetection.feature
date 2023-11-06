@@ -17,9 +17,26 @@ Feature: Nearby Platforms Detection
         Given No location was set
         Then no nearby platforms are detected
 
-    @ignore
     Scenario: Detects multiple nearby platforms
-        Given I am near multiple platforms
-        When I check for my current status
-        Then the current platform is detected
-        And nearby platforms are detected
+        Given I am at "Gelsenkirchen Hbf"
+        Then the ids of the nearest platforms are:
+            | de:05513:5613_Parent |
+            | de:05513:5613:2:10   |
+            | de:05513:5613:2:11   |
+            | de:05513:5613:90:5   |
+            | de:05513:5613:90:4   |
+            | de:05513:5613:91:6   |
+            | de:05513:5613:91:7   |
+            | de:05513:5613:98:8   |
+            | de:05513:5613:98:25  |
+            | de:05513:5613:1:01   |
+            | de:05513:5613:1:04   |
+            | de:05513:5613:1:07   |
+            | de:05513:5613:1:10   |
+            | de:05513:5613:1:05   |
+            | de:05513:5613:1:02   |
+            | de:05513:5613:1:08   |
+            | de:05513:5613:1:11   |
+            | de:05513:5613:1:06   |
+            | de:05513:5613:1:03   |
+            | de:05513:5613:1:09   |
