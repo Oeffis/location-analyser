@@ -35,3 +35,15 @@ jobs:
         - name: Build
           run: |
             npm run build
+
+        - name: Upload Stryker Report
+          uses: actions/upload-artifact@v2
+          with:
+            name: mutation-report
+            path: reports/mutation
+          
+        - name: Upload Build
+          uses: actions/upload-artifact@v2
+          with:
+            name: build
+            path: dist
