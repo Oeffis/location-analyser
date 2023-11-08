@@ -54,3 +54,9 @@ Feature: Nearby Platforms Detection
         But I add the VRR stops
         And I am at 'GE Westfälische Hochschule'
         Then the id of the nearest platform is 'de:05513:6762:0:01'
+
+    Scenario: Updates status when the position changes
+        Given I am 10.0 m west of 'GE Westfälische Hochschule'
+        Then the distance to the nearest platform is 10.0m
+        When I am at 'GE Westfälische Hochschule'
+        Then the distance to the nearest platform is 0.0m
