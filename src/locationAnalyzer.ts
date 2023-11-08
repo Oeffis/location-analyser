@@ -45,7 +45,7 @@ export class LocationAnalyzer {
         this.invalidateStatus();
     }
 
-    public static async forVRR(): Promise<LocationAnalyzer> {
+    public static async forVrr(): Promise<LocationAnalyzer> {
         return new LocationAnalyzer(await getVrrStops());
     }
 }
