@@ -5,6 +5,7 @@ import pako from "pako";
 
 export class LocationAnalyzer {
     private currentLocation?: GeoLocation;
+    private status?: Status;
 
     public constructor(
         private stops: Stop[]
@@ -12,9 +13,19 @@ export class LocationAnalyzer {
 
     public updateLocation(location?: GeoLocation): void {
         this.currentLocation = location;
+        this.invalidateStatus();
+    }
+
+    private invalidateStatus(): void {
+        this.status = undefined;
     }
 
     public getStatus(): Status {
+        this.status = this.status ?? this.calculateStatus();
+        return this.status;
+    }
+
+    private calculateStatus(): Status {
         const currentLocation = this.currentLocation;
         if (!currentLocation) {
             return {
