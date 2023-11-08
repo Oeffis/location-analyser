@@ -1,7 +1,5 @@
 import { getDistance } from "geolib";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import pako from "pako";
+import { getVrrStops } from "./getVrrStops";
 
 export class LocationAnalyzer {
     private currentLocation?: GeoLocation;
@@ -47,20 +45,8 @@ export class LocationAnalyzer {
         this.invalidateStatus();
     }
 
-    public static forVRR(): LocationAnalyzer {
-        const zippedCSVStopps = readFileSync(join(__dirname, "./data/stops.csv.pako"));
-        const csvStopps = pako.inflate(zippedCSVStopps, { to: "string" });
-        const lines = csvStopps.split("\n");
-        const stopLines = lines.slice(1);
-        const stops = stopLines.map(line => ({
-            id: line.split(",")[0],
-            parent: line.split(",")[1],
-            location: {
-                latitude: Number(line.split(",")[2]),
-                longitude: Number(line.split(",")[3])
-            }
-        } as Stop));
-        return new LocationAnalyzer(stops);
+    public static async forVRR(): Promise<LocationAnalyzer> {
+        return new LocationAnalyzer(await getVrrStops());
     }
 }
 

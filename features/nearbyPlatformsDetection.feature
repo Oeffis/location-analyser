@@ -3,6 +3,9 @@ Feature: Nearby Platforms Detection
     As a commuter
     I want to be able to detect nearby platforms
 
+    Background:
+        Given I add the VRR stops
+
     Scenario: Detects the platform when exactly at the platform
         Given I am at 'GE Westfälische Hochschule'
         Then the id of the nearest platform is 'de:05513:6762:0:01'
@@ -45,3 +48,9 @@ Feature: Nearby Platforms Detection
         Given I do not configure any stops initially
         But I am at 'GE Westfälische Hochschule'
         Then no nearby platforms are detected
+
+    Scenario: Stops are added later
+        Given I do not configure any stops initially
+        But I add the VRR stops
+        And I am at 'GE Westfälische Hochschule'
+        Then the id of the nearest platform is 'de:05513:6762:0:01'
