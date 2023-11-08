@@ -40,3 +40,8 @@ Feature: Nearby Platforms Detection
             | de:05513:5613:1:06   |
             | de:05513:5613:1:03   |
             | de:05513:5613:1:09   |
+
+    Scenario: No stops added
+        Given I do not configure any stops initially
+        But I am at 'GE Westfälische Hochschule'
+        Then no nearby platforms are detected

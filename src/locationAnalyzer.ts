@@ -8,7 +8,7 @@ export class LocationAnalyzer {
     private status?: Status;
 
     public constructor(
-        private stops: Stop[]
+        private stops: Stop[] = []
     ) { }
 
     public updateLocation(location?: GeoLocation): void {
@@ -40,6 +40,11 @@ export class LocationAnalyzer {
             }))
             .sort((a, b) => a.distance - b.distance);
         return { stops: sortedStops };
+    }
+
+    public updateStops(stops: Stop[]): void {
+        this.stops = stops;
+        this.invalidateStatus();
     }
 
     public static forVRR(): LocationAnalyzer {
