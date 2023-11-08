@@ -10,3 +10,7 @@ Given<LocationAnalyzerWorld>("I do not configure any stops initially", function 
 Given<LocationAnalyzerWorld>("I add the VRR stops", async function () {
     this.locationAnalyzer.updateStops(await getVrrStops());
 });
+
+Given<LocationAnalyzerWorld>("I use a location analyzer with the VRR stops", async function () {
+    this.locationAnalyzer = await LocationAnalyzer.forVRR();
+});

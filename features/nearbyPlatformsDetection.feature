@@ -4,7 +4,7 @@ Feature: Nearby Platforms Detection
     I want to be able to detect nearby platforms
 
     Background:
-        Given I add the VRR stops
+        Given I use a location analyzer with the VRR stops
 
     Scenario: Detects the platform when exactly at the platform
         Given I am at 'GE Westfälische Hochschule'
