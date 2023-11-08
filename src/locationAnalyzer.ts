@@ -59,7 +59,6 @@ export interface Status {
 
 export interface Stop {
     id: string;
-    parent: string;
     location: GeoLocation;
 }
 

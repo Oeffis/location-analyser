@@ -13,7 +13,6 @@ export async function getVrrStops(): Promise<Stop[]> {
 function lineToStop(line: string): Stop {
     return {
         id: line.split(",")[0],
-        parent: line.split(",")[1],
         location: {
             latitude: Number(line.split(",")[2]),
             longitude: Number(line.split(",")[3])
