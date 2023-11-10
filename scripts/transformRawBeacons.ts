@@ -1,5 +1,6 @@
 import { ok as assertOk } from "assert";
 import { readFileSync } from "fs";
+import { getVrrStops } from "../src/getVrrStops";
 
 class BufferedReader {
     public offset = 0;
@@ -46,33 +47,61 @@ class BufferedReader {
     }
 }
 
-const buffer = readFileSync("raw/STOP_AREA_Beacon.bin");
-const bufferedReader = new BufferedReader(buffer);
-const beaconCount = bufferedReader.readInt32LE();
-const beacons: Beacon[] = [];
+async function main(): Promise<void> {
+    const beacons = getBeacons();
+    const vrrStops = await getVrrStops();
 
-while (bufferedReader.canRead()) {
-    const string = bufferedReader.readString();
-    const splitted = string.split("/");
-    const type = splitted[0];
-    const splitted2 = splitted[1].split(":");
-    const uuid = splitted2[0].toUpperCase();
-    const major = parseInt(splitted2[1], 16);
-    const minor = parseInt(splitted2[2], 16);
+    const beaconMap = new Map<string, Beacon>();
+    beacons.forEach(beacon => beaconMap.set(beacon.globalId, beacon));
 
-    const globalId = bufferedReader.readString();
-    bufferedReader.offset += 4;
-
-    beacons.push({
-        type,
-        uuid,
-        major,
-        minor,
-        globalId
+    const stopsWithBeacons = vrrStops.filter(stop => {
+        const result = beacons.find(beacon => beacon.globalId && stop.id.startsWith(beacon.globalId));
+        if (result) {
+            console.log(`${stop.id} has a beacon with id ${result.globalId}`);
+        }
+        return result !== undefined;
     });
+
+    console.log(`stops with beacons: ${stopsWithBeacons.length} (${stopsWithBeacons.length / vrrStops.length * 100}%)`);
+
+    const beaconsWithoutStop = beacons.filter(beacon => {
+        const result = vrrStops.find(stop => stop.id.startsWith(beacon.globalId));
+        return result === undefined;
+    });
+
+    console.log(`beacons without stop: ${beaconsWithoutStop.length} (${beaconsWithoutStop.length / beacons.length * 100}%)`);
 }
 
-assertOk(beacons.length === beaconCount, "beacon count mismatch");
+function getBeacons(): Beacon[] {
+    const buffer = readFileSync("raw/STOP_AREA_Beacon.bin");
+    const bufferedReader = new BufferedReader(buffer);
+    const beaconCount = bufferedReader.readInt32LE();
+    const beacons: Beacon[] = [];
+
+    while (bufferedReader.canRead()) {
+        const string = bufferedReader.readString();
+        const splitted = string.split("/");
+        const type = splitted[0];
+        const splitted2 = splitted[1].split(":");
+        const uuid = splitted2[0].toUpperCase();
+        const major = parseInt(splitted2[1], 16);
+        const minor = parseInt(splitted2[2], 16);
+
+        const globalId = bufferedReader.readString();
+        bufferedReader.offset += 12;
+
+        beacons.push({
+            type,
+            uuid,
+            major,
+            minor,
+            globalId
+        });
+    }
+
+    assertOk(beacons.length === beaconCount, "beacon count mismatch");
+    return beacons;
+}
 
 interface Beacon {
     type: string;
@@ -81,3 +110,5 @@ interface Beacon {
     minor: number;
     globalId: string;
 }
+
+main().catch(console.error);

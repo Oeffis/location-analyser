@@ -1,11 +1,11 @@
 import { readFile } from "fs/promises";
 import { Stop } from "locationAnalyzer";
-import pako from "pako";
+import { inflate } from "pako";
 import { join } from "path";
 
 export async function getVrrStops(): Promise<Stop[]> {
     const zippedCSVStopps = await readFile(join(__dirname, "./data/stops.csv.pako"));
-    const csvStopps = pako.inflate(zippedCSVStopps, { to: "string" });
+    const csvStopps = inflate(zippedCSVStopps, { to: "string" });
     const lines = csvStopps.split("\n");
     const stopLines = lines.slice(1);
     return stopLines.map(lineToStop);
