@@ -62,17 +62,13 @@ while (bufferedReader.canRead()) {
 
     const globalId = bufferedReader.readString();
     bufferedReader.offset += 4;
-    const lon = bufferedReader.readInt32LE() / 1000;
-    const lat = bufferedReader.readInt32LE() / 1000;
 
     beacons.push({
         type,
         uuid,
         major,
         minor,
-        globalId,
-        lat,
-        lon
+        globalId
     });
 }
 
@@ -84,6 +80,4 @@ interface Beacon {
     major: number;
     minor: number;
     globalId: string;
-    lat: number;
-    lon: number;
 }
