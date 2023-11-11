@@ -1,0 +1,20 @@
+{
+    // use eslint schema
+    "$schema": "http://json.schemastore.org/eslintrc",
+    "env": {
+        "es6": true,
+        "node": true
+    },
+    "parserOptions": {
+        "sourceType": "module",
+        "project": [
+            "tsconfig.json",
+            "scripts/tsconfig.json",
+            "features/tsconfig.json"
+        ],
+        "ecmaVersion": 6
+    },
+    "extends": [
+        "../.eslintrc.json"
+    ]
+}

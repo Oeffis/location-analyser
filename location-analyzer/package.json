@@ -1,0 +1,49 @@
+{
+  "name": "@oeffis/location-analyser",
+  "version": "0.0.1",
+  "description": "Analyses location data to detect proximity to public transit stops and trains. Can be used to learn from user behavior to predict enter/exit stops and trips.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "lint": "eslint \"src/**/*.ts\" --fix",
+    "test": "cucumber-js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oeffis/location-analyser.git"
+  },
+  "keywords": [
+    "public transit",
+    "transit",
+    "location",
+    "location services",
+    "gps",
+    "ble"
+  ],
+  "author": "Tim Vahlbrock",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/Oeffis/location-analyser/issues"
+  },
+  "homepage": "https://github.com/Oeffis/location-analyser#readme",
+  "devDependencies": {
+    "@cucumber/cucumber": "^10.0.1",
+    "@stryker-mutator/core": "^7.3.0",
+    "@stryker-mutator/cucumber-runner": "^7.3.0",
+    "@types/node": "^20.8.10",
+    "@types/pako": "^2.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.9.1",
+    "csv-parse": "^5.5.2",
+    "eslint": "^8.52.0",
+    "eslint-plugin-import": "^2.29.0",
+    "geo-position.ts": "^1.4.1",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "geolib": "^3.3.4",
+    "pako": "^2.1.0"
+  }
+}
