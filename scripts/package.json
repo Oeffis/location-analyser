@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@oeffis/location-analyser": "file:../location-analyzer",
+    "@types/node": "^20.9.0"
+  },
+  "scripts": {
+    "lint": "eslint \"src/**/*.ts\" --fix"
+  }
+}

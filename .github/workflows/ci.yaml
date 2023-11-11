@@ -20,19 +20,33 @@ jobs:
           with:
             node-version: 20.x
 
-        - name: Install Dependencies
+        - name: Install Location Analyzer Dependencies
+          working-directory: ./location-analyzer
           run: |
             npm ci
 
-        - name: Lint
+        - name: Install Scripts Dependencies
+          working-directory: ./scripts
+          run: |
+            npm ci
+
+        - name: Lint Location Analyzer
+          working-directory: ./location-analyzer
+          run: |
+            npm run lint -- --max-warnings 0 --no-fix
+
+        - name: Lint Scripts
+          working-directory: ./scripts
           run: |
             npm run lint -- --max-warnings 0 --no-fix
 
         - name: Test
+          working-directory: ./location-analyzer
           run: |
             npx stryker run
 
         - name: Build
+          working-directory: ./location-analyzer
           run: |
             npm run build
 
@@ -40,10 +54,10 @@ jobs:
           uses: actions/upload-artifact@v2
           with:
             name: mutation-report
-            path: reports/mutation
+            path: location-analyzer/reports/mutation
           
         - name: Upload Build
           uses: actions/upload-artifact@v2
           with:
             name: build
-            path: dist
+            path: location-analyzer/dist

@@ -1,6 +1,6 @@
+import { getVrrStops } from "@oeffis/location-analyser";
 import { ok as assertOk } from "assert";
 import { readFileSync } from "fs";
-import { getVrrStops } from "../src/getVrrStops";
 
 class BufferedReader {
     public offset = 0;

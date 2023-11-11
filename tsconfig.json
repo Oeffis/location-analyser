@@ -1,7 +1,4 @@
 {
-    "include": [
-        "src/**/*.ts"
-    ],
     "compilerOptions": {
         "module": "commonjs",
         "declaration": true,
@@ -11,8 +8,6 @@
         "allowSyntheticDefaultImports": true,
         "target": "esnext",
         "sourceMap": true,
-        "outDir": "./dist",
-        "baseUrl": "./src",
         "incremental": true,
         "strict": true,
         "skipLibCheck": true,
