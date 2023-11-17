@@ -3,9 +3,9 @@ module.exports = {
   env: {
     node: true
   },
-  'extends': [
+  extends: [
+    '../.eslintrc.js',
     'plugin:react/recommended',
-    'eslint:recommended'
   ],
   parserOptions: {
     ecmaVersion: 2020
