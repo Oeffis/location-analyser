@@ -35,21 +35,6 @@ jobs:
           run: |
             npm ci
 
-        - name: Lint Location Analyzer
-          working-directory: ./location-analyzer
-          run: |
-            npm run lint -- --max-warnings 0 --no-fix
-
-        - name: Lint Scripts
-          working-directory: ./scripts
-          run: |
-            npm run lint -- --max-warnings 0 --no-fix
-
-        - name: Lint Demo
-          working-directory: ./demo
-          run: |
-            npm run lint -- --max-warnings 0 --no-fix
-
         - name: Test
           working-directory: ./location-analyzer
           run: |
@@ -64,6 +49,21 @@ jobs:
           working-directory: ./demo
           run: |
             npm run build
+
+        - name: Lint Location Analyzer
+          working-directory: ./location-analyzer
+          run: |
+            npm run lint -- --max-warnings 0 --no-fix
+
+        - name: Lint Scripts
+          working-directory: ./scripts
+          run: |
+            npm run lint -- --max-warnings 0 --no-fix
+
+        - name: Lint Demo
+          working-directory: ./demo
+          run: |
+            npm run lint -- --max-warnings 0 --no-fix
 
         - name: Upload Stryker Report
           uses: actions/upload-artifact@v2
