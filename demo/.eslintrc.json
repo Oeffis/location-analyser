@@ -13,6 +13,10 @@
         "ecmaVersion": 6
     },
     "extends": [
-        "../.eslintrc.json"
-    ]
+        "../.eslintrc.json",
+        "plugin:eslint-plugin-react/jsx-runtime"
+    ],
+    "rules": {
+        "@typescript-eslint/naming-convention": "off"
+    }
 }
