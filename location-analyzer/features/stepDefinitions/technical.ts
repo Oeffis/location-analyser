@@ -12,5 +12,5 @@ Given<LocationAnalyzerWorld>("I add the VRR stops", async function () {
 });
 
 Given<LocationAnalyzerWorld>("I use a location analyzer with the VRR stops", async function () {
-    this.locationAnalyzer = await LocationAnalyzer.forVrr();
+    this.locationAnalyzer = new LocationAnalyzer(await getVrrStops());
 });
