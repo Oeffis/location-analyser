@@ -18,7 +18,8 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { LocationAnalyzer, StatusStop } from "@oeffis/location-analyser";
+import { LocationAnalyzer, StatusStop, Stop } from "@oeffis/location-analyser";
+import { inflate } from "pako";
 import { useEffect, useState } from "react";
 import "./theme/variables.css";
 
@@ -27,7 +28,7 @@ setupIonicReact();
 const App: React.FC = () => {
   const position = usePosition();
   const analyzer = useLocationAnalyzer();
-  const [nearestStation, setNearestStation] = useState<StatusStop | null>(null);
+  const [nearestStop, setNearestStop] = useState<StatusStop | null>(null);
 
   useEffect(() => {
     if (position.isError || !analyzer) {
@@ -40,7 +41,7 @@ const App: React.FC = () => {
       altitude: position.position.coords.altitude ?? undefined
     });
     const status = analyzer.getStatus();
-    setNearestStation(status.stops[0] ?? null);
+    setNearestStop(status.stops[0] ?? null);
   }, [position, analyzer]);
 
   return (<IonApp>
@@ -57,9 +58,9 @@ const App: React.FC = () => {
         Time: {position.position.timestamp}<br />
       </p>)}
       <h1>Analysis Results</h1>
-      {nearestStation && (<p>
-        Nearest Station ID: {nearestStation.id}<br />
-        Nearest Station Distance: {nearestStation.distance}<br />
+      {nearestStop && (<p>
+        Nearest Stop ID: {nearestStop.id}<br />
+        Nearest Stop Distance: {nearestStop.distance}<br />
       </p>)}
     </IonContent>
   </IonApp>
@@ -123,9 +124,28 @@ function useLocationAnalyzer(): LocationAnalyzer | null {
   const [analyzer, setAnalyzer] = useState<LocationAnalyzer | null>(null);
 
   useEffect(() => {
-    const analyzer = new LocationAnalyzer();
-    setAnalyzer(analyzer);
+    (async () => {
+      const response = await fetch("stops.csv.pako");
+      const zippedCSVStopps = await response.arrayBuffer();
+      const csvStopps = inflate(zippedCSVStopps, { to: "string" });
+      const lines = csvStopps.split("\n");
+      const stopLines = lines.slice(1);
+
+      const analyzer = new LocationAnalyzer();
+      analyzer.updateStops(stopLines.map(lineToStop));
+      setAnalyzer(analyzer);
+    })().catch(console.error);
   });
+
+  function lineToStop(line: string): Stop {
+    return {
+      id: line.split(",")[0],
+      location: {
+        latitude: Number(line.split(",")[2]),
+        longitude: Number(line.split(",")[3])
+      }
+    };
+  }
 
   return analyzer;
 }
