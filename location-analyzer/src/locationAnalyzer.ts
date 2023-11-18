@@ -1,5 +1,4 @@
 import { getDistance } from "geolib";
-import { getVrrStops } from "./getVrrStops";
 
 export class LocationAnalyzer {
     private currentLocation?: GeoLocation;
@@ -44,17 +43,15 @@ export class LocationAnalyzer {
         this.stops = stops;
         this.invalidateStatus();
     }
-
-    public static async forVrr(): Promise<LocationAnalyzer> {
-        return new LocationAnalyzer(await getVrrStops());
-    }
 }
 
 export interface Status {
-    stops: {
-        id: string;
-        distance: number;
-    }[];
+    stops: StatusStop[];
+}
+
+export interface StatusStop {
+    id: string;
+    distance: number;
 }
 
 export interface Stop {

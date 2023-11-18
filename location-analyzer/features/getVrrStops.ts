@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import { inflate } from "pako";
 import { join } from "path";
-import { Stop } from "./locationAnalyzer";
+import { Stop } from "../src/locationAnalyzer";
 
 export async function getVrrStops(): Promise<Stop[]> {
     const path = join(__dirname, "./data/stops.csv.pako");

@@ -49,7 +49,7 @@ const App: React.FC = () => {
     </IonHeader>
     <IonContent>
       <h1>Position</h1>
-      {position.isError && <p color="red">{position.error as string}</p>}
+      {position.isError && <p color="red">{(position.error as Error).message}</p>}
       {!position.isError && (<p>
         Latitude: {position.position.coords.latitude} < br />
         Longitude: {position.position.coords.longitude}<br />
@@ -87,7 +87,7 @@ function usePosition(): PositionResult {
   useEffect(() => {
     Geolocation.watchPosition({
       enableHighAccuracy: true,
-      timeout: 5000,
+      timeout: 60000,
       maximumAge: 5000
     }, (position, err) => {
       if (err) {
@@ -100,7 +100,7 @@ function usePosition(): PositionResult {
       if (!position) {
         setPosition({
           isError: true,
-          error: "No error, but still no position"
+          error: new Error("No error, but still no position")
         });
         return;
       }
@@ -123,7 +123,8 @@ function useLocationAnalyzer(): LocationAnalyzer | null {
   const [analyzer, setAnalyzer] = useState<LocationAnalyzer | null>(null);
 
   useEffect(() => {
-    LocationAnalyzer.forVrr().then(setAnalyzer).catch(console.error);
+    const analyzer = new LocationAnalyzer();
+    setAnalyzer(analyzer);
   });
 
   return analyzer;
