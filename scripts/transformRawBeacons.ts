@@ -1,4 +1,4 @@
-import { getVrrStops } from "@oeffis/location-analyser";
+import { getVrrStops } from "@oeffis/location-analyser/features/getVrrStops";
 import { ok as assertOk } from "assert";
 import { readFileSync } from "fs";
 
