@@ -1,4 +1,4 @@
-import { IonApp, IonContent, IonHeader, setupIonicReact } from "@ionic/react";
+import { IonApp, IonContent, IonHeader, IonTitle, setupIonicReact } from "@ionic/react";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -18,6 +18,7 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
+import { LocationAnalyzer, StatusStop } from "@oeffis/location-analyser";
 import { useEffect, useState } from "react";
 import "./theme/variables.css";
 
@@ -25,18 +26,40 @@ setupIonicReact();
 
 const App: React.FC = () => {
   const position = usePosition();
+  const analyzer = useLocationAnalyzer();
+  const [nearestStation, setNearestStation] = useState<StatusStop | null>(null);
+
+  useEffect(() => {
+    if (position.isError || !analyzer) {
+      return;
+    }
+
+    analyzer.updateLocation({
+      latitude: position.position.coords.latitude,
+      longitude: position.position.coords.longitude,
+      altitude: position.position.coords.altitude ?? undefined
+    });
+    const status = analyzer.getStatus();
+    setNearestStation(status.stops[0] ?? null);
+  }, [position, analyzer]);
 
   return (<IonApp>
     <IonHeader>
-      <h1>Geolocation</h1>
+      <IonTitle>Location-Analyzer Demo</IonTitle>
     </IonHeader>
     <IonContent>
+      <h1>Position</h1>
       {position.isError && <p color="red">{position.error as string}</p>}
       {!position.isError && (<p>
         Latitude: {position.position.coords.latitude} < br />
         Longitude: {position.position.coords.longitude}<br />
         Accuracy: {position.position.coords.accuracy}<br />
         Time: {position.position.timestamp}<br />
+      </p>)}
+      <h1>Analysis Results</h1>
+      {nearestStation && (<p>
+        Nearest Station ID: {nearestStation.id}<br />
+        Nearest Station Distance: {nearestStation.distance}<br />
       </p>)}
     </IonContent>
   </IonApp>
@@ -94,6 +117,16 @@ function usePosition(): PositionResult {
   });
 
   return position;
+}
+
+function useLocationAnalyzer(): LocationAnalyzer | null {
+  const [analyzer, setAnalyzer] = useState<LocationAnalyzer | null>(null);
+
+  useEffect(() => {
+    LocationAnalyzer.forVrr().then(setAnalyzer).catch(console.error);
+  });
+
+  return analyzer;
 }
 
 export default App;
