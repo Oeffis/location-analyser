@@ -7,17 +7,21 @@ const parser = parse({ delimiter: ",", columns: true });
 parser.on("error", console.error);
 
 let newStops = "id,parent,latitude,longitude\n";
+let newStopsWithNames = "id,parent,latitude,longitude,name\n";
 parser.on("readable", function () {
     let stop: RawStop | null;
     while ((stop = parser.read() as RawStop | null) !== null) {
         newStops += `${stop.stop_id},${stop.parent_station},${stop.stop_lat},${stop.stop_lon}\n`;
+        newStopsWithNames += `${stop.stop_id},${stop.parent_station},${stop.stop_lat},${stop.stop_lon},${stop.stop_name}\n`;
     }
 });
 
 parser.on("end", function () {
     const compressed = deflate(newStops);
-    fs.mkdirSync(join(__dirname, "../src/data"), { recursive: true });
-    fs.writeFileSync(join(__dirname, "../src/data/stops.csv.pako"), compressed);
+    const compressedWithNames = deflate(newStopsWithNames);
+    fs.mkdirSync(join(__dirname, "../location-analyzer/features/data"), { recursive: true });
+    fs.writeFileSync(join(__dirname, "../location-analyzer/features/data/stops.csv.pako"), compressed);
+    fs.writeFileSync(join(__dirname, "../demo/public/stopsWithNames.csv.pako"), compressedWithNames);
 });
 
 parser.write(fs.readFileSync(join(__dirname, "../raw/stops.txt")));

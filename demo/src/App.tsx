@@ -1,4 +1,4 @@
-import { IonApp, IonContent, IonHeader, IonTitle, setupIonicReact } from "@ionic/react";
+import { IonApp, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, setupIonicReact } from "@ionic/react";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -25,13 +25,23 @@ import "./theme/variables.css";
 
 setupIonicReact();
 
+type StopWithName = Stop & { name: string };
+
 const App: React.FC = () => {
   const position = usePosition();
-  const analyzer = useLocationAnalyzer();
-  const [nearestStop, setNearestStop] = useState<StatusStop | null>(null);
+  const stops = useStops();
+  const [nearestStatusStop, setNearestStatusStop] = useState<StatusStop | null>(null);
+  const [nearestStop, setNearestStop] = useState<StopWithName | null>(null);
+  const analyzer = new LocationAnalyzer(stops);
+
+  const stopMap = stops.reduce<Record<string, StopWithName>>((map, stop) => {
+    map[stop.id] = stop;
+    return map;
+  }, {});
 
   useEffect(() => {
-    if (position.isError || !analyzer) {
+    if (position.isError) {
+      setNearestStop(null);
       return;
     }
 
@@ -41,28 +51,46 @@ const App: React.FC = () => {
       altitude: position.position.coords.altitude ?? undefined
     });
     const status = analyzer.getStatus();
-    setNearestStop(status.stops[0] ?? null);
+    const statusStop = status.stops[0];
+    if (!statusStop) {
+      setNearestStop(null);
+      return;
+    }
+    setNearestStatusStop(statusStop);
+
+    const stop = stopMap[statusStop.id];
+    if (!stop) {
+      setNearestStop(null);
+      return;
+    }
+
+    setNearestStop(stop);
   }, [position, analyzer]);
 
   return (<IonApp>
-    <IonHeader>
-      <IonTitle>Location-Analyzer Demo</IonTitle>
-    </IonHeader>
-    <IonContent>
-      <h1>Position</h1>
-      {position.isError && <p color="red">{(position.error as Error).message}</p>}
-      {!position.isError && (<p>
-        Latitude: {position.position.coords.latitude} < br />
-        Longitude: {position.position.coords.longitude}<br />
-        Accuracy: {position.position.coords.accuracy}<br />
-        Time: {position.position.timestamp}<br />
-      </p>)}
-      <h1>Analysis Results</h1>
-      {nearestStop && (<p>
-        Nearest Stop ID: {nearestStop.id}<br />
-        Nearest Stop Distance: {nearestStop.distance}<br />
-      </p>)}
-    </IonContent>
+    <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>Location-Analyzer Demo</IonTitle>
+        </IonToolbar>
+      </IonHeader>
+      <IonContent className="ion-padding">
+        <h1>Position</h1>
+        {position.isError && <p color="red">{(position.error as Error).message}</p>}
+        {!position.isError && (<p>
+          Latitude: {position.position.coords.latitude}°< br />
+          Longitude: {position.position.coords.longitude}°<br />
+          Accuracy: {position.position.coords.accuracy}m<br />
+          Time: {new Date(position.position.timestamp).toTimeString()}<br />
+        </p>)}
+        <h1>Nearest Stop</h1>
+        {nearestStop && nearestStatusStop && (<p>
+          ID: {nearestStop.id}<br />
+          Name: {nearestStop.name}<br />
+          Distance: {nearestStatusStop.distance}m<br />
+        </p>)}
+      </IonContent>
+    </IonPage>
   </IonApp>
   );
 };
@@ -120,34 +148,35 @@ function usePosition(): PositionResult {
   return position;
 }
 
-function useLocationAnalyzer(): LocationAnalyzer | null {
-  const [analyzer, setAnalyzer] = useState<LocationAnalyzer | null>(null);
+function useStops(): StopWithName[] {
+  const [stops, setStops] = useState<StopWithName[]>([]);
 
   useEffect(() => {
     (async () => {
-      const response = await fetch("stops.csv.pako");
+      const response = await fetch("stopsWithNames.csv.pako");
       const zippedCSVStopps = await response.arrayBuffer();
       const csvStopps = inflate(zippedCSVStopps, { to: "string" });
       const lines = csvStopps.split("\n");
       const stopLines = lines.slice(1);
 
-      const analyzer = new LocationAnalyzer();
-      analyzer.updateStops(stopLines.map(lineToStop));
-      setAnalyzer(analyzer);
+      setStops(stopLines.map(lineToStop));
     })().catch(console.error);
   });
 
-  function lineToStop(line: string): Stop {
+  function lineToStop(line: string): StopWithName {
     return {
-      id: line.split(",")[0],
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      id: line.split(",")[0]!,
       location: {
         latitude: Number(line.split(",")[2]),
         longitude: Number(line.split(",")[3])
-      }
+      },
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      name: line.split(",")[4]!
     };
   }
 
-  return analyzer;
+  return stops;
 }
 
 export default App;
