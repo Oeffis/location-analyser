@@ -12,6 +12,7 @@
     "csv-parse": "^5.5.2",
     "eslint": "^8.53.0",
     "eslint-plugin-import": "^2.29.0",
+    "fast-xml-parser": "^4.3.2",
     "pako": "^2.1.0"
   }
 }
