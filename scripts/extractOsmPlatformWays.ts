@@ -1,7 +1,7 @@
 import { createReadStream, createWriteStream } from "fs";
 
-const stream = createReadStream("../raw/nordrhein-westfalen-latest.osm", { encoding: "utf-8" });
-const writeStream = createWriteStream("../raw/osm-ways.xml", { encoding: "utf-8" });
+const stream = createReadStream("../raw/no-git/nordrhein-westfalen-latest.osm", { encoding: "utf-8" });
+const writeStream = createWriteStream("../raw/no-git/osm-ways.xml", { encoding: "utf-8" });
 writeStream.write("<ways>\n");
 
 let prevChunk = "";
