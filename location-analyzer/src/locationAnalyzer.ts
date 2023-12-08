@@ -5,7 +5,8 @@ export class LocationAnalyzer {
     private status?: Status;
 
     public constructor(
-        private stops: Stop[] = []
+        private stops: Stop[] = [],
+        private routes: Route[] = []
     ) { }
 
     public updateLocation(location?: GeoLocation): void {
@@ -63,4 +64,19 @@ export interface GeoLocation {
     latitude: number;
     longitude: number;
     altitude?: number;
+}
+
+export interface Route {
+    id: string;
+    from: string;
+    to: string;
+    ref: string;
+    sections: Section[];
+}
+
+export interface Section {
+    routeId: string;
+    sequence: number;
+    lat: number;
+    lon: number;
 }

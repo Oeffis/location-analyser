@@ -3,7 +3,9 @@ Feature: Onboard Train Detection
     As a commuter
     I want to be able to detect the train I am currently on
 
-    @ignore
+    Background:
+        Given I use a location analyzer with the VRR data
+
     Scenario: Detect the train I am currently on
         When I am on a train
         Then the train I am on is detected
