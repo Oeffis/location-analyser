@@ -6,22 +6,32 @@ let routesPromise: Promise<Route[]> | null = null;
 
 export function getVrrRoutes(): Promise<Route[]> {
     if (!routesPromise) {
-        routesPromise = loadRoutes();
+        routesPromise = loadFullRoutes();
     }
     return routesPromise;
 }
 
+async function loadFullRoutes(): Promise<Route[]> {
+    const routes = await loadRoutes();
+    const sections = await loadSections();
+    let sectionIndex = 0;
+    for (const route of routes) {
+        while (sectionIndex < sections.length && sections[sectionIndex].routeId === route.id) {
+            route.sections.push(sections[sectionIndex]);
+            sectionIndex++;
+        }
+    }
+    return routes;
+}
+
+async function loadSections(): Promise<Section[]> {
+    const sectionLines = await readZippedCsv("sections");
+    return sectionLines.map(lineToSection);
+}
+
 async function loadRoutes(): Promise<Route[]> {
     const routeLines = await readZippedCsv("routes");
-    const sectionLines = await readZippedCsv("sections");
-    const routes = routeLines.map(lineToRoute);
-    const sections = sectionLines.map(lineToSection);
-    routes.forEach(route =>
-        route.sections = sections
-            .filter(section => section.routeId === route.id)
-            .sort((a, b) => a.sequence - b.sequence)
-    );
-    return routes;
+    return routeLines.map(lineToRoute);
 }
 
 export interface Route {
