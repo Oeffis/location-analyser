@@ -35,7 +35,7 @@ export class LocationAnalyzer {
 
         const sortedStops = this.stops
             .map(stop => ({
-                id: stop.id,
+                ...stop,
                 distance: getDistance(currentLocation, stop.location)
             }))
             .sort((a, b) => a.distance - b.distance);
@@ -76,10 +76,8 @@ export interface Status {
     routes: StatusRoute[];
 }
 
-export interface StatusStop {
-    id: string;
-    distance: number;
-}
+export type StatusStop = Stop & { distance: number };
+export type StatusRoute = Route & { distance: number };
 
 export interface Stop {
     id: string;
@@ -99,8 +97,6 @@ export interface Route {
     ref: string;
     sections: Section[];
 }
-
-export type StatusRoute = Route & { distance: number };
 
 export interface Section {
     routeId: string;
