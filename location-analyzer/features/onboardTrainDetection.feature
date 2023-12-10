@@ -6,8 +6,8 @@ Feature: Onboard Train Detection
     Background:
         Given I use a location analyzer with the VRR data
 
-    Scenario: Detect the train I am currently on
-        When I am on a train
+    Scenario: Detect the train I am currently on when each direction travels a separate track
+        When I am on a train that travels on a separate track in each direction
         Then the train I am on is detected
 
     @ignore

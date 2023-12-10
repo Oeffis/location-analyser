@@ -27,7 +27,8 @@ export class LocationAnalyzer {
         const currentLocation = this.currentLocation;
         if (!currentLocation) {
             return {
-                stops: []
+                stops: [],
+                routes: []
             };
         }
 
@@ -37,7 +38,11 @@ export class LocationAnalyzer {
                 distance: getDistance(currentLocation, stop.location)
             }))
             .sort((a, b) => a.distance - b.distance);
-        return { stops: sortedStops };
+        return {
+            stops: sortedStops, routes: this.routes.filter(route =>
+                route.id == "572234368" || route.id == "64627576270"
+            )
+        };
     }
 
     public updateStops(stops: Stop[]): void {
@@ -48,6 +53,7 @@ export class LocationAnalyzer {
 
 export interface Status {
     stops: StatusStop[];
+    routes: Route[];
 }
 
 export interface StatusStop {
