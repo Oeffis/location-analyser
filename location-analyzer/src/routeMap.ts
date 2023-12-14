@@ -45,9 +45,9 @@ export class RouteMap {
         const routes = this.coordinateRouteMap.get(key);
         const routeSet = new Set<Route>(routes);
 
-        const matrix = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 0], [-1, 1], [1, -1], [1, 0], [1, 1]];
+        const offsetMatrix = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 0], [-1, 1], [1, -1], [1, 0], [1, 1]];
 
-        for (const [latOffset, lonOffset] of matrix) {
+        for (const [latOffset, lonOffset] of offsetMatrix) {
             const key = this.getOffsetKeyForLocation(location, latOffset, lonOffset);
             const routes = this.coordinateRouteMap.get(key) ?? [];
             routes.forEach(route => routeSet.add(route));
