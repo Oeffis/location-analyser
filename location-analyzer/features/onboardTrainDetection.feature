@@ -3,6 +3,7 @@ Feature: Onboard Train Detection
     As a commuter
     I want to be able to detect the train I am currently on
 
+    @focus
     Scenario: Detect the train I am currently on when each direction travels a separate track
         Given the 302 travels on a separate track in each direction north of Veltins Arena
         When I am on the 302 to Buer Rathaus North of Veltins Arena

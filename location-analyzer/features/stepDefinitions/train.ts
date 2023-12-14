@@ -2,16 +2,23 @@ import { Given, Then, When } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
 import { assert } from "chai";
+import { TransitPOI } from "routeMap";
 import { Route, getVrrRoutes } from "../getVrrRoutes";
-
-const TRAM_302_LANGENDREER_TO_BUER = "572234368";
-const TRAM_302_BUER_TO_LANGENDREER = "3720902989";
+import { getVrrStops } from "../getVrrStops";
 
 Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direction north of Veltins Arena", async function () {
-    const routes: Route[] = [
-        ...await getDummyRoutes(),
-        await getRouteWithIdOrThrow(TRAM_302_LANGENDREER_TO_BUER),
-        await getRouteWithIdOrThrow(TRAM_302_BUER_TO_LANGENDREER)
+    const TRAM_302_LANGENDREER_TO_BUER = "572234368";
+    const TRAM_302_BUER_TO_LANGENDREER = "3720902989";
+
+    // 302 serves this line twice in this direction, with different start locations. As this currently cannot be detected, we filter out these to the others will be detected.
+    const hasNoDuplicateAtThisLocation = (route: TransitPOI): boolean => ![
+        TRAM_302_LANGENDREER_TO_BUER,
+        TRAM_302_BUER_TO_LANGENDREER
+    ].includes(route.id);
+
+    const routes = [
+        ...await getVrrStops(),
+        ...(await getVrrRoutes()).filter(hasNoDuplicateAtThisLocation)
     ];
     this.locationAnalyzer.updatePOIs(routes);
 });
@@ -29,20 +36,3 @@ Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", fu
     assert.strictEqual(route.ref, line);
     assert.strictEqual(route.to, destination);
 });
-
-async function getRouteWithIdOrThrow(id: string): Promise<Route> {
-    const route = await getRouteWithId(id);
-    if (!route) {
-        throw new Error(`Route with id ${id} not found`);
-    }
-    return route;
-}
-
-async function getRouteWithId(id: string): Promise<Route | undefined> {
-    const routes = await getVrrRoutes();
-    return routes.find(route => route.id === id);
-}
-
-async function getDummyRoutes(): Promise<Route[]> {
-    return (await getVrrRoutes()).slice(0, 10);
-}
