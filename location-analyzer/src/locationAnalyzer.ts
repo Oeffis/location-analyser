@@ -1,5 +1,5 @@
 import { getDistance } from "geolib";
-import { getDistanceFromLine } from "getDistanceFromLine";
+import { getDistanceFromLine } from "./getDistanceFromLine";
 
 const LAT_LANG_DIGITS_BEFORE_DECIMAL = 3;
 const LAT_LANG_DIGITS_AFTER_DECIMAL = 2;
