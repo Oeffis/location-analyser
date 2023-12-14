@@ -9,6 +9,7 @@ const TRAM_302_BUER_TO_LANGENDREER = "3720902989";
 
 Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direction north of Veltins Arena", async function () {
     const routes: Route[] = [
+        ...await getDummyRoutes(),
         await getRouteWithIdOrThrow(TRAM_302_LANGENDREER_TO_BUER),
         await getRouteWithIdOrThrow(TRAM_302_BUER_TO_LANGENDREER)
     ];
@@ -40,4 +41,8 @@ async function getRouteWithIdOrThrow(id: string): Promise<Route> {
 async function getRouteWithId(id: string): Promise<Route | undefined> {
     const routes = await getVrrRoutes();
     return routes.find(route => route.id === id);
+}
+
+async function getDummyRoutes(): Promise<Route[]> {
+    return (await getVrrRoutes()).slice(0, 10);
 }
