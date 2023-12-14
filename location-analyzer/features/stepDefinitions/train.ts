@@ -13,7 +13,7 @@ Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direct
         await getRouteWithIdOrThrow(TRAM_302_LANGENDREER_TO_BUER),
         await getRouteWithIdOrThrow(TRAM_302_BUER_TO_LANGENDREER)
     ];
-    this.locationAnalyzer.updateRoutes(routes);
+    this.locationAnalyzer.updatePOIs(routes);
 });
 
 When<LocationAnalyzerWorld>("I am on the 302 to Buer Rathaus North of Veltins Arena", function () {
@@ -25,7 +25,7 @@ When<LocationAnalyzerWorld>("I am on the 302 to Buer Rathaus North of Veltins Ar
 
 Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", function (line: string, destination: string) {
     const status = this.locationAnalyzer.getStatus();
-    const route = status.routes[0];
+    const route = status.pois[0] as Route;
     assert.strictEqual(route.ref, line);
     assert.strictEqual(route.to, destination);
 });

@@ -1,20 +1,17 @@
 import { getDistance } from "geolib";
 import { getDistanceFromLine } from "./getDistanceFromLine";
-import { RouteMap } from "./routeMap";
+import { RouteMap, TransitPOI, isRoute } from "./routeMap";
 
 export class LocationAnalyzer {
-    private currentLocation?: GeoLocation;
-    private status?: Status;
-    private stops: Stop[] = [];
+    protected currentLocation?: GeoLocation;
+    protected status?: Status;
 
-    private routeMap = new RouteMap();
+    protected routeMap = new RouteMap();
 
     public constructor(
-        stops: Stop[] = [],
-        routes: Route[] = []
+        pois: TransitPOI[] = [],
     ) {
-        this.updateStops(stops);
-        this.updateRoutes(routes);
+        this.updatePOIs(pois);
     }
 
     public updateLocation(location?: GeoLocation): void {
@@ -22,7 +19,7 @@ export class LocationAnalyzer {
         this.invalidateStatus();
     }
 
-    private invalidateStatus(): void {
+    protected invalidateStatus(): void {
         this.status = undefined;
     }
 
@@ -31,62 +28,67 @@ export class LocationAnalyzer {
         return this.status;
     }
 
-    private calculateStatus(): Status {
+    protected calculateStatus(): Status {
         const currentLocation = this.currentLocation;
         if (!currentLocation) {
             return {
-                stops: [],
-                routes: []
+                pois: []
             };
         }
 
-        const sortedStops = this.stops
-            .map(stop => ({
-                ...stop,
-                distance: getDistance(currentLocation, stop.location)
-            }))
+        const nearbyPOIs = this.routeMap.getPOIsAtLocation(currentLocation);
+        const sortedPOIs = nearbyPOIs
+            .map(poi => this.withDistance(currentLocation, poi))
             .sort((a, b) => a.distance - b.distance);
 
-        const nearbyRoutes = this.routeMap.getRoutesAtLocation(currentLocation);
-        const sortedRoutes = nearbyRoutes
-            .map(route => ({
-                ...route,
-                distance: route.sections.reduce((minDistance, section, index, sections) => {
-                    if (index === sections.length - 1) {
-                        return minDistance;
-                    }
-                    return Math.min(minDistance, getDistanceFromLine(currentLocation, {
-                        latitude: section.lat,
-                        longitude: section.lon
-                    }, {
-                        latitude: sections[index + 1]?.lat,
-                        longitude: sections[index + 1]?.lon
-                    },
-                        0.1
-                    ));
-                }, Number.MAX_SAFE_INTEGER)
-            })).sort((a, b) => a.distance - b.distance);
         return {
-            stops: sortedStops,
-            routes: sortedRoutes
+            pois: sortedPOIs
         };
     }
 
-    public updateStops(stops: Stop[]): void {
-        this.stops = stops;
-        this.invalidateStatus();
+    protected withDistance<T extends Stop | Route>(base: GeoLocation, poi: T): T & { distance: number } {
+        const distance = this.distance(base, poi);
+        return { ...poi, distance };
     }
 
-    public updateRoutes(routes: Route[]): void {
-        this.routeMap.updateRoutes(routes);
+    protected distance<T extends Stop | Route>(base: GeoLocation, poi: T): number {
+        if (isRoute(poi)) {
+            return this.routeDistance(poi, base);
+        }
+        return this.stopDistance(poi, base);
+    }
+
+    private routeDistance(poi: Route, base: GeoLocation): number {
+        return poi.sections.reduce((min, section, index, sections) => {
+            if (index === 0) {
+                return min;
+            }
+            const distance = getDistanceFromLine(base, {
+                lat: section.lat,
+                lon: section.lon
+            }, {
+                lat: sections[index - 1].lat,
+                lon: sections[index - 1].lon
+            }, 0.1);
+            return Math.min(min, distance);
+        }, Number.MAX_SAFE_INTEGER);
+    }
+
+    private stopDistance(poi: Stop, base: GeoLocation): number {
+        return getDistance(base, poi.location);
+    }
+
+    public updatePOIs(pois: TransitPOI[]): void {
+        this.routeMap.update(pois);
         this.invalidateStatus();
     }
 }
 
 export interface Status {
-    stops: StatusStop[];
-    routes: StatusRoute[];
+    pois: WithDistance<Route | Stop>[]
 }
+
+export type WithDistance<T> = T & { distance: number };
 
 export type StatusStop = Stop & { distance: number };
 export type StatusRoute = Route & { distance: number };

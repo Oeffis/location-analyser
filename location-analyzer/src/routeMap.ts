@@ -1,28 +1,47 @@
-import { GeoLocation, Route, Section } from "locationAnalyzer";
+import { GeoLocation, Route, Section, Stop } from "locationAnalyzer";
+
+export type TransitPOI = Route | Stop;
 
 export class RouteMap {
-    protected coordinateRouteMap = new Map<number, Route[]>();
+    protected coordinateRouteMap = new Map<number, TransitPOI[]>();
 
     constructor() {
         this.coordinateRouteMap = new Map();
     }
 
-    public updateRoutes(routes: Route[]): void {
+    public update(pois: TransitPOI[]): void {
         this.coordinateRouteMap = new Map();
-        routes.forEach(route => this.addRoute(route));
+        pois.forEach(route => this.add(route));
     }
 
-    public addRoute(route: Route): void {
-        for (const section of route.sections) {
-            const key = GeoMapKey.fromSection(section).numeric();
-            const routes = this.coordinateRouteMap.get(key) ?? [];
-            routes.push(route);
-            this.coordinateRouteMap.set(key, routes);
+    public add(poi: TransitPOI): void {
+        if (isRoute(poi)) {
+            this.addRoute(poi);
+        } else {
+            this.addStop(poi);
         }
     }
 
-    public getRoutesAtLocation(location: GeoLocation): Route[] {
-        const routeSet = new Set<Route>();
+    protected addRoute(route: Route): void {
+        route.sections.forEach(section => this.addSection(section, route));
+    }
+
+    protected addSection(section: Section, route: Route): void {
+        const key = GeoMapKey.fromSection(section).numeric();
+        const routes = this.coordinateRouteMap.get(key) ?? [];
+        routes.push(route);
+        this.coordinateRouteMap.set(key, routes);
+    }
+
+    protected addStop(stop: Stop): void {
+        const key = GeoMapKey.fromStop(stop).numeric();
+        const routes = this.coordinateRouteMap.get(key) ?? [];
+        routes.push(stop);
+        this.coordinateRouteMap.set(key, routes);
+    }
+
+    public getPOIsAtLocation(location: GeoLocation): TransitPOI[] {
+        const routeSet = new Set<TransitPOI>();
         const offsetMatrix = [
             [-1, -1], [-1, 0], [-1, 1],
             [0, -1], [0, 0], [-1, 1],
@@ -83,4 +102,13 @@ class GeoMapKey {
     public static fromSection(section: Section): GeoMapKey {
         return new GeoMapKey(section.lat, section.lon);
     }
+
+    public static fromStop(stop: Stop): GeoMapKey {
+        return new GeoMapKey(stop.location.latitude, stop.location.longitude);
+    }
+}
+
+export function isRoute(poi: TransitPOI): poi is Route {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    return (poi as Route).sections !== undefined;
 }

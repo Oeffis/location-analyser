@@ -6,22 +6,22 @@ interface RawDataTable { rawTable: string[][] }
 
 Then<LocationAnalyzerWorld>("the id of the nearest platform is {string}", function (id: string) {
     const status = this.locationAnalyzer.getStatus();
-    assert.equal(status.stops[0].id, id);
+    assert.equal(status.pois[0].id, id);
 });
 
 Then<LocationAnalyzerWorld>("the distance to the nearest platform is {double}m", function (distance: number) {
     const status = this.locationAnalyzer.getStatus();
-    assert.equal(status.stops[0].distance, distance);
+    assert.equal(status.pois[0].distance, distance);
 });
 
 Then<LocationAnalyzerWorld>("no nearby platforms are detected", function () {
     const status = this.locationAnalyzer.getStatus();
-    assert.equal(status.stops.length, 0);
+    assert.equal(status.pois.length, 0);
 });
 
 Then<LocationAnalyzerWorld>("the ids of the nearest platforms are:", function (dataTable: RawDataTable) {
     const status = this.locationAnalyzer.getStatus();
-    const relevantSlice = status.stops.slice(0, dataTable.rawTable.length);
+    const relevantSlice = status.pois.slice(0, dataTable.rawTable.length);
     const ids = relevantSlice.map(stop => stop.id);
     const expectedIds = dataTable.rawTable.map(row => row[0]);
     assert.deepEqual(ids, expectedIds);
