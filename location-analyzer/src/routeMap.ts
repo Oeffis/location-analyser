@@ -44,13 +44,13 @@ export class RouteMap {
 }
 
 class GeoMapKey {
-    protected static readonly LAT_LONG_DIGITS_BEFORE_DECIMAL = 3;
-    protected static readonly LAT_LONG_DIGITS_AFTER_DECIMAL = 2;
-    protected static readonly LAT_LONG_TOTAL_DIGITS =
-        GeoMapKey.LAT_LONG_DIGITS_BEFORE_DECIMAL
-        + GeoMapKey.LAT_LONG_DIGITS_AFTER_DECIMAL;
-    protected static readonly ROUNDING_FACTOR = Math.pow(10, GeoMapKey.LAT_LONG_DIGITS_AFTER_DECIMAL);
-    protected static readonly TILING_FACTOR = Math.pow(10, GeoMapKey.LAT_LONG_TOTAL_DIGITS);
+    protected static readonly DIGITS_BEFORE_DECIMAL = 3;
+    protected static readonly DIGITS_AFTER_DECIMAL = 2;
+    protected static readonly TOTAL_DIGITS =
+        GeoMapKey.DIGITS_BEFORE_DECIMAL
+        + GeoMapKey.DIGITS_AFTER_DECIMAL;
+    protected static readonly ROUNDING_FACTOR = Math.pow(10, GeoMapKey.DIGITS_AFTER_DECIMAL);
+    protected static readonly TILING_FACTOR = Math.pow(10, GeoMapKey.TOTAL_DIGITS);
 
     public constructor(
         public readonly latitude: number,
