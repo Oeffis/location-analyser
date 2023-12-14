@@ -15,7 +15,7 @@ export class LocationAnalyzer {
 
     public constructor(
         stops: Stop[] = [],
-        private routes: Route[] = []
+        routes: Route[] = []
     ) {
         this.updateStops(stops);
         this.updateRoutes(routes);
@@ -70,10 +70,9 @@ export class LocationAnalyzer {
                     ));
                 }, Number.MAX_SAFE_INTEGER)
             })).sort((a, b) => a.distance - b.distance);
-        const slicedRoutes = sortedRoutes.slice(0, 2);
         return {
             stops: sortedStops,
-            routes: slicedRoutes
+            routes: sortedRoutes
         };
     }
 

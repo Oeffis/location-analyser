@@ -3,12 +3,10 @@ Feature: Onboard Train Detection
     As a commuter
     I want to be able to detect the train I am currently on
 
-    Background:
-        Given I use a location analyzer with the VRR data
-
     Scenario: Detect the train I am currently on when each direction travels a separate track
-        When I am on a train that travels on a separate track in each direction
-        Then the train I am on is detected
+        Given the 302 travels on a separate track in each direction north of Veltins Arena
+        When I am on the 302 to Buer Rathaus North of Veltins Arena
+        Then the detected train is the "302" to "Gelsenkirchen Buer Rathaus"
 
     @ignore
     Scenario: Detects the train I am currently on when it is at a station

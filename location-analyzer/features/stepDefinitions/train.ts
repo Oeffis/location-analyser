@@ -1,37 +1,43 @@
-import { Then, When } from "@cucumber/cucumber";
+import { Given, Then, When } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
 import { assert } from "chai";
-import { getVrrRoutes } from "../getVrrRoutes";
+import { Route, getVrrRoutes } from "../getVrrRoutes";
 
 const TRAM_302_LANGENDREER_TO_BUER = "572234368";
-const TRAM_302_OWERK_TO_BUER = "64627576270";
+const TRAM_302_BUER_TO_LANGENDREER = "3720902989";
 
-When<LocationAnalyzerWorld>("I am on a train that travels on a separate track in each direction", async function () {
-    const vrrRoutes = await getVrrRoutes();
-    this.expectedRoutes = vrrRoutes
-        .filter(route =>
-            [TRAM_302_LANGENDREER_TO_BUER, TRAM_302_OWERK_TO_BUER].includes(route.id)
-        ).map(route => ({
-            ...route,
-            distance: 0
-        }));
-    this.routeOrderMatters = false;
+Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direction north of Veltins Arena", async function () {
+    const routes: Route[] = [
+        await getRouteWithIdOrThrow(TRAM_302_LANGENDREER_TO_BUER),
+        await getRouteWithIdOrThrow(TRAM_302_BUER_TO_LANGENDREER)
+    ];
+    this.locationAnalyzer.updateRoutes(routes);
+});
 
-    // Set location on track near Veltins-Arena, where tracks have great separation
+When<LocationAnalyzerWorld>("I am on the 302 to Buer Rathaus North of Veltins Arena", function () {
     this.locationAnalyzer.updateLocation({
-        latitude: 51.55880,
-        longitude: 7.06044
+        latitude: 51.55826,
+        longitude: 7.06077
     });
 });
 
-Then<LocationAnalyzerWorld>("the train I am on is detected", function () {
-    if (this.routeOrderMatters) {
-        assert.equal(this.locationAnalyzer.getStatus().routes, this.expectedRoutes);
-    } else {
-        assert.sameDeepMembers(
-            this.locationAnalyzer.getStatus().routes,
-            this.expectedRoutes
-        );
-    }
+Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", function (line: string, destination: string) {
+    const status = this.locationAnalyzer.getStatus();
+    const route = status.routes[0];
+    assert.strictEqual(route.ref, line);
+    assert.strictEqual(route.to, destination);
 });
+
+async function getRouteWithIdOrThrow(id: string): Promise<Route> {
+    const route = await getRouteWithId(id);
+    if (!route) {
+        throw new Error(`Route with id ${id} not found`);
+    }
+    return route;
+}
+
+async function getRouteWithId(id: string): Promise<Route | undefined> {
+    const routes = await getVrrRoutes();
+    return routes.find(route => route.id === id);
+}
