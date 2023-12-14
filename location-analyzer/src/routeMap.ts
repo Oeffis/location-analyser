@@ -1,4 +1,4 @@
-import { GeoLocation, Route } from "locationAnalyzer";
+import { GeoLocation, Route, Section } from "locationAnalyzer";
 
 export class RouteMap {
     protected static readonly LAT_LANG_DIGITS_BEFORE_DECIMAL = 3;
@@ -14,60 +14,52 @@ export class RouteMap {
 
     public updateRoutes(routes: Route[]): void {
         this.coordinateRouteMap = new Map();
+        routes.forEach(route => this.addRoute(route));
+    }
 
-        for (const route of routes) {
-            for (const section of route.sections) {
-                const roundedLat = Math.round(section.lat * RouteMap.ROUNDING_FACTOR);
-                const roundedLon = Math.round(section.lon * RouteMap.ROUNDING_FACTOR);
-                const key = roundedLat * RouteMap.TILING_FACTOR + roundedLon;
-                const routesAtCoordinate = this.coordinateRouteMap.get(key);
-                if (!routesAtCoordinate) {
-                    this.coordinateRouteMap.set(key, [route]);
-                } else {
-                    if (routesAtCoordinate.includes(route)) {
-                        continue;
-                    }
-                    routesAtCoordinate.push(route);
-                }
-            }
+    public addRoute(route: Route): void {
+        for (const section of route.sections) {
+            const key = this.getMapKeyForSection(section);
+            const routes = this.coordinateRouteMap.get(key) ?? [];
+            routes.push(route);
+            this.coordinateRouteMap.set(key, routes);
         }
     }
 
-    public getRoutesAtLocation(location: GeoLocation): Route[] {
+    protected getMapKeyForSection(section: Section): number {
+        return this.getMapKeyForLocation(sectionToGeoLocation(section));
+    }
+
+    protected getMapKeyForLocation(location: GeoLocation): number {
+        return this.getOffsetKeyForLocation(location, 0, 0);
+    }
+
+    protected getOffsetKeyForLocation(location: GeoLocation, latOffset: number, lonOffset: number): number {
         const roundedLat = Math.round(location.latitude * RouteMap.ROUNDING_FACTOR);
         const roundedLon = Math.round(location.longitude * RouteMap.ROUNDING_FACTOR);
-        const key = roundedLat * RouteMap.TILING_FACTOR + roundedLon;
+        return (roundedLat + latOffset) * RouteMap.TILING_FACTOR + (roundedLon + lonOffset);
+    }
+
+    public getRoutesAtLocation(location: GeoLocation): Route[] {
+        const key = this.getMapKeyForLocation(location);
         const routes = this.coordinateRouteMap.get(key);
+        const routeSet = new Set<Route>(routes);
 
-        const nextLatKey = (roundedLat + 1) * RouteMap.TILING_FACTOR + roundedLon;
-        const nextRoutes = this.coordinateRouteMap.get(nextLatKey);
+        const matrix = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 0], [-1, 1], [1, -1], [1, 0], [1, 1]];
 
-        const previousLatKey = (roundedLat - 1) * RouteMap.TILING_FACTOR + roundedLon;
-        const previousRoutes = this.coordinateRouteMap.get(previousLatKey);
-
-        const nextLonKey = roundedLat * RouteMap.TILING_FACTOR + (roundedLon + 1);
-        const nextLonRoutes = this.coordinateRouteMap.get(nextLonKey);
-
-        const previousLonKey = roundedLat * RouteMap.TILING_FACTOR + (roundedLon - 1);
-        const previousLonRoutes = this.coordinateRouteMap.get(previousLonKey);
-
-        const routeSet = new Set<Route>();
-        if (routes) {
+        for (const [latOffset, lonOffset] of matrix) {
+            const key = this.getOffsetKeyForLocation(location, latOffset, lonOffset);
+            const routes = this.coordinateRouteMap.get(key) ?? [];
             routes.forEach(route => routeSet.add(route));
-        }
-        if (nextRoutes) {
-            nextRoutes.forEach(route => routeSet.add(route));
-        }
-        if (previousRoutes) {
-            previousRoutes.forEach(route => routeSet.add(route));
-        }
-        if (nextLonRoutes) {
-            nextLonRoutes.forEach(route => routeSet.add(route));
-        }
-        if (previousLonRoutes) {
-            previousLonRoutes.forEach(route => routeSet.add(route));
         }
 
         return Array.from(routeSet);
     }
 }
+
+function sectionToGeoLocation(section: Section): GeoLocation {
+    return {
+        latitude: section.lat,
+        longitude: section.lon
+    };
+} 
