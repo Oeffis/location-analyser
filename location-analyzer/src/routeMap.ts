@@ -1,11 +1,6 @@
 import { GeoLocation, Route, Section } from "locationAnalyzer";
 
 export class RouteMap {
-    protected static readonly LAT_LANG_DIGITS_BEFORE_DECIMAL = 3;
-    protected static readonly LAT_LANG_DIGITS_AFTER_DECIMAL = 2;
-    protected static readonly ROUNDING_FACTOR = Math.pow(10, RouteMap.LAT_LANG_DIGITS_AFTER_DECIMAL);
-    protected static readonly TILING_FACTOR = Math.pow(10, RouteMap.LAT_LANG_DIGITS_BEFORE_DECIMAL + RouteMap.LAT_LANG_DIGITS_AFTER_DECIMAL);
-
     protected coordinateRouteMap = new Map<number, Route[]>();
 
     constructor() {
@@ -19,36 +14,27 @@ export class RouteMap {
 
     public addRoute(route: Route): void {
         for (const section of route.sections) {
-            const key = this.getMapKeyForSection(section);
+            const key = GeoMapKey.fromSection(section).numeric();
             const routes = this.coordinateRouteMap.get(key) ?? [];
             routes.push(route);
             this.coordinateRouteMap.set(key, routes);
         }
     }
 
-    protected getMapKeyForSection(section: Section): number {
-        return this.getMapKeyForLocation(sectionToGeoLocation(section));
-    }
-
-    protected getMapKeyForLocation(location: GeoLocation): number {
-        return this.getOffsetKeyForLocation(location, 0, 0);
-    }
-
-    protected getOffsetKeyForLocation(location: GeoLocation, latOffset: number, lonOffset: number): number {
-        const roundedLat = Math.round(location.latitude * RouteMap.ROUNDING_FACTOR);
-        const roundedLon = Math.round(location.longitude * RouteMap.ROUNDING_FACTOR);
-        return (roundedLat + latOffset) * RouteMap.TILING_FACTOR + (roundedLon + lonOffset);
-    }
-
     public getRoutesAtLocation(location: GeoLocation): Route[] {
-        const key = this.getMapKeyForLocation(location);
-        const routes = this.coordinateRouteMap.get(key);
-        const routeSet = new Set<Route>(routes);
-
-        const offsetMatrix = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 0], [-1, 1], [1, -1], [1, 0], [1, 1]];
+        const routeSet = new Set<Route>();
+        const offsetMatrix = [
+            [-1, -1], [-1, 0], [-1, 1],
+            [0, -1], [0, 0], [-1, 1],
+            [1, -1], [1, 0], [1, 1]
+        ];
 
         for (const [latOffset, lonOffset] of offsetMatrix) {
-            const key = this.getOffsetKeyForLocation(location, latOffset, lonOffset);
+            const key = GeoMapKey
+                .fromGeoLocation(location)
+                .withLatOffset(latOffset)
+                .withLonOffset(lonOffset)
+                .numeric();
             const routes = this.coordinateRouteMap.get(key) ?? [];
             routes.forEach(route => routeSet.add(route));
         }
@@ -57,9 +43,44 @@ export class RouteMap {
     }
 }
 
-function sectionToGeoLocation(section: Section): GeoLocation {
-    return {
-        latitude: section.lat,
-        longitude: section.lon
-    };
-} 
+class GeoMapKey {
+    protected static readonly LAT_LONG_DIGITS_BEFORE_DECIMAL = 3;
+    protected static readonly LAT_LONG_DIGITS_AFTER_DECIMAL = 2;
+    protected static readonly LAT_LONG_TOTAL_DIGITS =
+        GeoMapKey.LAT_LONG_DIGITS_BEFORE_DECIMAL
+        + GeoMapKey.LAT_LONG_DIGITS_AFTER_DECIMAL;
+    protected static readonly ROUNDING_FACTOR = Math.pow(10, GeoMapKey.LAT_LONG_DIGITS_AFTER_DECIMAL);
+    protected static readonly TILING_FACTOR = Math.pow(10, GeoMapKey.LAT_LONG_TOTAL_DIGITS);
+
+    public constructor(
+        public readonly latitude: number,
+        public readonly longitude: number
+    ) {
+        this.latitude = GeoMapKey.round(latitude);
+        this.longitude = GeoMapKey.round(longitude);
+    }
+
+    protected static round(value: number): number {
+        return Math.round(value * GeoMapKey.ROUNDING_FACTOR) / GeoMapKey.ROUNDING_FACTOR;
+    }
+
+    public numeric(): number {
+        return this.latitude * GeoMapKey.TILING_FACTOR + this.longitude;
+    }
+
+    public withLatOffset(latOffset: number): GeoMapKey {
+        return new GeoMapKey(this.latitude + latOffset, this.longitude);
+    }
+
+    public withLonOffset(lonOffset: number): GeoMapKey {
+        return new GeoMapKey(this.latitude, this.longitude + lonOffset);
+    }
+
+    public static fromGeoLocation(location: GeoLocation): GeoMapKey {
+        return new GeoMapKey(location.latitude, location.longitude);
+    }
+
+    public static fromSection(section: Section): GeoMapKey {
+        return new GeoMapKey(section.lat, section.lon);
+    }
+}
