@@ -65,6 +65,16 @@
                 "format": [
                     "PascalCase"
                 ]
+            },
+            {
+                "selector": "classProperty",
+                "modifiers": [
+                    "static",
+                    "readonly"
+                ],
+                "format": [
+                    "UPPER_CASE"
+                ]
             }
         ],
         "@typescript-eslint/semi": "error",
