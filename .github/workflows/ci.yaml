@@ -25,20 +25,25 @@ jobs:
           run: |
             npm ci
 
-        - name: Build Location Analyzer
-          working-directory: ./location-analyzer
-          run: |
-            npm run build
-        
         - name: Lint Location Analyzer
           working-directory: ./location-analyzer
           run: |
             npm run lint -- --max-warnings 0 --no-fix
 
+        - name: Build Location Analyzer
+          working-directory: ./location-analyzer
+          run: |
+            npm run build
+
         - name: Install Scripts Dependencies
           working-directory: ./scripts
           run: |
             npm ci
+
+        - name: Lint Scripts
+          working-directory: ./scripts
+          run: |
+            npm run lint -- --max-warnings 0 --no-fix
 
         - name: Install Demo Dependencies
           working-directory: ./demo
@@ -54,11 +59,6 @@ jobs:
           working-directory: ./demo
           run: |
             npm run build
-
-        - name: Lint Scripts
-          working-directory: ./scripts
-          run: |
-            npm run lint -- --max-warnings 0 --no-fix
 
         - name: Test
           working-directory: ./location-analyzer
