@@ -20,13 +20,23 @@ jobs:
           with:
             node-version: 20.x
 
-        - name: Install Scripts Dependencies
-          working-directory: ./scripts
+        - name: Install Location Analyzer Dependencies
+          working-directory: ./location-analyzer
           run: |
             npm ci
 
-        - name: Install Location Analyzer Dependencies
+        - name: Build Location Analyzer
           working-directory: ./location-analyzer
+          run: |
+            npm run build
+        
+        - name: Lint Location Analyzer
+          working-directory: ./location-analyzer
+          run: |
+            npm run lint -- --max-warnings 0 --no-fix
+
+        - name: Install Scripts Dependencies
+          working-directory: ./scripts
           run: |
             npm ci
 
@@ -35,28 +45,18 @@ jobs:
           run: |
             npm ci
 
-        - name: Build Location Analyzer
-          working-directory: ./location-analyzer
+        - name: Lint Demo
+          working-directory: ./demo
           run: |
-            npm run build
+            npm run lint -- --max-warnings 0 --no-fix
 
         - name: Build Demo
           working-directory: ./demo
           run: |
             npm run build
 
-        - name: Lint Location Analyzer
-          working-directory: ./location-analyzer
-          run: |
-            npm run lint -- --max-warnings 0 --no-fix
-
         - name: Lint Scripts
           working-directory: ./scripts
-          run: |
-            npm run lint -- --max-warnings 0 --no-fix
-
-        - name: Lint Demo
-          working-directory: ./demo
           run: |
             npm run lint -- --max-warnings 0 --no-fix
 
