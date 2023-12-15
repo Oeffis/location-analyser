@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { getVrrStops } from "@oeffis/location-analyzer/features/getVrrStops";
 import { ok as assertOk } from "assert";
 import { readFileSync } from "fs";
