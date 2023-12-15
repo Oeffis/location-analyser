@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "@oeffis/location-analyser": "file:../location-analyzer",
+    "@oeffis/location-analyzer": "file:../location-analyzer",
     "@types/node": "^20.9.0"
   },
   "scripts": {
