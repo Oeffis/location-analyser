@@ -18,7 +18,7 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { LocationAnalyzer, StatusStop, Stop } from "@oeffis/location-analyser";
+import { LocationAnalyzer, Route, Stop, WithDistance, isRoute } from "@oeffis/location-analyser";
 import { inflate } from "pako";
 import { useEffect, useState } from "react";
 import "./theme/variables.css";
@@ -29,19 +29,20 @@ type StopWithName = Stop & { name: string };
 
 const App: React.FC = () => {
   const position = usePosition();
-  const stops = useStops();
-  const [nearestStatusStop, setNearestStatusStop] = useState<StatusStop | null>(null);
-  const [nearestStop, setNearestStop] = useState<StopWithName | null>(null);
-  const analyzer = new LocationAnalyzer(stops);
+  const pois = useStops();
+  const [nearestPOI, setNearestPOI] = useState<WithDistance<Route | Stop> | null>(null);
+  const analyzer = new LocationAnalyzer(pois);
 
-  const stopMap = stops.reduce<Record<string, StopWithName>>((map, stop) => {
-    map[stop.id] = stop;
-    return map;
-  }, {});
+  function getName(poi: WithDistance<Route | Stop>): string {
+    if (isRoute(poi)) {
+      return (poi as Route).from + " - " + (poi as Route).to;
+    }
+    return (poi as StopWithName).name;
+  }
 
   useEffect(() => {
     if (position.isError) {
-      setNearestStop(null);
+      setNearestPOI(null);
       return;
     }
 
@@ -51,20 +52,13 @@ const App: React.FC = () => {
       altitude: position.position.coords.altitude ?? undefined
     });
     const status = analyzer.getStatus();
-    const statusStop = status.stops[0];
+    const statusStop = status.pois[0];
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!statusStop) {
-      setNearestStop(null);
+      setNearestPOI(null);
       return;
     }
-    setNearestStatusStop(statusStop);
-
-    const stop = stopMap[statusStop.id];
-    if (!stop) {
-      setNearestStop(null);
-      return;
-    }
-
-    setNearestStop(stop);
+    setNearestPOI(statusStop);
   }, [position, analyzer]);
 
   return (<IonApp>
@@ -83,11 +77,11 @@ const App: React.FC = () => {
           Accuracy: {position.position.coords.accuracy}m<br />
           Time: {new Date(position.position.timestamp).toTimeString()}<br />
         </p>)}
-        <h1>Nearest Stop</h1>
-        {nearestStop && nearestStatusStop && (<p>
-          ID: {nearestStop.id}<br />
-          Name: {nearestStop.name}<br />
-          Distance: {nearestStatusStop.distance}m<br />
+        <h1>Nearest POI</h1>
+        {nearestPOI && (<p>
+          ID: {nearestPOI.id}<br />
+          Name: {getName(nearestPOI)}<br />
+          Distance: {nearestPOI.distance}m<br />
         </p>)}
       </IonContent>
     </IonPage>
