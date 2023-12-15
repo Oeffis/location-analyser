@@ -7,13 +7,5 @@ export default defineConfig({
   plugins: [
     react(),
     legacy()
-  ],
-  optimizeDeps: {
-    include: ["@oeffis/location-analyzer"]
-  },
-  build: {
-    commonjsOptions: {
-      include: [/location-analyzer/, /node_modules/]
-    }
-  }
+  ]
 });

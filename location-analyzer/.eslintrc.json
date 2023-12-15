@@ -9,6 +9,7 @@
         "sourceType": "module",
         "project": [
             "tsconfig.json",
+            "tsconfig.node.json",
             "features/tsconfig.json"
         ],
         "ecmaVersion": 6

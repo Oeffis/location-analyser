@@ -18,7 +18,7 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { LocationAnalyzer, Route, Stop, WithDistance, isRoute } from "@oeffis/location-analyser";
+import { LocationAnalyzer, Route, Stop, WithDistance, isRoute } from "@oeffis/location-analyzer";
 import { inflate } from "pako";
 import { useEffect, useState } from "react";
 import "./theme/variables.css";

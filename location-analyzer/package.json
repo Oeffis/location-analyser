@@ -1,12 +1,22 @@
 {
-  "name": "@oeffis/location-analyser",
+  "name": "@oeffis/location-analyzer",
   "version": "0.0.1",
   "description": "Analyses location data to detect proximity to public transit stops and trains. Can be used to learn from user behavior to predict enter/exit stops and trips.",
-  "main": "dist/index.js",
+  "main": "dist/location-analyzer.js",
   "types": "dist/index.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/location-analyzer.js",
+      "require": "./dist/location-analyzer.umd.cjs"
+    },
+    "./dist/index.d.ts": "./dist/index.d.ts",
+    "./dist/location-analyzer.js": "./dist/location-analyzer.js",
+    "./dist/location-analyzer.umd.cjs": "./dist/location-analyzer.umd.cjs"
+  },
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc -w",
+    "build": "vite build",
+    "build:watch": "vite build --watch",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "test": "cucumber-js"
   },
@@ -30,19 +40,22 @@
   "homepage": "https://github.com/Oeffis/location-analyser#readme",
   "devDependencies": {
     "@cucumber/cucumber": "^10.0.1",
+    "@rollup/plugin-typescript": "^11.1.5",
     "@stryker-mutator/core": "^7.3.0",
     "@stryker-mutator/cucumber-runner": "^7.3.0",
     "@types/chai": "^4.3.11",
     "@types/node": "^20.8.10",
     "@types/pako": "^2.0.2",
     "@typescript-eslint/eslint-plugin": "^6.9.1",
+    "@vitejs/plugin-legacy": "^5.2.0",
     "chai": "^4.3.10",
     "eslint": "^8.52.0",
     "eslint-plugin-import": "^2.29.0",
     "geo-position.ts": "^1.4.1",
     "pako": "^2.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "vite": "^5.0.9"
   },
   "dependencies": {
     "geolib": "^3.3.4"
