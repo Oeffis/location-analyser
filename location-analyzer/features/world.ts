@@ -1,5 +1,5 @@
 import { setWorldConstructor } from "@cucumber/cucumber";
-import { LocationAnalyzer, Route } from "../src/locationAnalyzer";
+import { LocationAnalyzer, Route } from "@oeffis/location-analyzer";
 
 export class LocationAnalyzerWorld {
     public locationAnalyzer: LocationAnalyzer = new LocationAnalyzer();

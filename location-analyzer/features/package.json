@@ -1,0 +1,7 @@
+{
+    "name": "oeffis-location-analyzer-features",
+    "type": "module",
+    "dependencies": {
+        "@oeffis/location-analyzer": "file:.."
+    }
+}

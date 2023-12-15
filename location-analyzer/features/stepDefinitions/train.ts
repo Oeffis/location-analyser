@@ -1,17 +1,17 @@
 import { Given, Then, When } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
+import { Stop } from "@oeffis/location-analyzer";
 import { assert } from "chai";
-import { TransitPOI } from "routeMap";
-import { Route, getVrrRoutes } from "../getVrrRoutes";
-import { getVrrStops } from "../getVrrStops";
+import { Route, getVrrRoutes } from "../getVrrRoutes.js";
+import { getVrrStops } from "../getVrrStops.js";
 
 Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direction north of Veltins Arena", async function () {
     const TRAM_302_LANGENDREER_TO_BUER = "572234368";
     const TRAM_302_BUER_TO_LANGENDREER = "3720902989";
 
     // 302 serves this line twice in this direction, with different start locations. As this currently cannot be detected, we filter out these to the others will be detected.
-    const hasNoDuplicateAtThisLocation = (route: TransitPOI): boolean => ![
+    const hasNoDuplicateAtThisLocation = (route: Route | Stop): boolean => ![
         TRAM_302_LANGENDREER_TO_BUER,
         TRAM_302_BUER_TO_LANGENDREER
     ].includes(route.id);

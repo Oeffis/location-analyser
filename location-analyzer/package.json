@@ -18,7 +18,7 @@
     "build": "vite build",
     "build:watch": "vite build --watch",
     "lint": "eslint \"src/**/*.ts\" --fix",
-    "test": "cucumber-js"
+    "test": "cross-env NODE_OPTIONS=\"--loader ts-node/esm -r tsconfig-paths/register\" cucumber-js"
   },
   "repository": {
     "type": "git",
@@ -49,11 +49,13 @@
     "@typescript-eslint/eslint-plugin": "^6.9.1",
     "@vitejs/plugin-legacy": "^5.2.0",
     "chai": "^4.3.10",
+    "cross-env": "^7.0.3",
     "eslint": "^8.52.0",
     "eslint-plugin-import": "^2.29.0",
     "geo-position.ts": "^1.4.1",
     "pako": "^2.1.0",
     "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.9"
   },

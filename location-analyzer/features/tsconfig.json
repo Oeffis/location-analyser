@@ -6,6 +6,12 @@
         "../stryker.config.mjs"
     ],
     "compilerOptions": {
-        "esModuleInterop": true
+        "paths": {
+            "location-analyzer": [
+                "../location-analyzer"
+            ],
+        },
+        "rootDir": ".",
+        "baseUrl": "./src"
     }
 }

@@ -1,8 +1,7 @@
-
 import { Given } from "@cucumber/cucumber";
+import { GeoLocation } from "@oeffis/location-analyzer";
 import assert from "assert";
 import { computeDestinationPoint } from "geolib";
-import { GeoLocation } from "locationAnalyzer";
 import { LocationAnalyzerWorld } from "../world";
 
 const locationMap: Record<string, GeoLocation> = {

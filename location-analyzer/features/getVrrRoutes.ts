@@ -1,6 +1,7 @@
 import { readFile } from "fs/promises";
 import { inflate } from "pako";
-import { join } from "path";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
 let routesPromise: Promise<Route[]> | null = null;
 
@@ -50,7 +51,9 @@ export interface Section {
 }
 
 async function readZippedCsv(name: string): Promise<string[]> {
-    const path = join(__dirname, `./data/${name}.csv.zlib`);
+    const filename = fileURLToPath(import.meta.url);
+    const currentDirname = dirname(filename);
+    const path = join(currentDirname, `./data/${name}.csv.zlib`);
     const zippedCSV = await readFile(path);
     const csv = inflate(zippedCSV, { to: "string" });
     const lines = csv.split("\n");

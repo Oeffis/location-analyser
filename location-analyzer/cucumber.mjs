@@ -1,8 +1,7 @@
 export default [
     `--format-options '{"snippetInterface": "synchronous"}'`,
-    `--require-module ts-node/register`,
-    `--require features/stepDefinitions/**/*.ts`,
-    `--require features/world.ts`,
+    `--import features/stepDefinitions/**/*.ts`,
+    `--import features/world.ts`,
     `--tags "not @ignore"`
 ].join(" ");
 

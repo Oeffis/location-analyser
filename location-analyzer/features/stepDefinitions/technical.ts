@@ -1,6 +1,6 @@
 import { Given } from "@cucumber/cucumber";
-import { LocationAnalyzer } from "../../src/locationAnalyzer";
-import { getVrrStops } from "../getVrrStops";
+import { LocationAnalyzer } from "@oeffis/location-analyzer";
+import { getVrrStops } from "../getVrrStops.js";
 import { LocationAnalyzerWorld } from "../world";
 
 Given<LocationAnalyzerWorld>("I do not configure any stops initially", function () {

@@ -1,10 +1,13 @@
+import { Stop } from "@oeffis/location-analyzer";
 import { readFile } from "fs/promises";
 import { inflate } from "pako";
-import { join } from "path";
-import { Stop } from "../src/locationAnalyzer";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
 export async function getVrrStops(): Promise<Stop[]> {
-    const path = join(__dirname, "./data/stops.csv.pako");
+    const filename = fileURLToPath(import.meta.url);
+    const currentDirname = dirname(filename);
+    const path = join(currentDirname, "./data/stops.csv.pako");
     const zippedCSVStopps = await readFile(path);
     const csvStopps = inflate(zippedCSVStopps, { to: "string" });
     const lines = csvStopps.split("\n");
