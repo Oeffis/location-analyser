@@ -18,7 +18,7 @@
     "build": "vite build",
     "build:watch": "vite build --watch",
     "lint": "eslint \"src/**/*.ts\" --fix",
-    "test": "cross-env NODE_OPTIONS=\"--loader ts-node/esm -r tsconfig-paths/register\" cucumber-js"
+    "test": "cucumber-js"
   },
   "repository": {
     "type": "git",
