@@ -3,3 +3,4 @@ dist
 .stryker-tmp
 reports
 raw/no-git
+.rollup.cache
