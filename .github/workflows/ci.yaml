@@ -63,14 +63,8 @@ jobs:
         - name: Test
           working-directory: ./location-analyzer
           run: |
-            npx stryker run
+            npm run test
 
-        - name: Upload Stryker Report
-          uses: actions/upload-artifact@v2
-          with:
-            name: mutation-report
-            path: location-analyzer/reports/mutation
-          
         - name: Upload Build
           uses: actions/upload-artifact@v2
           with:
