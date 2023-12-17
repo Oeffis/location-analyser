@@ -41,8 +41,8 @@
   "devDependencies": {
     "@cucumber/cucumber": "^10.0.1",
     "@rollup/plugin-typescript": "^11.1.5",
-    "@stryker-mutator/core": "^7.3.0",
-    "@stryker-mutator/cucumber-runner": "^7.3.0",
+    "@stryker-mutator/core": "^8.0.0",
+    "@stryker-mutator/cucumber-runner": "^8.0.0",
     "@types/chai": "^4.3.11",
     "@types/node": "^20.8.10",
     "@types/pako": "^2.0.2",
