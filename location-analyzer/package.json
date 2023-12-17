@@ -61,5 +61,10 @@
   },
   "dependencies": {
     "geolib": "^3.3.4"
+  },
+  "overrides": {
+    "vite": {
+      "rollup": "npm:@rollup/wasm-node"
+    }
   }
 }
