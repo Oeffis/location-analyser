@@ -3,11 +3,18 @@ Feature: Onboard Train Detection
     As a commuter
     I want to be able to detect the train I am currently on
 
-    @focus
     Scenario: Detect the train I am currently on when each direction travels a separate track
         Given the 302 travels on a separate track in each direction north of Veltins Arena
         When I am on the 302 to Buer Rathaus North of Veltins Arena
         Then the detected train is the "302" to "Gelsenkirchen Buer Rathaus"
+
+    @focus
+    Scenario: Detect the train I am currently on both directions travel on the same track
+        Given the RB43 travels on a single track between Dingden and Bocholt
+        When I am on the RB43 between Buer Süd and Zoo
+        And I am traveling in the direction of Zoo
+        Then the detected train is the "RB 43" to "Dortmund"
+        And the train "RB 43" to "Dorsten" is not detected
 
     @ignore
     Scenario: Detects the train I am currently on when it is at a station

@@ -23,6 +23,11 @@ Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direct
     this.locationAnalyzer.updatePOIs(routes);
 });
 
+Given<LocationAnalyzerWorld>("the RB43 travels on a single track between Dingden and Bocholt", async function () {
+    const allRoutes = await getVrrRoutes();
+    this.locationAnalyzer.updatePOIs(allRoutes);
+});
+
 When<LocationAnalyzerWorld>("I am on the 302 to Buer Rathaus North of Veltins Arena", function () {
     this.locationAnalyzer.updateLocation({
         latitude: 51.55826,
@@ -30,9 +35,37 @@ When<LocationAnalyzerWorld>("I am on the 302 to Buer Rathaus North of Veltins Ar
     });
 });
 
+When<LocationAnalyzerWorld>("I am on the RB43 between Buer Süd and Zoo", function () {
+    this.locationAnalyzer.updateLocation({
+        latitude: 51.5393,
+        longitude: 7.07059
+    });
+});
+
+When<LocationAnalyzerWorld>("I am traveling in the direction of Zoo", function () {
+    this.locationAnalyzer.updateLocation({
+        latitude: 51.53879,
+        longitude: 7.07231
+    });
+});
+
 Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", function (line: string, destination: string) {
-    const status = this.locationAnalyzer.getStatus();
-    const route = status.pois[0] as Route;
+    const route = getFirstRoute(this);
     assert.strictEqual(route.ref, line);
     assert.strictEqual(route.to, destination);
 });
+
+Then<LocationAnalyzerWorld>("the train {string} to {string} is not detected", function (line: string, destination: string) {
+    const route = getFirstRoute(this);
+
+    const sameLine = route.ref === line;
+    const sameDestination = route.to === destination;
+    assert.isFalse(sameLine && sameDestination, `The train ${line} to ${destination} is detected, but should not be.`);
+});
+
+function getFirstRoute(world: LocationAnalyzerWorld): Route {
+    const status = world.locationAnalyzer.getStatus();
+    const route = status.pois[0] as Route;
+    assert.exists(route, "There is no route to check against.");
+    return route;
+}
