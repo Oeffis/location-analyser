@@ -11,7 +11,8 @@
   "workspaces": [
     "location-analyzer",
     "demo",
-    "scripts"
+    "scripts",
+    "location-analyzer/features"
   ],
   "overrides": {
     "vite": {
