@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -84,11 +85,11 @@ function getBeacons(): Beacon[] {
     while (bufferedReader.canRead()) {
         const string = bufferedReader.readString();
         const splitted = string.split("/");
-        const type = splitted[0];
-        const splitted2 = splitted[1].split(":");
-        const uuid = splitted2[0].toUpperCase();
-        const major = parseInt(splitted2[1], 16);
-        const minor = parseInt(splitted2[2], 16);
+        const type = splitted[0]!;
+        const splitted2 = splitted[1]!.split(":");
+        const uuid = splitted2[0]!.toUpperCase();
+        const major = parseInt(splitted2[1]!, 16);
+        const minor = parseInt(splitted2[2]!, 16);
 
         const globalId = bufferedReader.readString();
         bufferedReader.offset += 12;

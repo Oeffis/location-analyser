@@ -25,13 +25,14 @@ Given<LocationAnalyzerWorld>("I am at {string}", function (location: string) {
 
 Given<LocationAnalyzerWorld>("I am {double} m {word} of {string}", function (distance: number, direction: Direction, location: string) {
     const locationCoords = locationMap[location];
+    assert.ok(locationCoords, `Location ${location} not found`);
     const bearing = directionToBearing(direction);
     const newCoords = computeDestinationPoint(locationCoords, distance, bearing);
     this.locationAnalyzer.updateLocation(newCoords);
 });
 
 Given<LocationAnalyzerWorld>("No location was set", function () {
-    this.locationAnalyzer.updateLocation(undefined);
+    // This is the default
 });
 
 type Direction = "north" | "east" | "south" | "west";

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Stop } from "@oeffis/location-analyzer";
 import { readFile } from "fs/promises";
 import { inflate } from "pako";
@@ -17,10 +18,10 @@ export async function getVrrStops(): Promise<Stop[]> {
 
 function lineToStop(line: string): Stop {
     return {
-        id: line.split(",")[0],
+        id: line.split(",")[0]!,
         location: {
-            latitude: Number(line.split(",")[2]),
-            longitude: Number(line.split(",")[3])
+            latitude: Number(line.split(",")[2])!,
+            longitude: Number(line.split(",")[3])!
         }
     };
 }

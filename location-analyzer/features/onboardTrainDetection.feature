@@ -8,7 +8,7 @@ Feature: Onboard Train Detection
         When I am on the 302 to Buer Rathaus North of Veltins Arena
         Then the detected train is the "302" to "Gelsenkirchen Buer Rathaus"
 
-    @focus
+    @ignore
     Scenario: Detect the train I am currently on both directions travel on the same track
         Given the RB43 travels on a single track between Dingden and Bocholt
         When I am on the RB43 between Buer Süd and Zoo

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { readFile } from "fs/promises";
 import { inflate } from "pako";
 import { dirname, join } from "path";
@@ -17,8 +18,8 @@ async function loadFullRoutes(): Promise<Route[]> {
     const sections = await loadSections();
     let sectionIndex = 0;
     for (const route of routes) {
-        while (sectionIndex < sections.length && sections[sectionIndex].routeId === route.id) {
-            route.sections.push(sections[sectionIndex]);
+        while (sectionIndex < sections.length && sections[sectionIndex]?.routeId === route.id) {
+            route.sections.push(sections[sectionIndex]!);
             sectionIndex++;
         }
     }
@@ -62,17 +63,17 @@ async function readZippedCsv(name: string): Promise<string[]> {
 
 function lineToRoute(line: string): Route {
     return {
-        id: line.split(",")[0],
-        from: line.split(",")[1],
-        to: line.split(",")[2],
-        ref: line.split(",")[3],
+        id: line.split(",")[0]!,
+        from: line.split(",")[1]!,
+        to: line.split(",")[2]!,
+        ref: line.split(",")[3]!,
         sections: []
     };
 }
 
 function lineToSection(line: string): Section {
     return {
-        routeId: line.split(",")[0],
+        routeId: line.split(",")[0]!,
         sequence: Number(line.split(",")[1]),
         lat: Number(line.split(",")[2]),
         lon: Number(line.split(",")[3])
