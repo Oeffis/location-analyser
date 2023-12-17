@@ -12,5 +12,10 @@
     "location-analyzer",
     "demo",
     "scripts"
-  ]
+  ],
+  "overrides": {
+    "vite": {
+      "rollup": "npm:@rollup/wasm-node"
+    }
+  }
 }
