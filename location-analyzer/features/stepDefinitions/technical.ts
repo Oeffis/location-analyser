@@ -1,7 +1,7 @@
 import { Given } from "@cucumber/cucumber";
-import { LocationAnalyzer } from "@oeffis/location-analyzer";
+import { LocationAnalyzer } from "../../src/locationAnalyzer.js";
 import { getVrrStops } from "../getVrrStops.js";
-import { LocationAnalyzerWorld } from "../world";
+import { LocationAnalyzerWorld } from "../world.js";
 
 Given<LocationAnalyzerWorld>("I do not configure any stops initially", function () {
     this.locationAnalyzer = new LocationAnalyzer();

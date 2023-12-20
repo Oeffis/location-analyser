@@ -1,8 +1,8 @@
 import { Given, Then, When } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
-import { Stop } from "@oeffis/location-analyzer";
 import { assert } from "chai";
+import { Stop } from "../../src";
 import { Route, getVrrRoutes } from "../getVrrRoutes.js";
 import { getVrrStops } from "../getVrrStops.js";
 

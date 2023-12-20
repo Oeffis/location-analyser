@@ -3,15 +3,15 @@
     "include": [
         "**/*.ts",
         "../cucumber.mjs",
-        "../stryker.config.mjs"
+        "../stryker.config.mjs",
+        "../src/**/*.ts",
     ],
     "compilerOptions": {
-        "paths": {
-            "location-analyzer": [
-                "../location-analyzer"
-            ],
-        },
-        "rootDir": ".",
-        "baseUrl": "./src"
+        "composite": true,
+        "rootDir": "..",
+        "baseUrl": "./src",
+        "target": "ES6",
+        "moduleResolution": "Node",
+        "strictNullChecks": true
     }
 }

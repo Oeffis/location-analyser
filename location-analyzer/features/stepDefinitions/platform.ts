@@ -1,7 +1,7 @@
 import { Then } from "@cucumber/cucumber";
 import { assert } from "chai";
-import { Stop, WithDistance } from "../../dist";
-import { LocationAnalyzerWorld } from "../world";
+import { Stop, WithDistance } from "../../src/locationAnalyzer.js";
+import { LocationAnalyzerWorld } from "../world.js";
 
 interface RawDataTable { rawTable: string[][] }
 

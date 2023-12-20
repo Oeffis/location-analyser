@@ -1,8 +1,8 @@
 import { Given } from "@cucumber/cucumber";
-import { GeoLocation } from "@oeffis/location-analyzer";
-import assert from "assert";
+import { assert } from "chai";
 import { computeDestinationPoint } from "geolib";
-import { LocationAnalyzerWorld } from "../world";
+import { GeoLocation } from "../../src/locationAnalyzer.js";
+import { LocationAnalyzerWorld } from "../world.js";
 
 const locationMap: Record<string, GeoLocation> = {
     /* eslint-disable @typescript-eslint/naming-convention */
@@ -20,14 +20,16 @@ const locationMap: Record<string, GeoLocation> = {
 Given<LocationAnalyzerWorld>("I am at {string}", function (location: string) {
     const locationCoords = locationMap[location];
     assert.ok(locationCoords, `Location ${location} not found`);
-    this.locationAnalyzer.updateLocation(locationCoords);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    this.locationAnalyzer.updateLocation(locationCoords!);
 });
 
 Given<LocationAnalyzerWorld>("I am {double} m {word} of {string}", function (distance: number, direction: Direction, location: string) {
     const locationCoords = locationMap[location];
     assert.ok(locationCoords, `Location ${location} not found`);
     const bearing = directionToBearing(direction);
-    const newCoords = computeDestinationPoint(locationCoords, distance, bearing);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const newCoords = computeDestinationPoint(locationCoords!, distance, bearing);
     this.locationAnalyzer.updateLocation(newCoords);
 });
 

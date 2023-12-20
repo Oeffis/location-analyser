@@ -1,4 +1,4 @@
-import { GeoLocation, Route, Section, Stop } from "locationAnalyzer";
+import { GeoLocation, Route, Section, Stop } from "./locationAnalyzer";
 
 export type TransitPOI = Route | Stop;
 
@@ -42,7 +42,7 @@ export class RouteMap {
 
     public getPOIsAtLocation(location: GeoLocation): TransitPOI[] {
         const routeSet = new Set<TransitPOI>();
-        const offsetMatrix = [
+        const offsetMatrix: [number, number][] = [
             [-1, -1], [-1, 0], [-1, 1],
             [0, -1], [0, 0], [-1, 1],
             [1, -1], [1, 0], [1, 1]

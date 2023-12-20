@@ -29,7 +29,7 @@ stream.on("data", (chunk) => {
 
     const filteredMatchArray = matchArray
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        .filter((match) => nodeIds.includes(parseInt(match.groups!.id, 10)))
+        .filter((match) => nodeIds.includes(parseInt(match.groups!.id!, 10)))
         .map((match) => match[0]);
 
     if (filteredMatchArray.length > 0) {

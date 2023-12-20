@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Stop } from "@oeffis/location-analyzer";
 import { readFile } from "fs/promises";
 import { inflate } from "pako";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { Stop } from "..";
 
 export async function getVrrStops(): Promise<Stop[]> {
     const filename = fileURLToPath(import.meta.url);

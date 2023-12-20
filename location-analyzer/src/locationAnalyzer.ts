@@ -1,6 +1,6 @@
 import { getDistance } from "geolib";
-import { getDistanceFromLine } from "./getDistanceFromLine";
-import { RouteMap, TransitPOI, isRoute } from "./routeMap";
+import { getDistanceFromLine } from "./getDistanceFromLine.js";
+import { RouteMap, TransitPOI, isRoute } from "./routeMap.js";
 
 interface SectionDistance {
     poiId: string;
