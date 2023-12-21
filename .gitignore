@@ -4,3 +4,4 @@ dist
 reports
 raw/no-git
 .rollup.cache
+notes.md
