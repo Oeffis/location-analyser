@@ -1,5 +1,11 @@
 import { createOSMStream } from "osm-pbf-parser-node";
 
+interface StreamFilter<C extends OSMType> {
+    typeGuard: (item: OSMType) => item is C;
+    filter: (item: C) => boolean;
+    onMatch: (item: C) => void;
+}
+
 class OsmExtractor {
     private readonly routeTypes = [
         "bus",
@@ -33,15 +39,14 @@ class OsmExtractor {
 
     private async getRelations(): Promise<Relation[]> {
         const relations: Relation[] = [];
-        const stream = this.createStream();
-        for await (const item of stream) {
-            if (isRoot(item)) continue;
-            if (!isRelation(item)) continue;
-            if (item.tags.type !== "route") continue;
-            const isPublicTransitRoute = this.routeTypes.includes(item.tags.route ?? "");
-            if (!isPublicTransitRoute) continue;
-            relations.push(item);
-        }
+
+        await this.filterStream({
+            typeGuard: isRelation,
+            filter: relation => relation.tags.type === "route"
+                && this.routeTypes.includes(relation.tags.route ?? ""),
+            onMatch: relation => void relations.push(relation)
+        });
+
         return relations;
     }
 
@@ -66,27 +71,35 @@ class OsmExtractor {
 
     private async getNodeIds(waysToKeep: Set<number>): Promise<Set<number>> {
         const nodesToKeep = new Set<number>();
-        const stream = this.createStream();
-        for await (const item of stream) {
-            if (isRoot(item)) continue;
-            if (!isWay(item)) continue;
-            if (!waysToKeep.has(item.id)) continue;
-            const nodes = item.refs ?? [];
-            nodes.forEach(node => nodesToKeep.add(node));
-        }
+
+        await this.filterStream({
+            typeGuard: isWay,
+            filter: way => waysToKeep.has(way.id),
+            onMatch: way => (way.refs ?? []).forEach(node => nodesToKeep.add(node))
+        });
+
         return nodesToKeep;
     }
 
     private async getNodes(nodeIdsToKeep: Set<number>): Promise<Node[]> {
-        const nodes = [];
+        const nodes: Node[] = [];
+
+        await this.filterStream({
+            typeGuard: isNode,
+            filter: node => nodeIdsToKeep.has(node.id),
+            onMatch: node => void nodes.push(node)
+        });
+
+        return nodes;
+    }
+
+    private async filterStream<C extends OSMType>({ typeGuard: typeFilter, filter: filterFunction, onMatch: doFunction }: StreamFilter<C>): Promise<void> {
         const stream = this.createStream();
         for await (const item of stream) {
-            if (isRoot(item)) continue;
-            if (!isNode(item)) continue;
-            if (!nodeIdsToKeep.has(item.id)) continue;
-            nodes.push(item);
+            if (!typeFilter(item)) continue;
+            if (!filterFunction(item)) continue;
+            doFunction(item);
         }
-        return nodes;
     }
 }
 
