@@ -26,15 +26,10 @@ class OsmExtractor {
         const wayIdsToKeep = this.getWayIds(relations);
         const nodeIdsToKeep = await this.getNodeIds(wayIdsToKeep);
         const nodes = await this.getNodes(nodeIdsToKeep);
-
         console.log("Done filtering, checking if we have everything");
 
-        const missing = Array.from(nodeIdsToKeep.values()).filter(node => !nodes.find(n => n.id === node));
-        if (missing.length > 0) {
-            console.log("Missing nodes", missing);
-        } else {
-            console.log(`All nodes onboard (${nodes.length} for ${relations.length} routes)`);
-        }
+        this.verifyCompleteness(nodeIdsToKeep, nodes);
+        console.log(`All ${nodes.length} node found for ${relations.length} routes.`);
     }
 
     private async getRelations(): Promise<Relation[]> {
@@ -99,6 +94,13 @@ class OsmExtractor {
             if (!typeFilter(item)) continue;
             if (!filterFunction(item)) continue;
             doFunction(item);
+        }
+    }
+
+    private verifyCompleteness(nodeIdsToKeep: Set<number>, nodes: Node[]): void {
+        const missing = Array.from(nodeIdsToKeep.values()).filter(node => !nodes.find(n => n.id === node));
+        if (missing.length > 0) {
+            throw new Error(`Missing ${missing.length} nodes: ${missing.join(", ")}`);
         }
     }
 }
