@@ -1,8 +1,6 @@
 import { createOSMStream } from "osm-pbf-parser-node";
 
 class OsmExtractor {
-    private readonly waysToKeep = new Set<number>();
-
     private readonly routeTypes = [
         "bus",
         "trolleybus",
@@ -19,7 +17,8 @@ class OsmExtractor {
 
     public async extract(): Promise<void> {
         const relations = await this.getRelations();
-        const nodeIdsToKeep = await this.getNodeIds();
+        const wayIdsToKeep = this.getWayIds(relations);
+        const nodeIdsToKeep = await this.getNodeIds(wayIdsToKeep);
         const nodes = await this.getNodes(nodeIdsToKeep);
 
         console.log("Done filtering, checking if we have everything");
@@ -42,24 +41,33 @@ class OsmExtractor {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 if (!this.routeTypes.includes(item.tags.route!)) continue;
                 relations.push(item);
-                const ways = item.members
-                    .filter(member => member.type === "way"
-                        && member.role === "")
-                    .map(member => member.ref);
-                ways.forEach(way => this.waysToKeep.add(way));
-                continue;
             }
         }
         return relations;
     }
 
-    private async getNodeIds(): Promise<Set<number>> {
+    private getWayIds(relations: Relation[]): Set<number> {
+        const wayIds = new Set<number>();
+        relations.forEach(relation => {
+            const ways = relation
+                .members
+                .filter(
+                    member => member.type === "way"
+                        && member.role === ""
+                )
+                .map(member => member.ref);
+            ways.forEach(way => wayIds.add(way));
+        });
+        return wayIds;
+    }
+
+    private async getNodeIds(waysToKeep: Set<number>): Promise<Set<number>> {
         const stream = createOSMStream("../raw/no-git/Bochum.osm.pbf") as AsyncGenerator<OSMType, void>;
         const nodesToKeep = new Set<number>();
         for await (const item of stream) {
             if (isRoot(item)) continue;
             if (isWay(item)) {
-                if (!this.waysToKeep.has(item.id)) continue;
+                if (!waysToKeep.has(item.id)) continue;
                 const nodes = item.refs ?? [];
                 nodes.forEach(node => nodesToKeep.add(node));
                 continue;
