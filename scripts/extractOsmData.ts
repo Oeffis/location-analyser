@@ -106,11 +106,6 @@ class OsmExtractor {
 const extractor = new OsmExtractor();
 extractor.extract().catch(console.error);
 
-function isRoot(item: OSMType): item is Root {
-    // eslint-disable-next-line no-prototype-builtins
-    return !item.hasOwnProperty("type");
-}
-
 function isNode(item: OSMType): item is Node {
     return (item as OSMNonRootType).type === "node";
 }
