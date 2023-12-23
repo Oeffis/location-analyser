@@ -33,17 +33,20 @@ class OsmExtractor {
 
     private async getRelations(): Promise<Relation[]> {
         const relations: Relation[] = [];
-        const stream = createOSMStream("../raw/no-git/Bochum.osm.pbf") as AsyncGenerator<OSMType, void>;
+        const stream = this.createStream();
         for await (const item of stream) {
             if (isRoot(item)) continue;
-            if (isRelation(item)) {
-                if (item.tags.type !== "route") continue;
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                if (!this.routeTypes.includes(item.tags.route!)) continue;
-                relations.push(item);
-            }
+            if (!isRelation(item)) continue;
+            if (item.tags.type !== "route") continue;
+            const isPublicTransitRoute = this.routeTypes.includes(item.tags.route ?? "");
+            if (!isPublicTransitRoute) continue;
+            relations.push(item);
         }
         return relations;
+    }
+
+    private createStream(): AsyncGenerator<OSMType, void> {
+        return createOSMStream("../raw/no-git/Bochum.osm.pbf") as AsyncGenerator<OSMType, void>;
     }
 
     private getWayIds(relations: Relation[]): Set<number> {
@@ -62,30 +65,26 @@ class OsmExtractor {
     }
 
     private async getNodeIds(waysToKeep: Set<number>): Promise<Set<number>> {
-        const stream = createOSMStream("../raw/no-git/Bochum.osm.pbf") as AsyncGenerator<OSMType, void>;
         const nodesToKeep = new Set<number>();
+        const stream = this.createStream();
         for await (const item of stream) {
             if (isRoot(item)) continue;
-            if (isWay(item)) {
-                if (!waysToKeep.has(item.id)) continue;
-                const nodes = item.refs ?? [];
-                nodes.forEach(node => nodesToKeep.add(node));
-                continue;
-            }
+            if (!isWay(item)) continue;
+            if (!waysToKeep.has(item.id)) continue;
+            const nodes = item.refs ?? [];
+            nodes.forEach(node => nodesToKeep.add(node));
         }
         return nodesToKeep;
     }
 
     private async getNodes(nodeIdsToKeep: Set<number>): Promise<Node[]> {
         const nodes = [];
-        const stream = createOSMStream("../raw/no-git/Bochum.osm.pbf") as AsyncGenerator<OSMType, void>;
+        const stream = this.createStream();
         for await (const item of stream) {
             if (isRoot(item)) continue;
-            if (isNode(item)) {
-                if (!nodeIdsToKeep.has(item.id)) continue;
-                nodes.push(item);
-                continue;
-            }
+            if (!isNode(item)) continue;
+            if (!nodeIdsToKeep.has(item.id)) continue;
+            nodes.push(item);
         }
         return nodes;
     }
