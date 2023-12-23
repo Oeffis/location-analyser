@@ -45,10 +45,6 @@ class OsmExtractor {
         return relations;
     }
 
-    private createStream(): AsyncGenerator<OSMType, void> {
-        return createOSMStream("../raw/no-git/Bochum.osm.pbf") as AsyncGenerator<OSMType, void>;
-    }
-
     private getWayIds(relations: Relation[]): Set<number> {
         const wayIds = new Set<number>();
         relations.forEach(relation => {
@@ -95,6 +91,10 @@ class OsmExtractor {
             if (!filterFunction(item)) continue;
             doFunction(item);
         }
+    }
+
+    private createStream(): AsyncGenerator<OSMType, void> {
+        return createOSMStream("../raw/no-git/Bochum.osm.pbf") as AsyncGenerator<OSMType, void>;
     }
 
     private verifyCompleteness(nodeIdsToKeep: Set<number>, nodes: Node[]): void {
