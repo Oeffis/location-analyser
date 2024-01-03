@@ -18,7 +18,7 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { LocationAnalyzer, Route, Stop, WithDistance, isRoute } from "@oeffis/location-analyzer";
+import { LocationAnalyzer, POIWithDistance, Route, Stop, isRoute } from "@oeffis/location-analyzer";
 import { inflate } from "pako";
 import { useEffect, useState } from "react";
 import "./theme/variables.css";
@@ -30,14 +30,14 @@ type StopWithName = Stop & { name: string };
 const App: React.FC = () => {
   const position = usePosition();
   const pois = useStops();
-  const [nearestPOI, setNearestPOI] = useState<WithDistance<Route | Stop> | null>(null);
+  const [nearestPOI, setNearestPOI] = useState<POIWithDistance | null>(null);
   const analyzer = new LocationAnalyzer(pois);
 
-  function getName(poi: WithDistance<Route | Stop>): string {
+  function getName(poi: POIWithDistance): string {
     if (isRoute(poi)) {
       return (poi as Route).from + " - " + (poi as Route).to;
     }
-    return (poi as StopWithName).name;
+    return (poi as unknown as StopWithName).name;
   }
 
   useEffect(() => {
@@ -81,7 +81,7 @@ const App: React.FC = () => {
         {nearestPOI && (<p>
           ID: {nearestPOI.id}<br />
           Name: {getName(nearestPOI)}<br />
-          Distance: {nearestPOI.distance}m<br />
+          Distance: {nearestPOI.distance.value}m<br />
         </p>)}
       </IonContent>
     </IonPage>
