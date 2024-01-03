@@ -23,7 +23,7 @@ Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direct
     this.locationAnalyzer.updatePOIs(routes);
 });
 
-Given<LocationAnalyzerWorld>("the RB43 travels on a single track between Dingden and Bocholt", async function () {
+Given<LocationAnalyzerWorld>("the RB43 travels on a single track between Buer Süd and Zoo", async function () {
     const allRoutes = await getVrrRoutes();
     this.locationAnalyzer.updatePOIs(allRoutes);
 });

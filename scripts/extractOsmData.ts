@@ -167,32 +167,25 @@ class OsmExtractor {
                 firstWay.refs = firstWay.refs?.reverse();
             }
 
-            let currentWay: Way | undefined = firstWay;
-            let lastNodeId = currentWay.refs?.[currentWay.refs.length - 1];
-            while (currentWay) {
-                const currentWayStartNodeId: number | undefined = currentWay.refs?.[0];
-                const currentWayEndNodeId: number | undefined = currentWay.refs?.[currentWay.refs.length - 1];
-                if (!currentWayStartNodeId) throw new Error(`Way ${currentWay.id} has no start node`);
-                if (!currentWayEndNodeId) throw new Error(`Way ${currentWay.id} has no end node`);
-                const endNodeMatch: Way | undefined = remainingWays.find(way => way.refs?.includes(currentWayStartNodeId));
-                const startNodeMatch: Way | undefined = remainingWays.find(way => way.refs?.includes(currentWayEndNodeId));
+            let lastNodeId = firstWay.refs?.[firstWay.refs.length - 1];
+            while (lastNodeId !== undefined) {
+                const currentNodeId = lastNodeId;
+                const next = remainingWays.find(way => way.refs?.includes(currentNodeId));
 
-                let wayNodeIds = currentWay.refs;
-                if (!wayNodeIds) throw new Error(`Way ${currentWay.id} has no nodes`);
-                const isLastWay = startNodeMatch === undefined && endNodeMatch === undefined;
-                const isLastWayReversed = isLastWay && lastNodeId !== wayNodeIds[0];
-                if (startNodeMatch !== undefined || isLastWayReversed) {
-                    // no nodes connect to the end of the current way, so we need to reverse it
+                if (!next) {
+                    break;
+                }
+
+                let wayNodeIds = next.refs ?? [];
+                if (wayNodeIds[wayNodeIds.length - 1] === currentNodeId) {
+                    // way end connects to last way
                     wayNodeIds = wayNodeIds.reverse();
-                    currentWay = startNodeMatch;
-                } else {
-                    currentWay = endNodeMatch;
+                } else if (wayNodeIds[0] !== currentNodeId) {
+                    console.warn(`${relation.tags.name} (${relation.id}) Way ${next.id} does contain node ${currentNodeId} of previous way, but at neither end nor start`);
+                    return;
                 }
                 lastNodeId = wayNodeIds[wayNodeIds.length - 1];
-
-                if (currentWay !== undefined) {
-                    remainingWays = remainingWays.filter(way => way.id !== currentWay?.id);
-                }
+                remainingWays = remainingWays.filter(way => way.id !== next.id);
 
                 const wayNodes = wayNodeIds.map(nodeId => nodes.get(nodeId));
                 wayNodes.forEach(node => {
@@ -204,12 +197,10 @@ class OsmExtractor {
 
             if (remainingWays.length > 0) {
                 if (remainingWays.length > 10) {
-                    console.warn(`Relation ${relation.tags.name} has ${remainingWays.length} ways left over.`);
+                    console.warn(`${relation.tags.name} (${relation.id}) has ${remainingWays.length} ways left over.`);
                 } else {
-                    console.log(`Relation ${relation.tags.name} has ${remainingWays.length} ways left over: ${remainingWays.map(way => way.id).join(", ")}`);
+                    console.log(`${relation.tags.name} (${relation.id}) has ${remainingWays.length} ways left over: ${remainingWays.map(way => way.id).join(", ")}`);
                 }
-            } else {
-                console.log(`Relation ${relation.tags.name} has no ways left over`);
             }
         });
 
@@ -217,7 +208,9 @@ class OsmExtractor {
         const zippedSections = deflate(sections);
         await Promise.all([
             writeFile("../location-analyzer/features/data/routes.csv.zlib", zippedRoutes),
-            writeFile("../location-analyzer/features/data/sections.csv.zlib", zippedSections)
+            writeFile("../location-analyzer/features/data/sections.csv.zlib", zippedSections),
+            writeFile("../raw/no-git/routes.csv", routes),
+            writeFile("../raw/no-git/sections.csv", sections)
         ]);
     }
 }
