@@ -143,20 +143,74 @@ class OsmExtractor {
             const waysInRelation = relation
                 .members
                 .filter(member => member.type === "way" && member.role === "")
-                .map(member => member.ref);
+                .map(member => member.ref)
+                .map(wayId => ways.get(wayId));
+
+            if (waysInRelation.some(way => !way))
+                throw new Error(`Relation ${relation.tags.name} has missing ways`);
 
             let sequenceNumber = 0;
-            waysInRelation.forEach(wayId => {
-                const way = ways.get(wayId);
-                if (!way) throw new Error(`Way ${wayId} not found`);
-                const wayNodes = way.refs?.map(ref => nodes.get(ref));
-                if (!wayNodes) throw new Error(`Way ${wayId} has no nodes`);
+
+            let remainingWays = waysInRelation as Way[];
+            const firstWay = remainingWays.shift();
+
+            const firstWayStartNodeId = firstWay?.refs?.[0];
+            if (!firstWayStartNodeId) {
+                console.warn(`Relation ${relation.tags.name} (${relation.id}) has no start node`);
+                return;
+            }
+
+            const startNodeMatch = waysInRelation.find(way => way?.refs?.includes(firstWayStartNodeId));
+
+            if (startNodeMatch) {
+                // no nodes connect to the end of the first way, so we need to reverse it
+                firstWay.refs = firstWay.refs?.reverse();
+            }
+
+            let currentWay: Way | undefined = firstWay;
+            let lastNodeId = currentWay.refs?.[currentWay.refs.length - 1];
+            while (currentWay) {
+                const currentWayStartNodeId: number | undefined = currentWay.refs?.[0];
+                const currentWayEndNodeId: number | undefined = currentWay.refs?.[currentWay.refs.length - 1];
+                if (!currentWayStartNodeId) throw new Error(`Way ${currentWay.id} has no start node`);
+                if (!currentWayEndNodeId) throw new Error(`Way ${currentWay.id} has no end node`);
+                const endNodeMatch: Way | undefined = remainingWays.find(way => way.refs?.includes(currentWayStartNodeId));
+                const startNodeMatch: Way | undefined = remainingWays.find(way => way.refs?.includes(currentWayEndNodeId));
+
+                let wayNodeIds = currentWay.refs;
+                if (!wayNodeIds) throw new Error(`Way ${currentWay.id} has no nodes`);
+                const isLastWay = startNodeMatch === undefined && endNodeMatch === undefined;
+                const isLastWayReversed = isLastWay && lastNodeId !== wayNodeIds[0];
+                if (startNodeMatch !== undefined || isLastWayReversed) {
+                    // no nodes connect to the end of the current way, so we need to reverse it
+                    wayNodeIds = wayNodeIds.reverse();
+                    currentWay = startNodeMatch;
+                } else {
+                    currentWay = endNodeMatch;
+                }
+                lastNodeId = wayNodeIds[wayNodeIds.length - 1];
+
+                if (currentWay !== undefined) {
+                    remainingWays = remainingWays.filter(way => way.id !== currentWay?.id);
+                }
+
+                const wayNodes = wayNodeIds.map(nodeId => nodes.get(nodeId));
                 wayNodes.forEach(node => {
                     if (!node) throw new Error(`Node ${node} not found`);
                     sections += `${routeId},${sequenceNumber},${node.lat},${node.lon}\n`;
                     sequenceNumber++;
                 });
-            });
+            }
+
+            if (remainingWays.length > 0) {
+                if (remainingWays.length > 10) {
+                    console.warn(`Relation ${relation.tags.name} has ${remainingWays.length} ways left over.`);
+                } else {
+                    console.log(`Relation ${relation.tags.name} has ${remainingWays.length} ways left over: ${remainingWays.map(way => way.id).join(", ")}`);
+                }
+            } else {
+                console.log(`Relation ${relation.tags.name} has no ways left over`);
+            }
         });
 
         const zippedRoutes = deflate(routes);
