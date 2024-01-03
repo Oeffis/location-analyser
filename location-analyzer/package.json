@@ -40,7 +40,7 @@
   },
   "homepage": "https://github.com/Oeffis/location-analyser#readme",
   "devDependencies": {
-    "@cucumber/cucumber": "^10.0.1",
+    "@cucumber/cucumber": "^10.1.0",
     "@rollup/plugin-typescript": "^11.1.5",
     "@stryker-mutator/core": "^8.0.0",
     "@stryker-mutator/cucumber-runner": "^8.0.0",
