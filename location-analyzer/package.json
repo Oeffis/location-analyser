@@ -18,7 +18,8 @@
     "build": "vite build",
     "build:watch": "vite build --watch",
     "lint": "eslint \"src/**/*.ts\" --fix",
-    "test": "cucumber-js"
+    "test": "cucumber-js",
+    "test:mutation": "stryker run"
   },
   "repository": {
     "type": "git",
