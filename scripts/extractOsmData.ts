@@ -246,9 +246,6 @@ export class OsmExtractor {
     }
 }
 
-const extractor = new OsmExtractor();
-extractor.transform().catch(console.error);
-
 function isNode(item: OSMType): item is Node {
     return (item as OSMNonRootType).type === "node";
 }
@@ -292,4 +289,9 @@ interface Relation {
         role: string;
     }[];
     tags: Record<string, string>;
+}
+
+if (require.main === module) {
+    const extractor = new OsmExtractor();
+    extractor.transform().catch(console.error);
 }
