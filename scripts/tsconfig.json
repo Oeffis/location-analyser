@@ -6,6 +6,6 @@
     "compilerOptions": {
         "types": [
             "@oeffis/location-analyzer"
-        ]
+        ],
     }
 }

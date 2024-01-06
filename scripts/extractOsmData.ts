@@ -2,13 +2,23 @@ import { writeFile } from "fs/promises";
 import { createOSMStream } from "osm-pbf-parser-node";
 import { deflate } from "pako";
 
+export interface ExtractionResult {
+    relations: Map<number, Relation>;
+    ways: Map<number, Way>;
+    nodes: Map<number, Node>;
+}
+
+export interface ExtractionFilter {
+    relations?: number[];
+}
+
 interface StreamFilter<C extends OSMType> {
     typeGuard: (item: OSMType) => item is C;
     filter: (item: C) => boolean;
     onMatch: (item: C) => void;
 }
 
-class OsmExtractor {
+export class OsmExtractor {
     private readonly routeTypes = [
         "bus",
         "trolleybus",
@@ -23,8 +33,15 @@ class OsmExtractor {
         "funicular"
     ];
 
-    public async extract(): Promise<void> {
-        const relations = await this.getRelations();
+    public async transform(filter?: ExtractionFilter): Promise<void> {
+        const { relations, ways, nodes } = await this.extract(filter);
+
+        console.log("Writing to file");
+        await this.writeToFile(relations, ways, nodes);
+    }
+
+    public async extract(filter?: ExtractionFilter): Promise<ExtractionResult> {
+        const relations = await this.getRelations(filter?.relations);
         const wayIdsToKeep = this.getWayIds(relations);
         const ways = await this.getWays(wayIdsToKeep);
         const nodeIdsToKeep = this.getNodeIds(ways);
@@ -35,17 +52,31 @@ class OsmExtractor {
         this.verifyNodeCompleteness(nodeIdsToKeep, nodes);
         console.log(`All ${nodes.size} node found in ${ways.size} ways for ${relations.size} routes.`);
 
-        console.log("Writing to file");
-        await this.writeToFile(relations, ways, nodes);
+        return {
+            relations,
+            ways,
+            nodes
+        };
     }
 
-    private async getRelations(): Promise<Map<number, Relation>> {
+    private async getRelations(relationIds?: number[]): Promise<Map<number, Relation>> {
         const relations = new Map<number, Relation>();
+
+        const baseFilter = (relation: Relation): boolean =>
+            relation.tags.type === "route"
+            && this.routeTypes.includes(relation.tags.route ?? "");
+        let filter = baseFilter;
+
+        if (relationIds) {
+            const relationIdsToKeep = new Set(relationIds);
+            filter = relation =>
+                relationIdsToKeep.has(relation.id)
+                && baseFilter(relation);
+        }
 
         await this.filterStream({
             typeGuard: isRelation,
-            filter: relation => relation.tags.type === "route"
-                && this.routeTypes.includes(relation.tags.route ?? ""),
+            filter,
             onMatch: relation => void relations.set(relation.id, relation)
         });
 
@@ -216,7 +247,7 @@ class OsmExtractor {
 }
 
 const extractor = new OsmExtractor();
-extractor.extract().catch(console.error);
+extractor.transform().catch(console.error);
 
 function isNode(item: OSMType): item is Node {
     return (item as OSMNonRootType).type === "node";
