@@ -174,34 +174,29 @@ export class OsmExtractor {
 
     private generateOutput(relations: Map<number, Relation>, ways: Map<number, Way>, nodes: Map<number, Node>): { routes: string; sections: string } {
         const routes = this.getRouteOutput(relations);
+        const sections = this.getSectionsOutput(relations, ways, nodes);
+        return { routes, sections };
+    }
 
+    private getSectionsOutput(relations: Map<number, Relation>, ways: Map<number, Way>, nodes: Map<number, Node>): string {
         let sections = "route_id,sequence_number,lat,lon\n";
-
         relations.forEach(relation => {
             const routeId = relation.id;
-            const waysInRelation = relation
-                .members
-                .filter(member => member.type === "way" && member.role === "")
-                .map(member => member.ref)
-                .map(wayId => ways.get(wayId));
-
-            if (waysInRelation.some(way => !way))
-                throw new Error(`Relation ${relation.tags.name} has missing ways`);
-
             let sequenceNumber = 0;
+            let remainingWays = this.getWaysInRelation(relation, ways);
 
-            let remainingWays = waysInRelation as Way[];
             const firstWay = remainingWays.shift();
+            if (!firstWay) throw new Error(`Relation ${relation.tags.name} has no ways`);
 
-            const firstWayStartNodeId = firstWay?.refs?.[0];
+            const firstWayStartNodeId = firstWay.refs?.[0];
             if (!firstWayStartNodeId) {
-                console.warn(`Relation ${relation.tags.name}(${relation.id}) has no start node`);
-                return;
+                throw new Error(`No start Node`);
             }
 
-            const startNodeMatch = waysInRelation.find(way => way?.refs?.includes(firstWayStartNodeId));
+            const startNodeMatch = remainingWays.find(way => way.refs?.includes(firstWayStartNodeId));
+            const endNodeMatch = remainingWays.find(way => way.refs?.includes(firstWay.refs?.[firstWay.refs.length - 1] ?? -1));
 
-            if (startNodeMatch) {
+            if (startNodeMatch && !endNodeMatch) {
                 // no nodes connect to the end of the first way, so we need to reverse it
                 firstWay.refs = firstWay.refs?.reverse();
             }
@@ -215,7 +210,12 @@ export class OsmExtractor {
                     break;
                 }
 
-                let wayNodeIds = next.refs ?? [];
+                let wayNodeIds = next.refs;
+                if (!wayNodeIds) {
+                    console.warn(`${relation.tags.name}(${relation.id}) Way ${lastNodeId} connects to empty way ${next.id}`);
+                    return;
+                }
+
                 if (wayNodeIds[wayNodeIds.length - 1] === currentNodeId) {
                     // way end connects to last way
                     wayNodeIds = wayNodeIds.reverse();
@@ -226,12 +226,7 @@ export class OsmExtractor {
                 lastNodeId = wayNodeIds[wayNodeIds.length - 1];
                 remainingWays = remainingWays.filter(way => way.id !== next.id);
 
-                const wayNodes = wayNodeIds.map(nodeId => nodes.get(nodeId));
-                wayNodes.forEach(node => {
-                    if (!node) throw new Error(`Node ${node} not found`);
-                    sections += `${routeId}, ${sequenceNumber}, ${node.lat}, ${node.lon}\n`;
-                    sequenceNumber++;
-                });
+                sequenceNumber = appendOutputForNodesWithIds(wayNodeIds, routeId, sequenceNumber);
             }
 
             if (remainingWays.length > 0) {
@@ -242,7 +237,30 @@ export class OsmExtractor {
                 }
             }
         });
-        return { routes, sections };
+        return sections;
+
+        function appendOutputForNodesWithIds(wayNodeIds: number[], routeId: number, sequenceNumber: number): number {
+            const wayNodes = wayNodeIds.map(nodeId => nodes.get(nodeId));
+            wayNodes.forEach(node => {
+                if (!node) throw new Error(`Node ${node} not found`);
+                sections += `${routeId}, ${sequenceNumber}, ${node.lat}, ${node.lon}\n`;
+                sequenceNumber++;
+            });
+            return sequenceNumber;
+        }
+    }
+
+    private getWaysInRelation(relation: Relation, ways: Map<number, Way>): Way[] {
+        const waysInRelation = relation
+            .members
+            .filter(member => member.type === "way" && member.role === "")
+            .map(member => member.ref)
+            .map(wayId => ways.get(wayId));
+
+        if (waysInRelation.some(way => !way))
+            throw new Error(`Relation ${relation.tags.name} has missing ways`);
+
+        return waysInRelation as Way[];
     }
 
     private getRouteOutput(relations: Map<number, Relation>): string {
