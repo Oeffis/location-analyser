@@ -201,6 +201,8 @@ export class OsmExtractor {
                 firstWay.refs = firstWay.refs?.reverse();
             }
 
+            // TODO: BUG!: first way is never printed!!!
+
             let lastNodeId = firstWay.refs?.[firstWay.refs.length - 1];
             while (lastNodeId !== undefined) {
                 const currentNodeId = lastNodeId;
