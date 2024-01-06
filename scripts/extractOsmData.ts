@@ -1,7 +1,7 @@
 import { writeFile } from "fs/promises";
-import * as url from "node:url";
 import { createOSMStream } from "osm-pbf-parser-node";
 import { deflate } from "pako";
+import { fileURLToPath } from "url";
 
 export interface ExtractionResult {
     relations: Map<number, Relation>;
@@ -34,11 +34,18 @@ export class OsmExtractor {
         "funicular"
     ];
 
-    public async transform(filter?: ExtractionFilter): Promise<void> {
-        const { relations, ways, nodes } = await this.extract(filter);
+    public async fileTransform(filter?: ExtractionFilter): Promise<void> {
+        const { routes, sections } = await this.getTransformed(filter);
 
-        console.log("Writing to file");
-        await this.writeToFile(relations, ways, nodes);
+        await Promise.all([
+            this.zipAndWrite(routes, "routes"),
+            this.zipAndWrite(sections, "sections")
+        ]);
+    }
+
+    public async getTransformed(filter?: ExtractionFilter): Promise<{ routes: string; sections: string }> {
+        const { relations, ways, nodes } = await this.extract(filter);
+        return this.generateOutput(relations, ways, nodes);
     }
 
     public async extract(filter?: ExtractionFilter): Promise<ExtractionResult> {
@@ -157,11 +164,15 @@ export class OsmExtractor {
         }
     }
 
-    private async writeToFile(
-        relations: Map<number, Relation>,
-        ways: Map<number, Way>,
-        nodes: Map<number, Node>
-    ): Promise<void> {
+    private async zipAndWrite(data: string, dataName: string): Promise<void> {
+        const zippedSections = deflate(data);
+        await Promise.all([
+            writeFile(`../location-analyzer/features/data/${dataName}.csv.zlib`, zippedSections),
+            writeFile(`../raw/no-git/${dataName}.csv`, data)
+        ]);
+    }
+
+    private generateOutput(relations: Map<number, Relation>, ways: Map<number, Way>, nodes: Map<number, Node>): { routes: string; sections: string } {
         let routes = "id,from,to,ref\n";
         let sections = "route_id,sequence_number,lat,lon\n";
 
@@ -170,7 +181,7 @@ export class OsmExtractor {
             const routeRef = relation.tags.ref ?? "";
             const routeFrom = relation.tags.from ?? "";
             const routeTo = relation.tags.to ?? "";
-            routes += `${routeId},${routeFrom},${routeTo},${routeRef}\n`;
+            routes += `${routeId}, ${routeFrom}, ${routeTo}, ${routeRef}\n`;
 
             const waysInRelation = relation
                 .members
@@ -188,7 +199,7 @@ export class OsmExtractor {
 
             const firstWayStartNodeId = firstWay?.refs?.[0];
             if (!firstWayStartNodeId) {
-                console.warn(`Relation ${relation.tags.name} (${relation.id}) has no start node`);
+                console.warn(`Relation ${relation.tags.name}(${relation.id}) has no start node`);
                 return;
             }
 
@@ -213,7 +224,7 @@ export class OsmExtractor {
                     // way end connects to last way
                     wayNodeIds = wayNodeIds.reverse();
                 } else if (wayNodeIds[0] !== currentNodeId) {
-                    console.warn(`${relation.tags.name} (${relation.id}) Way ${next.id} does contain node ${currentNodeId} of previous way, but at neither end nor start`);
+                    console.warn(`${relation.tags.name}(${relation.id}) Way ${next.id} does contain node ${currentNodeId} of previous way, but at neither end nor start`);
                     return;
                 }
                 lastNodeId = wayNodeIds[wayNodeIds.length - 1];
@@ -222,28 +233,20 @@ export class OsmExtractor {
                 const wayNodes = wayNodeIds.map(nodeId => nodes.get(nodeId));
                 wayNodes.forEach(node => {
                     if (!node) throw new Error(`Node ${node} not found`);
-                    sections += `${routeId},${sequenceNumber},${node.lat},${node.lon}\n`;
+                    sections += `${routeId}, ${sequenceNumber}, ${node.lat}, ${node.lon}\n`;
                     sequenceNumber++;
                 });
             }
 
             if (remainingWays.length > 0) {
                 if (remainingWays.length > 10) {
-                    console.warn(`${relation.tags.name} (${relation.id}) has ${remainingWays.length} ways left over.`);
+                    console.warn(`${relation.tags.name}(${relation.id}) has ${remainingWays.length} ways left over.`);
                 } else {
-                    console.log(`${relation.tags.name} (${relation.id}) has ${remainingWays.length} ways left over: ${remainingWays.map(way => way.id).join(", ")}`);
+                    console.log(`${relation.tags.name}(${relation.id}) has ${remainingWays.length} ways left over: ${remainingWays.map(way => way.id).join(", ")}`);
                 }
             }
         });
-
-        const zippedRoutes = deflate(routes);
-        const zippedSections = deflate(sections);
-        await Promise.all([
-            writeFile("../location-analyzer/features/data/routes.csv.zlib", zippedRoutes),
-            writeFile("../location-analyzer/features/data/sections.csv.zlib", zippedSections),
-            writeFile("../raw/no-git/routes.csv", routes),
-            writeFile("../raw/no-git/sections.csv", sections)
-        ]);
+        return { routes, sections };
     }
 }
 
@@ -292,10 +295,10 @@ interface Relation {
     tags: Record<string, string>;
 }
 if (import.meta.url.startsWith("file:")) {
-    const modulePath = url.fileURLToPath(import.meta.url);
+    const modulePath = fileURLToPath(import.meta.url);
     if (process.argv[1] === modulePath || (process.argv[1] + ".ts") === modulePath) {
         console.log("Extracting OSM data");
         const extractor = new OsmExtractor();
-        extractor.transform().then(() => console.log("Done")).catch(console.error);
+        extractor.fileTransform().then(() => console.log("Done")).catch(console.error);
     }
 }
