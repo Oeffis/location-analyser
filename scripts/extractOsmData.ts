@@ -1,4 +1,5 @@
 import { writeFile } from "fs/promises";
+import * as url from "node:url";
 import { createOSMStream } from "osm-pbf-parser-node";
 import { deflate } from "pako";
 
@@ -290,8 +291,11 @@ interface Relation {
     }[];
     tags: Record<string, string>;
 }
-
-if (require.main === module) {
-    const extractor = new OsmExtractor();
-    extractor.transform().catch(console.error);
+if (import.meta.url.startsWith("file:")) {
+    const modulePath = url.fileURLToPath(import.meta.url);
+    if (process.argv[1] === modulePath || (process.argv[1] + ".ts") === modulePath) {
+        console.log("Extracting OSM data");
+        const extractor = new OsmExtractor();
+        extractor.transform().then(() => console.log("Done")).catch(console.error);
+    }
 }
