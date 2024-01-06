@@ -254,7 +254,7 @@ export class OsmExtractor {
             const routeTo = relation.tags.to ?? "";
             return `${routeId}, ${routeFrom}, ${routeTo}, ${routeRef}`;
         });
-        return [header, ...output].join("\n");
+        return [header, ...output].join("\n") + "\n";
     }
 }
 
