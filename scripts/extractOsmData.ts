@@ -173,16 +173,12 @@ export class OsmExtractor {
     }
 
     private generateOutput(relations: Map<number, Relation>, ways: Map<number, Way>, nodes: Map<number, Node>): { routes: string; sections: string } {
-        let routes = "id,from,to,ref\n";
+        const routes = this.getRouteOutput(relations);
+
         let sections = "route_id,sequence_number,lat,lon\n";
 
         relations.forEach(relation => {
             const routeId = relation.id;
-            const routeRef = relation.tags.ref ?? "";
-            const routeFrom = relation.tags.from ?? "";
-            const routeTo = relation.tags.to ?? "";
-            routes += `${routeId}, ${routeFrom}, ${routeTo}, ${routeRef}\n`;
-
             const waysInRelation = relation
                 .members
                 .filter(member => member.type === "way" && member.role === "")
@@ -247,6 +243,18 @@ export class OsmExtractor {
             }
         });
         return { routes, sections };
+    }
+
+    private getRouteOutput(relations: Map<number, Relation>): string {
+        const header = "id,from,to,ref";
+        const output = Array.from(relations.values()).map(relation => {
+            const routeId = relation.id;
+            const routeRef = relation.tags.ref ?? "";
+            const routeFrom = relation.tags.from ?? "";
+            const routeTo = relation.tags.to ?? "";
+            return `${routeId}, ${routeFrom}, ${routeTo}, ${routeRef}`;
+        });
+        return [header, ...output].join("\n");
     }
 }
 
