@@ -227,27 +227,10 @@ class SingleRouteTransformer {
     }
 
     public getSectionsOutput(): string {
-        const firstWay = this.remainingWays.shift();
-        if (!firstWay) throw new Error(`Relation ${this.relation.tags.name} has no ways`);
+        let lastNodeId: number | undefined = this.getStartNodeId();
 
-        const firstWayStartNodeId = firstWay.refs?.[0];
-        if (!firstWayStartNodeId) {
-            throw new Error(`No start Node`);
-        }
-
-        const startNodeMatch = this.remainingWays.find(way => way.refs?.includes(firstWayStartNodeId));
-        const endNodeMatch = this.remainingWays.find(way => way.refs?.includes(firstWay.refs?.[firstWay.refs.length - 1] ?? -1));
-
-        if (startNodeMatch && !endNodeMatch) {
-            // no nodes connect to the end of the first way, so we need to reverse it
-            firstWay.refs = firstWay.refs?.reverse();
-        }
-
-        this.appendForNodesWithIds(firstWay.refs ?? []);
-
-        let lastNodeId = firstWay.refs?.[firstWay.refs.length - 1];
         while (lastNodeId !== undefined) {
-            const currentNodeId = lastNodeId;
+            const currentNodeId: number = lastNodeId;
             const next = this.remainingWays.find(way => way.refs?.includes(currentNodeId));
 
             if (!next) {
@@ -282,6 +265,29 @@ class SingleRouteTransformer {
         }
 
         return this.output;
+    }
+
+    private getStartNodeId(): number {
+        const firstWay = this.remainingWays[0];
+        if (!firstWay) throw new Error(`Relation ${this.relation.tags.name} has no ways`);
+
+        const firstWayStartNodeId = firstWay.refs?.[0];
+        const firstWayEndNodeId = firstWay.refs?.[firstWay.refs.length - 1];
+        if (!firstWayStartNodeId) {
+            throw new Error(`No start Node`);
+        }
+        if (!firstWayEndNodeId) {
+            throw new Error(`No end Node`);
+        }
+
+        const startNodeMatch = this.remainingWays.find(way => way.refs?.includes(firstWayStartNodeId));
+        const endNodeMatch = this.remainingWays.find(way => way.refs?.includes(firstWayEndNodeId));
+
+        let startNodeId = firstWayEndNodeId;
+        if (startNodeMatch && !endNodeMatch) {
+            startNodeId = firstWayStartNodeId;
+        }
+        return startNodeId;
     }
 
     private appendForNodesWithIds(wayNodeIds: number[]): void {
