@@ -202,6 +202,7 @@ export class OsmExtractor {
 
 class SingleRouteTransformer {
     private output = "";
+    private sequenceNumber = 0;
 
     public constructor(
         private readonly relation: Relation,
@@ -210,8 +211,6 @@ class SingleRouteTransformer {
     ) { }
 
     public getSectionsOutput(): string {
-        const routeId = this.relation.id;
-        let sequenceNumber = 0;
         let remainingWays = this.getWaysInRelation();
 
         const firstWay = remainingWays.shift();
@@ -230,7 +229,7 @@ class SingleRouteTransformer {
             firstWay.refs = firstWay.refs?.reverse();
         }
 
-        sequenceNumber = this.appendOutputForNodesWithIds(firstWay.refs ?? [], routeId, sequenceNumber);
+        this.appendOutputForNodesWithIds(firstWay.refs ?? []);
 
         let lastNodeId = firstWay.refs?.[firstWay.refs.length - 1];
         while (lastNodeId !== undefined) {
@@ -257,7 +256,7 @@ class SingleRouteTransformer {
             lastNodeId = wayNodeIds[wayNodeIds.length - 1];
             remainingWays = remainingWays.filter(way => way.id !== next.id);
 
-            sequenceNumber = this.appendOutputForNodesWithIds(wayNodeIds, routeId, sequenceNumber);
+            this.appendOutputForNodesWithIds(wayNodeIds);
         }
 
         if (remainingWays.length > 0) {
@@ -284,14 +283,13 @@ class SingleRouteTransformer {
         return waysInRelation as Way[];
     }
 
-    private appendOutputForNodesWithIds(wayNodeIds: number[], routeId: number, sequenceNumber: number): number {
+    private appendOutputForNodesWithIds(wayNodeIds: number[]): void {
         const wayNodes = wayNodeIds.map(nodeId => this.nodes.get(nodeId));
         wayNodes.forEach(node => {
             if (!node) throw new Error(`Node ${node} not found`);
-            this.output += `${routeId}, ${sequenceNumber}, ${node.lat}, ${node.lon}\n`;
-            sequenceNumber++;
+            this.output += `${this.relation.id}, ${this.sequenceNumber}, ${node.lat}, ${node.lon}\n`;
+            this.sequenceNumber++;
         });
-        return sequenceNumber;
     }
 }
 
