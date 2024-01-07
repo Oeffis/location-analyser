@@ -203,17 +203,31 @@ export class OsmExtractor {
 class SingleRouteTransformer {
     private output = "";
     private sequenceNumber = 0;
+    private remainingWays: Way[];
 
     public constructor(
         private readonly relation: Relation,
         private readonly ways: Map<number, Way>,
         private readonly nodes: Map<number, Node>
-    ) { }
+    ) {
+        this.remainingWays = this.getWaysInRelation();
+    }
+
+    private getWaysInRelation(): Way[] {
+        const waysInRelation = this.relation
+            .members
+            .filter(member => member.type === "way" && member.role === "")
+            .map(member => member.ref)
+            .map(wayId => this.ways.get(wayId));
+
+        if (waysInRelation.some(way => !way))
+            throw new Error(`Relation ${this.relation.tags.name} has missing ways`);
+
+        return waysInRelation as Way[];
+    }
 
     public getSectionsOutput(): string {
-        let remainingWays = this.getWaysInRelation();
-
-        const firstWay = remainingWays.shift();
+        const firstWay = this.remainingWays.shift();
         if (!firstWay) throw new Error(`Relation ${this.relation.tags.name} has no ways`);
 
         const firstWayStartNodeId = firstWay.refs?.[0];
@@ -221,20 +235,20 @@ class SingleRouteTransformer {
             throw new Error(`No start Node`);
         }
 
-        const startNodeMatch = remainingWays.find(way => way.refs?.includes(firstWayStartNodeId));
-        const endNodeMatch = remainingWays.find(way => way.refs?.includes(firstWay.refs?.[firstWay.refs.length - 1] ?? -1));
+        const startNodeMatch = this.remainingWays.find(way => way.refs?.includes(firstWayStartNodeId));
+        const endNodeMatch = this.remainingWays.find(way => way.refs?.includes(firstWay.refs?.[firstWay.refs.length - 1] ?? -1));
 
         if (startNodeMatch && !endNodeMatch) {
             // no nodes connect to the end of the first way, so we need to reverse it
             firstWay.refs = firstWay.refs?.reverse();
         }
 
-        this.appendOutputForNodesWithIds(firstWay.refs ?? []);
+        this.appendForNodesWithIds(firstWay.refs ?? []);
 
         let lastNodeId = firstWay.refs?.[firstWay.refs.length - 1];
         while (lastNodeId !== undefined) {
             const currentNodeId = lastNodeId;
-            const next = remainingWays.find(way => way.refs?.includes(currentNodeId));
+            const next = this.remainingWays.find(way => way.refs?.includes(currentNodeId));
 
             if (!next) {
                 break;
@@ -254,36 +268,23 @@ class SingleRouteTransformer {
                 return "";
             }
             lastNodeId = wayNodeIds[wayNodeIds.length - 1];
-            remainingWays = remainingWays.filter(way => way.id !== next.id);
+            this.remainingWays = this.remainingWays.filter(way => way.id !== next.id);
 
-            this.appendOutputForNodesWithIds(wayNodeIds);
+            this.appendForNodesWithIds(wayNodeIds);
         }
 
-        if (remainingWays.length > 0) {
-            if (remainingWays.length > 10) {
-                console.warn(`${this.relation.tags.name}(${this.relation.id}) has ${remainingWays.length} ways left over.`);
+        if (this.remainingWays.length > 0) {
+            if (this.remainingWays.length > 10) {
+                console.warn(`${this.relation.tags.name}(${this.relation.id}) has ${this.remainingWays.length} ways left over.`);
             } else {
-                console.log(`${this.relation.tags.name}(${this.relation.id}) has ${remainingWays.length} ways left over: ${remainingWays.map(way => way.id).join(", ")}`);
+                console.log(`${this.relation.tags.name}(${this.relation.id}) has ${this.remainingWays.length} ways left over: ${this.remainingWays.map(way => way.id).join(", ")}`);
             }
         }
 
         return this.output;
     }
 
-    private getWaysInRelation(): Way[] {
-        const waysInRelation = this.relation
-            .members
-            .filter(member => member.type === "way" && member.role === "")
-            .map(member => member.ref)
-            .map(wayId => this.ways.get(wayId));
-
-        if (waysInRelation.some(way => !way))
-            throw new Error(`Relation ${this.relation.tags.name} has missing ways`);
-
-        return waysInRelation as Way[];
-    }
-
-    private appendOutputForNodesWithIds(wayNodeIds: number[]): void {
+    private appendForNodesWithIds(wayNodeIds: number[]): void {
         const wayNodes = wayNodeIds.map(nodeId => this.nodes.get(nodeId));
         wayNodes.forEach(node => {
             if (!node) throw new Error(`Node ${node} not found`);
