@@ -201,7 +201,7 @@ export class OsmExtractor {
                 firstWay.refs = firstWay.refs?.reverse();
             }
 
-            // TODO: BUG!: first way is never printed!!!
+            sequenceNumber = appendOutputForNodesWithIds(firstWay.refs ?? [], routeId, sequenceNumber);
 
             let lastNodeId = firstWay.refs?.[firstWay.refs.length - 1];
             while (lastNodeId !== undefined) {
