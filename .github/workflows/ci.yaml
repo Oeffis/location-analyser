@@ -63,7 +63,7 @@ jobs:
         - name: Test Scripts
           working-directory: ./scripts
           run: |
-            npm run test:ci
+            npm run test
 
         - name: Test Lib
           working-directory: ./location-analyzer

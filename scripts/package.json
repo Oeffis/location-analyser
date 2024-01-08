@@ -14,8 +14,7 @@
   },
   "scripts": {
     "lint": "eslint \"./**/*.ts\" --fix",
-    "test": "vitest",
-    "test:ci": "vitest --ci"
+    "test": "vitest"
   },
   "devDependencies": {
     "vitest": "^1.1.3"
