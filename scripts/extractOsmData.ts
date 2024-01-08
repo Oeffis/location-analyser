@@ -294,15 +294,6 @@ class SingleRouteTransformer {
         }
     }
 
-    private getFirstWayBorderingOrThrow(currentNodeId: number): Way {
-        const currentWay = this.findWayBordering(currentNodeId);
-
-        if (!currentWay) {
-            throw new Error(`Relation ${this.relation.tags.name} has no way containing node ${currentNodeId}`);
-        }
-        return currentWay;
-    }
-
     private findWayBordering(nodeId: number): Way | undefined {
         return this.remainingWays.find(way => way.refs?.[0] === nodeId || way.refs?.[way.refs.length - 1] === nodeId);
     }
