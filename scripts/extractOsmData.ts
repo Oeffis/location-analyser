@@ -229,19 +229,23 @@ class SingleRouteTransformer {
     public getSectionsOutput(): string {
         let startNodeId: number | undefined = this.getStartNodeId();
 
-        while (startNodeId !== undefined) {
-            const currentWay = this.getFirstWayBordering(startNodeId);
-            if (!currentWay) break;
+        let currentWay = this.findWayBordering(startNodeId);
+        while (currentWay !== undefined) {
             const wayNodeIds = this.getSortedNodesOf(currentWay, startNodeId);
             this.appendForNodesWithIds(wayNodeIds);
+            this.removeFromRemaining(currentWay);
 
-            startNodeId = wayNodeIds[wayNodeIds.length - 1];
-            this.remainingWays = this.remainingWays.filter(way => way.id !== currentWay.id);
+            startNodeId = wayNodeIds[wayNodeIds.length - 1] ?? -1;
+            currentWay = this.findWayBordering(startNodeId);
         }
 
         this.checkRemainingWaysNotEmpty();
 
         return this.output;
+    }
+
+    private removeFromRemaining(way: Way): void {
+        this.remainingWays = this.remainingWays.filter(remainingWay => remainingWay.id !== way.id);
     }
 
     private getStartNodeId(): number {
@@ -291,7 +295,7 @@ class SingleRouteTransformer {
     }
 
     private getFirstWayBorderingOrThrow(currentNodeId: number): Way {
-        const currentWay = this.getFirstWayBordering(currentNodeId);
+        const currentWay = this.findWayBordering(currentNodeId);
 
         if (!currentWay) {
             throw new Error(`Relation ${this.relation.tags.name} has no way containing node ${currentNodeId}`);
@@ -299,7 +303,7 @@ class SingleRouteTransformer {
         return currentWay;
     }
 
-    private getFirstWayBordering(nodeId: number): Way | undefined {
+    private findWayBordering(nodeId: number): Way | undefined {
         return this.remainingWays.find(way => way.refs?.[0] === nodeId || way.refs?.[way.refs.length - 1] === nodeId);
     }
 
