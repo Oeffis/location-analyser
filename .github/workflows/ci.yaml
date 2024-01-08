@@ -38,7 +38,7 @@ jobs:
         - name: Install Scripts Dependencies
           working-directory: ./scripts
           run: |
-            npm ci --include=dev
+            npm ci
 
         - name: Lint Scripts
           working-directory: ./scripts
