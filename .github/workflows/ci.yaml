@@ -60,7 +60,12 @@ jobs:
           run: |
             npm run build
 
-        - name: Test
+        - name: Test Scripts
+          working-directory: ./scripts
+          run: |
+            npm run test:ci
+
+        - name: Test Lib
           working-directory: ./location-analyzer
           run: |
             npm run test:mutation
