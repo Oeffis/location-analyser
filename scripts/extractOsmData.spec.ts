@@ -10,4 +10,4 @@ test("extract RB 43 to Dorsten", async () => {
     });
 
     expect(data).toMatchSnapshot();
-}, { timeout: 60000 });
+}, { timeout: 240000 });

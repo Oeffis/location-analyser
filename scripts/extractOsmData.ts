@@ -227,42 +227,19 @@ class SingleRouteTransformer {
     }
 
     public getSectionsOutput(): string {
-        let lastNodeId: number | undefined = this.getStartNodeId();
+        let startNodeId: number | undefined = this.getStartNodeId();
 
-        while (lastNodeId !== undefined) {
-            const currentNodeId: number = lastNodeId;
-            const next = this.remainingWays.find(way => way.refs?.includes(currentNodeId));
-
-            if (!next) {
-                break;
-            }
-
-            let wayNodeIds = next.refs;
-            if (!wayNodeIds) {
-                console.warn(`${this.relation.tags.name}(${this.relation.id}) Way ${lastNodeId} connects to empty way ${next.id}`);
-                return "";
-            }
-
-            if (wayNodeIds[wayNodeIds.length - 1] === currentNodeId) {
-                // way end connects to last way
-                wayNodeIds = wayNodeIds.reverse();
-            } else if (wayNodeIds[0] !== currentNodeId) {
-                console.warn(`${this.relation.tags.name}(${this.relation.id}) Way ${next.id} does contain node ${currentNodeId} of previous way, but at neither end nor start`);
-                return "";
-            }
-            lastNodeId = wayNodeIds[wayNodeIds.length - 1];
-            this.remainingWays = this.remainingWays.filter(way => way.id !== next.id);
-
+        while (startNodeId !== undefined) {
+            const currentWay = this.getFirstWayBordering(startNodeId);
+            if (!currentWay) break;
+            const wayNodeIds = this.getSortedNodesOf(currentWay, startNodeId);
             this.appendForNodesWithIds(wayNodeIds);
+
+            startNodeId = wayNodeIds[wayNodeIds.length - 1];
+            this.remainingWays = this.remainingWays.filter(way => way.id !== currentWay.id);
         }
 
-        if (this.remainingWays.length > 0) {
-            if (this.remainingWays.length > 10) {
-                console.warn(`${this.relation.tags.name}(${this.relation.id}) has ${this.remainingWays.length} ways left over.`);
-            } else {
-                console.log(`${this.relation.tags.name}(${this.relation.id}) has ${this.remainingWays.length} ways left over: ${this.remainingWays.map(way => way.id).join(", ")}`);
-            }
-        }
+        this.checkRemainingWaysNotEmpty();
 
         return this.output;
     }
@@ -271,23 +248,59 @@ class SingleRouteTransformer {
         const firstWay = this.remainingWays[0];
         if (!firstWay) throw new Error(`Relation ${this.relation.tags.name} has no ways`);
 
-        const firstWayStartNodeId = firstWay.refs?.[0];
-        const firstWayEndNodeId = firstWay.refs?.[firstWay.refs.length - 1];
-        if (!firstWayStartNodeId) {
-            throw new Error(`No start Node`);
-        }
-        if (!firstWayEndNodeId) {
-            throw new Error(`No end Node`);
+        const startNodeId = firstWay.refs?.[0];
+        const endNodeId = firstWay.refs?.[firstWay.refs.length - 1];
+        if (!startNodeId) throw new Error(`No start Node`);
+        if (!endNodeId) throw new Error(`No end Node`);
+
+        const nonFirstWays = this.remainingWays.slice(1);
+        const startFoundInOthers = nonFirstWays.find(way => way.refs?.includes(startNodeId));
+        const endFoundInOthers = nonFirstWays.find(way => way.refs?.includes(endNodeId));
+
+        console.log(`Start: ${startNodeId} End: ${endNodeId}`);
+        console.log(`Start found result: ${startFoundInOthers?.id} End found result: ${endFoundInOthers?.id}`);
+
+        const endIsStart = startFoundInOthers && !endFoundInOthers;
+        console.log(`End is start: ${endIsStart}`);
+        return endIsStart ? endNodeId : startNodeId;
+    }
+
+    private getSortedNodesOf(way: Way, startNodeId: number): number[] {
+        let wayNodeIds = [...way.refs ?? []];
+        if (wayNodeIds.length === 0) {
+            throw new Error(`${this.relation.tags.name}(${this.relation.id}) Way ${startNodeId} connects to empty way ${way.id}`);
         }
 
-        const startNodeMatch = this.remainingWays.find(way => way.refs?.includes(firstWayStartNodeId));
-        const endNodeMatch = this.remainingWays.find(way => way.refs?.includes(firstWayEndNodeId));
-
-        let startNodeId = firstWayEndNodeId;
-        if (startNodeMatch && !endNodeMatch) {
-            startNodeId = firstWayStartNodeId;
+        if (wayNodeIds[wayNodeIds.length - 1] === startNodeId) {
+            // way end connects to last way
+            wayNodeIds = wayNodeIds.reverse();
+        } else if (wayNodeIds[0] !== startNodeId) {
+            console.warn(`${this.relation.tags.name}(${this.relation.id}) Way ${way.id} does contain node ${startNodeId} of previous way, but at neither end nor start`);
         }
-        return startNodeId;
+        return wayNodeIds;
+    }
+
+    private checkRemainingWaysNotEmpty(): void {
+        if (this.remainingWays.length > 0) {
+            if (this.remainingWays.length > 10) {
+                console.warn(`${this.relation.tags.name}(${this.relation.id}) has ${this.remainingWays.length} ways left over.`);
+            } else {
+                console.log(`${this.relation.tags.name}(${this.relation.id}) has ${this.remainingWays.length} ways left over: ${this.remainingWays.map(way => way.id).join(", ")}`);
+            }
+        }
+    }
+
+    private getFirstWayBorderingOrThrow(currentNodeId: number): Way {
+        const currentWay = this.getFirstWayBordering(currentNodeId);
+
+        if (!currentWay) {
+            throw new Error(`Relation ${this.relation.tags.name} has no way containing node ${currentNodeId}`);
+        }
+        return currentWay;
+    }
+
+    private getFirstWayBordering(nodeId: number): Way | undefined {
+        return this.remainingWays.find(way => way.refs?.[0] === nodeId || way.refs?.[way.refs.length - 1] === nodeId);
     }
 
     private appendForNodesWithIds(wayNodeIds: number[]): void {
