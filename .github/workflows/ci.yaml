@@ -63,7 +63,8 @@ jobs:
         - name: Test Scripts
           working-directory: ./scripts
           run: |
-            npm run test
+            npx vitest
+          # npm run test does not work for whatever reason
 
         - name: Test Lib
           working-directory: ./location-analyzer
