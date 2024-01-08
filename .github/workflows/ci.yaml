@@ -38,7 +38,7 @@ jobs:
         - name: Install Scripts Dependencies
           working-directory: ./scripts
           run: |
-            npm ci
+            npm ci --include=dev
 
         - name: Lint Scripts
           working-directory: ./scripts
@@ -63,8 +63,7 @@ jobs:
         - name: Test Scripts
           working-directory: ./scripts
           run: |
-            npx vitest
-          # npm run test does not work for whatever reason
+            npm run test
 
         - name: Test Lib
           working-directory: ./location-analyzer
