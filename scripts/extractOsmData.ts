@@ -228,11 +228,13 @@ class SingleRouteTransformer {
 
     public getSectionsOutput(): string {
         let startNodeId: number | undefined = this.getStartNodeId();
+        this.printNode(this.getNodeOrThrow(startNodeId));
 
         let currentWay = this.findWayBordering(startNodeId);
         while (currentWay !== undefined) {
             const wayNodeIds = this.getSortedNodesOf(currentWay, startNodeId);
-            this.appendForNodesWithIds(wayNodeIds);
+            const nodesToPrint = wayNodeIds.slice(1);
+            this.appendForNodesWithIds(nodesToPrint);
             this.removeFromRemaining(currentWay);
 
             startNodeId = wayNodeIds[wayNodeIds.length - 1] ?? -1;
@@ -299,12 +301,19 @@ class SingleRouteTransformer {
     }
 
     private appendForNodesWithIds(wayNodeIds: number[]): void {
-        const wayNodes = wayNodeIds.map(nodeId => this.nodes.get(nodeId));
-        wayNodes.forEach(node => {
-            if (!node) throw new Error(`Node ${node} not found`);
-            this.output += `${this.relation.id}, ${this.sequenceNumber}, ${node.lat}, ${node.lon}\n`;
-            this.sequenceNumber++;
-        });
+        const wayNodes = wayNodeIds.map(nodeId => this.getNodeOrThrow(nodeId));
+        wayNodes.forEach(node => this.printNode(node));
+    }
+
+    private getNodeOrThrow(nodeId: number): Node {
+        const node = this.nodes.get(nodeId);
+        if (!node) throw new Error(`Node ${nodeId} not found`);
+        return node;
+    }
+
+    private printNode(node: Node): void {
+        this.output += `${this.relation.id}, ${this.sequenceNumber}, ${node.lat}, ${node.lon}\n`;
+        this.sequenceNumber++;
     }
 }
 
