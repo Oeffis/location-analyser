@@ -229,28 +229,30 @@ class SingleRouteTransformer {
     public getSectionsOutput(): string {
         const startNodeId = this.getStartNodeIdOrUndefined();
 
+        let nodeIds: number[] = [];
         if (startNodeId !== undefined) {
-            this.appendOutputFollowing(startNodeId);
+            nodeIds = [startNodeId, ...this.getNodesFollowing(startNodeId)];
         }
 
+        this.appendForNodesWithIds(nodeIds);
         return this.output;
     }
 
-    private appendOutputFollowing(startNodeId: number): void {
-        this.printNode(this.getNodeOrThrow(startNodeId));
+    private getNodesFollowing(startNodeId: number): number[] {
+        const nodeIds = [];
 
         let currentWay = this.findWayBordering(startNodeId);
         while (currentWay !== undefined) {
             const wayNodeIds = this.getSortedNodesOf(currentWay, startNodeId);
             const nodesToPrint = wayNodeIds.slice(1);
-            this.appendForNodesWithIds(nodesToPrint);
+            nodeIds.push(...nodesToPrint);
             this.removeFromRemaining(currentWay);
 
             startNodeId = wayNodeIds[wayNodeIds.length - 1] ?? -1;
             currentWay = this.findWayBordering(startNodeId);
         }
 
-        this.checkRemainingWaysNotEmpty();
+        return nodeIds;
     }
 
     private removeFromRemaining(way: Way): void {
@@ -296,16 +298,6 @@ class SingleRouteTransformer {
             console.warn(`${this.relation.tags.name}(${this.relation.id}) Way ${way.id} does contain node ${startNodeId} of previous way, but at neither end nor start`);
         }
         return wayNodeIds;
-    }
-
-    private checkRemainingWaysNotEmpty(): void {
-        if (this.remainingWays.length > 0) {
-            if (this.remainingWays.length > 10) {
-                console.warn(`${this.relation.tags.name}(${this.relation.id}) has ${this.remainingWays.length} ways left over.`);
-            } else {
-                console.warn(`${this.relation.tags.name}(${this.relation.id}) has ${this.remainingWays.length} ways left over: ${this.remainingWays.map(way => way.id).join(", ")}`);
-            }
-        }
     }
 
     private findWayBordering(nodeId: number): Way | undefined {
