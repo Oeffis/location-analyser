@@ -227,13 +227,16 @@ class SingleRouteTransformer {
     }
 
     public getSectionsOutput(): string {
-        let startNodeId: number | undefined;
-        try {
-            startNodeId = this.getStartNodeId();
-        } catch (e) {
-            console.warn(e);
-            return "";
+        const startNodeId = this.getStartNodeIdOrUndefined();
+
+        if (startNodeId !== undefined) {
+            this.appendOutputFollowing(startNodeId);
         }
+
+        return this.output;
+    }
+
+    private appendOutputFollowing(startNodeId: number): void {
         this.printNode(this.getNodeOrThrow(startNodeId));
 
         let currentWay = this.findWayBordering(startNodeId);
@@ -248,15 +251,22 @@ class SingleRouteTransformer {
         }
 
         this.checkRemainingWaysNotEmpty();
-
-        return this.output;
     }
 
     private removeFromRemaining(way: Way): void {
         this.remainingWays = this.remainingWays.filter(remainingWay => remainingWay.id !== way.id);
     }
 
-    private getStartNodeId(): number {
+    private getStartNodeIdOrUndefined(): number | undefined {
+        try {
+            return this.getStartNodeIdOrThrow();
+        } catch (e) {
+            console.warn(e);
+            return undefined;
+        }
+    }
+
+    private getStartNodeIdOrThrow(): number {
         const firstWay = this.remainingWays[0];
         if (!firstWay) throw new Error(`Relation ${this.relation.tags.name} has no ways`);
 
