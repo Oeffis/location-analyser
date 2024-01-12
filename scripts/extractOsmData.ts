@@ -227,7 +227,13 @@ class SingleRouteTransformer {
     }
 
     public getSectionsOutput(): string {
-        let startNodeId: number | undefined = this.getStartNodeId();
+        let startNodeId: number | undefined;
+        try {
+            startNodeId = this.getStartNodeId();
+        } catch (e) {
+            console.warn(e);
+            return "";
+        }
         this.printNode(this.getNodeOrThrow(startNodeId));
 
         let currentWay = this.findWayBordering(startNodeId);
