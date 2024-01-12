@@ -269,11 +269,7 @@ class SingleRouteTransformer {
         const startFoundInOthers = nonFirstWays.find(way => way.refs?.includes(startNodeId));
         const endFoundInOthers = nonFirstWays.find(way => way.refs?.includes(endNodeId));
 
-        console.log(`Start: ${startNodeId} End: ${endNodeId}`);
-        console.log(`Start found result: ${startFoundInOthers?.id} End found result: ${endFoundInOthers?.id}`);
-
         const endIsStart = startFoundInOthers && !endFoundInOthers;
-        console.log(`End is start: ${endIsStart}`);
         return endIsStart ? endNodeId : startNodeId;
     }
 
@@ -297,7 +293,7 @@ class SingleRouteTransformer {
             if (this.remainingWays.length > 10) {
                 console.warn(`${this.relation.tags.name}(${this.relation.id}) has ${this.remainingWays.length} ways left over.`);
             } else {
-                console.log(`${this.relation.tags.name}(${this.relation.id}) has ${this.remainingWays.length} ways left over: ${this.remainingWays.map(way => way.id).join(", ")}`);
+                console.warn(`${this.relation.tags.name}(${this.relation.id}) has ${this.remainingWays.length} ways left over: ${this.remainingWays.map(way => way.id).join(", ")}`);
             }
         }
     }
