@@ -180,10 +180,19 @@ export class OsmExtractor {
 
     private getSectionsOutput(relations: Map<number, Relation>, ways: Map<number, Way>, nodes: Map<number, Node>): string {
         const header = "route_id,sequence_number,lat,lon";
-        const sections = Array.from(relations.values()).map(relation => {
-            const transformer = new SingleRouteTransformer(relation, ways, nodes);
-            return transformer.getSectionsOutput();
-        });
+
+        function getNodeOrThrow(nodeId: number): Node {
+            const node = nodes.get(nodeId);
+            if (!node) throw new Error(`Node ${nodeId} not found`);
+            return node;
+        }
+        const relationsAsArray = Array.from(relations.values());
+        const sections = relationsAsArray.flatMap(relation =>
+            new RouteSorter(relation, ways)
+                .getSortedNodeIds()
+                .map(nodeId => getNodeOrThrow(nodeId))
+                .map((node, index) => `${relation.id}, ${index}, ${node.lat}, ${node.lon}`)
+        );
         return [header, ...sections].join("\n") + "\n";
     }
 
@@ -200,15 +209,12 @@ export class OsmExtractor {
     }
 }
 
-class SingleRouteTransformer {
-    private output = "";
-    private sequenceNumber = 0;
+class RouteSorter {
     private remainingWays: Way[];
 
     public constructor(
         private readonly relation: Relation,
-        private readonly ways: Map<number, Way>,
-        private readonly nodes: Map<number, Node>
+        private readonly ways: Map<number, Way>
     ) {
         this.remainingWays = this.getWaysInRelation();
     }
@@ -226,16 +232,10 @@ class SingleRouteTransformer {
         return waysInRelation as Way[];
     }
 
-    public getSectionsOutput(): string {
+    public getSortedNodeIds(): number[] {
         const startNodeId = this.getStartNodeIdOrUndefined();
-
-        let nodeIds: number[] = [];
-        if (startNodeId !== undefined) {
-            nodeIds = [startNodeId, ...this.getNodesFollowing(startNodeId)];
-        }
-
-        this.appendForNodesWithIds(nodeIds);
-        return this.output;
+        if (startNodeId === undefined) return [];
+        return [startNodeId, ...this.getNodesFollowing(startNodeId)];
     }
 
     private getNodesFollowing(startNodeId: number): number[] {
@@ -286,7 +286,7 @@ class SingleRouteTransformer {
     }
 
     private getSortedNodesOf(way: Way, startNodeId: number): number[] {
-        let wayNodeIds = [...way.refs ?? []];
+        let wayNodeIds = [...(way.refs ?? [])];
         if (wayNodeIds.length === 0) {
             throw new Error(`${this.relation.tags.name}(${this.relation.id}) Way ${startNodeId} connects to empty way ${way.id}`);
         }
@@ -302,22 +302,6 @@ class SingleRouteTransformer {
 
     private findWayBordering(nodeId: number): Way | undefined {
         return this.remainingWays.find(way => way.refs?.[0] === nodeId || way.refs?.[way.refs.length - 1] === nodeId);
-    }
-
-    private appendForNodesWithIds(wayNodeIds: number[]): void {
-        const wayNodes = wayNodeIds.map(nodeId => this.getNodeOrThrow(nodeId));
-        wayNodes.forEach(node => this.printNode(node));
-    }
-
-    private getNodeOrThrow(nodeId: number): Node {
-        const node = this.nodes.get(nodeId);
-        if (!node) throw new Error(`Node ${nodeId} not found`);
-        return node;
-    }
-
-    private printNode(node: Node): void {
-        this.output += `${this.relation.id}, ${this.sequenceNumber}, ${node.lat}, ${node.lon}\n`;
-        this.sequenceNumber++;
     }
 }
 
