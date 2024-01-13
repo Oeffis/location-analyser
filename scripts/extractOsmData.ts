@@ -266,20 +266,28 @@ class RouteSorter {
             this.removeFromRemaining(currentWay);
             const nodes = currentWay.refs ?? [];
             const nextWay = this.findWayIntersecting(nodes);
-            const startNodeIndex = nodes.indexOf(startNodeId);
-            const commonNodeIdIndex = nodes.findIndex(nodeId => nextWay?.refs?.includes(nodeId));
+            if (nextWay) {
+                const startNodeIndex = nodes.indexOf(startNodeId);
+                const commonNodeIdIndex = nodes.findIndex(nodeId => nextWay.refs?.includes(nodeId));
 
-            let wayNodeIds: number[];
-            if (commonNodeIdIndex >= startNodeIndex) {
-                wayNodeIds = nodes.slice(startNodeIndex, commonNodeIdIndex + 1);
+                let wayNodeIds: number[];
+                if (commonNodeIdIndex >= startNodeIndex) {
+                    wayNodeIds = nodes.slice(startNodeIndex, commonNodeIdIndex + 1);
+                } else {
+                    wayNodeIds = nodes.slice(commonNodeIdIndex, startNodeIndex + 1).reverse();
+                }
+
+                const nodesToPrint = wayNodeIds.slice(1);
+                nodeIds.push(...nodesToPrint);
+                startNodeId = nodesToPrint[nodesToPrint.length - 1] ?? -1;
             } else {
-                wayNodeIds = nodes.slice(commonNodeIdIndex, startNodeIndex + 1).reverse();
+                if (nodes[0] === startNodeId) {
+                    nodeIds.push(...nodes.slice(1));
+                } else {
+                    nodeIds.push(...nodes.slice(0, -1).reverse());
+                }
             }
 
-            const nodesToPrint = wayNodeIds.slice(1);
-            nodeIds.push(...nodesToPrint);
-
-            startNodeId = nodesToPrint[nodesToPrint.length - 1] ?? -1;
             currentWay = nextWay;
         }
 
@@ -314,21 +322,6 @@ class RouteSorter {
 
         const endIsStart = startFoundInOthers && !endFoundInOthers;
         return endIsStart ? endNodeId : startNodeId;
-    }
-
-    private getSortedNodesOf(way: Way, startNodeId: number): number[] {
-        let wayNodeIds = [...(way.refs ?? [])];
-        if (wayNodeIds.length === 0) {
-            throw new Error(`${this.relation.tags.name}(${this.relation.id}) Way ${startNodeId} connects to empty way ${way.id}`);
-        }
-
-        if (wayNodeIds[wayNodeIds.length - 1] === startNodeId) {
-            // way end connects to last way
-            wayNodeIds = wayNodeIds.reverse();
-        } else if (wayNodeIds[0] !== startNodeId) {
-            console.warn(`${this.relation.tags.name}(${this.relation.id}) Way ${way.id} does contain node ${startNodeId} of previous way, but at neither end nor start`);
-        }
-        return wayNodeIds;
     }
 
     private findWayIntersecting(nodeIds: number[]): Way | undefined {
