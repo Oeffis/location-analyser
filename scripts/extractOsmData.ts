@@ -336,7 +336,7 @@ interface Root {
     source: string;
 }
 
-interface Node {
+export interface Node {
     type: "node";
     id: number;
     lat: number;
@@ -344,14 +344,14 @@ interface Node {
     tags: Record<string, string>;
 }
 
-interface Way {
+export interface Way {
     type: "way";
     id: number;
     refs?: number[];
     tags?: Record<string, string>;
 }
 
-interface Relation {
+export interface Relation {
     type: "relation";
     id: number;
     members: {
