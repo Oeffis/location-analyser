@@ -9,8 +9,8 @@ export interface ExtractionResult {
     nodes: Map<number, Node>;
 }
 
-export interface ExtractionFilter {
-    relations?: number[];
+export interface RouteFilter {
+    routes?: number[];
 }
 
 interface StreamFilter<C extends OSMType> {
@@ -34,22 +34,8 @@ export class OsmExtractor {
         "funicular"
     ];
 
-    public async fileTransform(filter?: ExtractionFilter): Promise<void> {
-        const { routes, sections } = await this.getTransformed(filter);
-
-        await Promise.all([
-            this.zipAndWrite(routes, "routes"),
-            this.zipAndWrite(sections, "sections")
-        ]);
-    }
-
-    public async getTransformed(filter?: ExtractionFilter): Promise<{ routes: string; sections: string }> {
-        const { relations, ways, nodes } = await this.extract(filter);
-        return this.generateOutput(relations, ways, nodes);
-    }
-
-    public async extract(filter?: ExtractionFilter): Promise<ExtractionResult> {
-        const relations = await this.getRelations(filter?.relations);
+    public async extract(filter?: RouteFilter): Promise<ExtractionResult> {
+        const relations = await this.getRelations(filter?.routes);
         const wayIdsToKeep = this.getWayIds(relations);
         const ways = await this.getWays(wayIdsToKeep);
         const nodeIdsToKeep = this.getNodeIds(ways);
@@ -163,6 +149,68 @@ export class OsmExtractor {
             throw new Error(`Missing ${missing.length} nodes: ${missing.join(", ")}`);
         }
     }
+}
+
+export class OsmTransformer {
+    private readonly relations: Map<number, Relation>;
+    private readonly ways: Map<number, Way>;
+    private readonly nodes: Map<number, Node>;
+
+    public constructor(
+        extraction: ExtractionResult
+    ) {
+        this.relations = extraction.relations;
+        this.ways = extraction.ways;
+        this.nodes = extraction.nodes;
+    }
+
+    public async writeToFile(): Promise<void> {
+        const { routes, sections } = this.getTransformed();
+
+        await Promise.all([
+            this.zipAndWrite(routes, "routes"),
+            this.zipAndWrite(sections, "sections")
+        ]);
+    }
+
+    public getTransformed(filter?: RouteFilter): { routes: string; sections: string } {
+        const routes = this.getTransformedRoutes(filter);
+        const sections = this.getTransformedSections(filter);
+        return { routes, sections };
+    }
+
+    public getTransformedRoutes(filter?: RouteFilter): string {
+        const header = "id,from,to,ref";
+        const output = Array.from(this.relations.values())
+            .filter(relation => !filter?.routes || filter.routes.includes(relation.id))
+            .map(relation => {
+                const routeId = relation.id;
+                const routeRef = relation.tags.ref ?? "";
+                const routeFrom = relation.tags.from ?? "";
+                const routeTo = relation.tags.to ?? "";
+                return `${routeId}, ${routeFrom}, ${routeTo}, ${routeRef}`;
+            });
+        return [header, ...output].join("\n") + "\n";
+    }
+
+    private getTransformedSections(filter?: RouteFilter): string {
+        const header = "route_id,sequence_number,lat,lon";
+        const relationsAsArray = Array.from(this.relations.values())
+            .filter(relation => !filter?.routes || filter.routes.includes(relation.id));
+        const sections = relationsAsArray.flatMap(relation =>
+            new RouteSorter(relation, this.ways)
+                .getSortedNodeIds()
+                .map(nodeId => this.getNodeOrThrow(nodeId))
+                .map((node, index) => `${relation.id}, ${index}, ${node.lat}, ${node.lon}`)
+        );
+        return [header, ...sections].join("\n") + "\n";
+    }
+
+    private getNodeOrThrow(nodeId: number): Node {
+        const node = this.nodes.get(nodeId);
+        if (!node) throw new Error(`Node ${nodeId} not found`);
+        return node;
+    }
 
     private async zipAndWrite(data: string, dataName: string): Promise<void> {
         const zippedSections = deflate(data);
@@ -170,42 +218,6 @@ export class OsmExtractor {
             writeFile(`../location-analyzer/features/data/${dataName}.csv.zlib`, zippedSections),
             writeFile(`../raw/no-git/${dataName}.csv`, data)
         ]);
-    }
-
-    private generateOutput(relations: Map<number, Relation>, ways: Map<number, Way>, nodes: Map<number, Node>): { routes: string; sections: string } {
-        const routes = this.getRouteOutput(relations);
-        const sections = this.getSectionsOutput(relations, ways, nodes);
-        return { routes, sections };
-    }
-
-    private getSectionsOutput(relations: Map<number, Relation>, ways: Map<number, Way>, nodes: Map<number, Node>): string {
-        const header = "route_id,sequence_number,lat,lon";
-
-        function getNodeOrThrow(nodeId: number): Node {
-            const node = nodes.get(nodeId);
-            if (!node) throw new Error(`Node ${nodeId} not found`);
-            return node;
-        }
-        const relationsAsArray = Array.from(relations.values());
-        const sections = relationsAsArray.flatMap(relation =>
-            new RouteSorter(relation, ways)
-                .getSortedNodeIds()
-                .map(nodeId => getNodeOrThrow(nodeId))
-                .map((node, index) => `${relation.id}, ${index}, ${node.lat}, ${node.lon}`)
-        );
-        return [header, ...sections].join("\n") + "\n";
-    }
-
-    private getRouteOutput(relations: Map<number, Relation>): string {
-        const header = "id,from,to,ref";
-        const output = Array.from(relations.values()).map(relation => {
-            const routeId = relation.id;
-            const routeRef = relation.tags.ref ?? "";
-            const routeFrom = relation.tags.from ?? "";
-            const routeTo = relation.tags.to ?? "";
-            return `${routeId}, ${routeFrom}, ${routeTo}, ${routeRef}`;
-        });
-        return [header, ...output].join("\n") + "\n";
     }
 }
 
@@ -354,6 +366,9 @@ if (import.meta.url.startsWith("file:")) {
     if (process.argv[1] === modulePath || (process.argv[1] + ".ts") === modulePath) {
         console.log("Extracting OSM data");
         const extractor = new OsmExtractor();
-        extractor.fileTransform().then(() => console.log("Done")).catch(console.error);
+        extractor.extract().then(result => {
+            const transformer = new OsmTransformer(result);
+            return transformer.writeToFile();
+        }).then(() => console.log("Done")).catch(console.error);
     }
 }

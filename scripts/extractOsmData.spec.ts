@@ -1,14 +1,33 @@
-import { expect, test } from "vitest";
-import { OsmExtractor } from "./extractOsmData";
+import { beforeAll, expect, suite, test } from "vitest";
+import { ExtractionResult, OsmExtractor, OsmTransformer } from "./extractOsmData";
 
-test("extract RB 43 to Dorsten", async () => {
-    const RB43ToDorsten = 1998588; // normal railway route, completely contained
-    const Bus390LindenToHerne = 16335332; // bus route, contains roundabouts
-    const extractor = new OsmExtractor();
+suite("extractOsmData", () => {
+    const RailRB43ToDorsten = 1998588; // normal railway route, completely contained
+    const Bus390LindenToHerneHasRoundabout = 16335332;
 
-    const data = await extractor.getTransformed({
-        relations: [RB43ToDorsten, Bus390LindenToHerne]
+    let extractor: OsmExtractor;
+    let extraction: ExtractionResult;
+
+    beforeAll(async () => {
+        extractor = new OsmExtractor();
+        extraction = await extractor.extract();
+    }, 60000);
+
+    test("extracts data", () => {
+        expect(extraction).toMatchSnapshot();
     });
 
-    expect(data).toMatchSnapshot();
-}, { timeout: 60000 });
+    test("transforms simple rail line", () => {
+        const transformer = new OsmTransformer(extraction);
+        expect(transformer.getTransformed({
+            routes: [RailRB43ToDorsten]
+        })).toMatchSnapshot();
+    });
+
+    test("transforms bus line with roundabout", () => {
+        const transformer = new OsmTransformer(extraction);
+        expect(transformer.getTransformed({
+            routes: [Bus390LindenToHerneHasRoundabout]
+        })).toMatchSnapshot();
+    });
+});
