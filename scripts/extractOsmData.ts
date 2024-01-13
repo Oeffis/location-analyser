@@ -247,21 +247,40 @@ class RouteSorter {
     public getSortedNodeIds(): number[] {
         const startNodeId = this.getStartNodeIdOrUndefined();
         if (startNodeId === undefined) return [];
-        return [startNodeId, ...this.getNodesFollowing(startNodeId)];
+        const nodes = [startNodeId, ...this.getNodesFollowing(startNodeId)];
+
+        if (this.remainingWays.length > 5) {
+            console.warn(`Relation ${this.relation.tags.name} (${this.relation.id}) has ${this.remainingWays.length} ways left after sorting: ${this.remainingWays.slice(0, 5).map(way => way.id).join(", ")},...`);
+        } else if (this.remainingWays.length > 0) {
+            console.warn(`Relation ${this.relation.tags.name} (${this.relation.id}) has ${this.remainingWays.length} ways left after sorting: ${this.remainingWays.map(way => way.id).join(", ")}`);
+        }
+
+        return nodes;
     }
 
     private getNodesFollowing(startNodeId: number): number[] {
         const nodeIds = [];
 
-        let currentWay = this.findWayBordering(startNodeId);
+        let currentWay = this.findWayIntersecting([startNodeId]);
         while (currentWay !== undefined) {
-            const wayNodeIds = this.getSortedNodesOf(currentWay, startNodeId);
+            this.removeFromRemaining(currentWay);
+            const nodes = currentWay.refs ?? [];
+            const nextWay = this.findWayIntersecting(nodes);
+            const startNodeIndex = nodes.indexOf(startNodeId);
+            const commonNodeIdIndex = nodes.findIndex(nodeId => nextWay?.refs?.includes(nodeId));
+
+            let wayNodeIds: number[];
+            if (commonNodeIdIndex >= startNodeIndex) {
+                wayNodeIds = nodes.slice(startNodeIndex, commonNodeIdIndex + 1);
+            } else {
+                wayNodeIds = nodes.slice(commonNodeIdIndex, startNodeIndex + 1).reverse();
+            }
+
             const nodesToPrint = wayNodeIds.slice(1);
             nodeIds.push(...nodesToPrint);
-            this.removeFromRemaining(currentWay);
 
-            startNodeId = wayNodeIds[wayNodeIds.length - 1] ?? -1;
-            currentWay = this.findWayBordering(startNodeId);
+            startNodeId = nodesToPrint[nodesToPrint.length - 1] ?? -1;
+            currentWay = nextWay;
         }
 
         return nodeIds;
@@ -312,8 +331,8 @@ class RouteSorter {
         return wayNodeIds;
     }
 
-    private findWayBordering(nodeId: number): Way | undefined {
-        return this.remainingWays.find(way => way.refs?.[0] === nodeId || way.refs?.[way.refs.length - 1] === nodeId);
+    private findWayIntersecting(nodeIds: number[]): Way | undefined {
+        return this.remainingWays.find(way => nodeIds.some(nodeId => way.refs?.includes(nodeId)));
     }
 }
 

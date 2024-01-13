@@ -8,7 +8,6 @@ suite("extractOsmData", () => {
 
     let extractor: OsmExtractor;
     let extraction: ExtractionResult;
-    let isCached = false;
 
     beforeAll(async () => {
         extractor = new OsmExtractor();
@@ -16,7 +15,6 @@ suite("extractOsmData", () => {
         try {
             const cachedExtraction = await readFile("./test-cache/extracted.json", "utf-8");
             console.log("using cached extraction");
-            isCached = true;
 
             const parsedCachedExtraction = JSON.parse(cachedExtraction) as { relations: Relation[]; ways: Way[]; nodes: Node[] };
             extraction = {
@@ -38,7 +36,6 @@ suite("extractOsmData", () => {
     }, 60000);
 
     test("extracts data", () => {
-        if (isCached) return;
         expect(extraction).toMatchSnapshot();
     });
 
