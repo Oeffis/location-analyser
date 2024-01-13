@@ -194,14 +194,17 @@ export class OsmTransformer {
     }
 
     private getTransformedSections(filter?: RouteFilter): string {
-        const header = "route_id,sequence_number,lat,lon";
+        const header = "route_id,consecutive_section,sequence_number,lat,lon";
         const relationsAsArray = Array.from(this.relations.values())
             .filter(relation => !filter?.routes || filter.routes.includes(relation.id));
         const sections = relationsAsArray.flatMap(relation =>
             new RouteSorter(relation, this.ways)
-                .getSortedNodeIds()
-                .map(nodeId => this.getNodeOrThrow(nodeId))
-                .map((node, index) => `${relation.id}, ${index}, ${node.lat}, ${node.lon}`)
+                .getConsecutiveSections()
+                .flatMap((cSection, cSectionIndex) =>
+                    cSection
+                        .map(nodeId => this.getNodeOrThrow(nodeId))
+                        .map((node, sectionIndex) => `${relation.id}, ${cSectionIndex}, ${sectionIndex}, ${node.lat}, ${node.lon}`)
+                )
         );
         return [header, ...sections].join("\n") + "\n";
     }
@@ -244,18 +247,22 @@ class RouteSorter {
         return waysInRelation as Way[];
     }
 
-    public getSortedNodeIds(): number[] {
-        const startNodeId = this.getStartNodeIdOrUndefined();
-        if (startNodeId === undefined) return [];
-        const nodes = [startNodeId, ...this.getNodesFollowing(startNodeId)];
+    public getConsecutiveSections(): number[][] {
+        const consecutiveSections = [];
 
-        if (this.remainingWays.length > 5) {
-            console.warn(`Relation ${this.relation.tags.name} (${this.relation.id}) has ${this.remainingWays.length} ways left after sorting: ${this.remainingWays.slice(0, 5).map(way => way.id).join(", ")},...`);
-        } else if (this.remainingWays.length > 0) {
-            console.warn(`Relation ${this.relation.tags.name} (${this.relation.id}) has ${this.remainingWays.length} ways left after sorting: ${this.remainingWays.map(way => way.id).join(", ")}`);
+        for (
+            let startNodeId = this.getStartNodeIdOrUndefined();
+            startNodeId !== undefined;
+            startNodeId = this.getStartNodeIdOrUndefined()
+        ) {
+            consecutiveSections.push([startNodeId, ...this.getNodesFollowing(startNodeId)]);
         }
 
-        return nodes;
+        if (consecutiveSections.length === 0) {
+            console.warn(`Relation ${this.relation.tags.name}(${this.relation.id}) has not a single section`);
+        }
+
+        return consecutiveSections;
     }
 
     private getNodesFollowing(startNodeId: number): number[] {
@@ -302,7 +309,6 @@ class RouteSorter {
         try {
             return this.getStartNodeIdOrThrow();
         } catch (e) {
-            console.warn(e);
             return undefined;
         }
     }
