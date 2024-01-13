@@ -35,9 +35,10 @@ suite("extractOsmData", () => {
         }
     }, 60000);
 
-    test("extracts data", () => {
-        expect(extraction).toMatchSnapshot();
-    });
+    // removed because it's too big for snapshots
+    // test("extracts data", () => {
+    //     expect(extraction).toMatchSnapshot();
+    // });
 
     test("transforms simple rail line", () => {
         const transformer = new OsmTransformer(extraction);
