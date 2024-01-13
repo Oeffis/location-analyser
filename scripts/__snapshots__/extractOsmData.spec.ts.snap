@@ -1,5 +1,15 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`extractOsmData > ignores consecutive sections where it cannot determine a start node, because there is only one way 1`] = `
+{
+  "routes": "id,from,to,ref
+1901043, Technologiezentrum, Eichlinghofen, H1
+",
+  "sections": "route_id,consecutive_section,sequence_number,lat,lon
+",
+}
+`;
+
 exports[`extractOsmData > transforms bus line with roundabout 1`] = `
 {
   "routes": "id,from,to,ref

@@ -327,6 +327,7 @@ class RouteSorter {
         const endFoundInOthers = nonFirstWays.find(way => way.refs?.includes(endNodeId));
 
         const endIsStart = startFoundInOthers && !endFoundInOthers;
+        if (!endFoundInOthers && !startFoundInOthers) throw new Error(`Start node ${startNodeId} not found in any other way`);
         return endIsStart ? endNodeId : startNodeId;
     }
 

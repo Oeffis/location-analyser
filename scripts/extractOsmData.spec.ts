@@ -3,9 +3,11 @@ import { beforeAll, expect, suite, test } from "vitest";
 import { ExtractionResult, Node, OsmExtractor, OsmTransformer, Relation, Way } from "./extractOsmData";
 
 suite("extractOsmData", () => {
-    const RailRB43ToDorsten = 1998588; // normal railway route, completely contained
+    const RailRB43ToDorsten = 1998588;
     const Bus390LindenToHerneHasRoundabout = 16335332;
     const BusNE12ThatLeavesTheArea = 173344;
+    const MonorailH1WithSingleWayConsecutiveSectionAtStart = 1901043;
+    const MonorailH1WithSingleWayConsecutiveSectionAtEnd = 93947;
 
     let extractor: OsmExtractor;
     let extraction: ExtractionResult;
@@ -59,6 +61,20 @@ suite("extractOsmData", () => {
         const transformer = new OsmTransformer(extraction);
         expect(transformer.getTransformed({
             routes: [BusNE12ThatLeavesTheArea]
+        })).toMatchSnapshot();
+    });
+
+    test("ignores route with consecutive sections at start where it cannot determine a start node, because there is only one way", () => {
+        const transformer = new OsmTransformer(extraction);
+        expect(transformer.getTransformed({
+            routes: [MonorailH1WithSingleWayConsecutiveSectionAtStart]
+        })).toMatchSnapshot();
+    });
+
+    test("ignores route with consecutive sections at end where it cannot determine a start node, because there is only one way", () => {
+        const transformer = new OsmTransformer(extraction);
+        expect(transformer.getTransformed({
+            routes: [MonorailH1WithSingleWayConsecutiveSectionAtEnd]
         })).toMatchSnapshot();
     });
 });
