@@ -5,6 +5,7 @@ import { ExtractionResult, Node, OsmExtractor, OsmTransformer, Relation, Way } f
 suite("extractOsmData", () => {
     const RailRB43ToDorsten = 1998588; // normal railway route, completely contained
     const Bus390LindenToHerneHasRoundabout = 16335332;
+    const BusNE12ThatLeavesTheArea = 173344;
 
     let extractor: OsmExtractor;
     let extraction: ExtractionResult;
@@ -51,6 +52,13 @@ suite("extractOsmData", () => {
         const transformer = new OsmTransformer(extraction);
         expect(transformer.getTransformed({
             routes: [Bus390LindenToHerneHasRoundabout]
+        })).toMatchSnapshot();
+    });
+
+    test("transforms route that partially leaves the area", () => {
+        const transformer = new OsmTransformer(extraction);
+        expect(transformer.getTransformed({
+            routes: [BusNE12ThatLeavesTheArea]
         })).toMatchSnapshot();
     });
 });
