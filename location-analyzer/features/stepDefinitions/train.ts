@@ -2,7 +2,7 @@ import { Given, Then, When } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
 import { assert } from "chai";
-import { Stop } from "../../src";
+import { LocationAnalyzer, Stop } from "../../src";
 import { Route, getVrrRoutes } from "../getVrrRoutes.js";
 import { getVrrStops } from "../getVrrStops.js";
 
@@ -24,8 +24,11 @@ Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direct
 });
 
 Given<LocationAnalyzerWorld>("the RB43 travels on a single track between Buer Süd and Zoo", async function () {
-    const allRoutes = await getVrrRoutes();
-    this.locationAnalyzer.updatePOIs(allRoutes);
+    await loadAllRoutesTo(this.locationAnalyzer);
+});
+
+Given<LocationAnalyzerWorld>("the S9 to Wuppertal leaves the area between Gladback and Essen", async function () {
+    await loadAllRoutesTo(this.locationAnalyzer);
 });
 
 When<LocationAnalyzerWorld>("I am on the 302 to Buer Rathaus North of Veltins Arena", function () {
@@ -49,6 +52,18 @@ When<LocationAnalyzerWorld>("I am traveling in the direction of Zoo", function (
     });
 });
 
+When<LocationAnalyzerWorld>("I move along the area edge between Gladback and Essen", function () {
+    this.locationAnalyzer.updateLocation({
+        latitude: 51.5857704,
+        longitude: 7.000457
+    });
+
+    this.locationAnalyzer.updateLocation({
+        latitude: 51.4500238,
+        longitude: 7.0000507
+    });
+});
+
 Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", function (line: string, destination: string) {
     const route = getFirstRoute(this);
     assert.strictEqual(route.ref, line);
@@ -62,6 +77,11 @@ Then<LocationAnalyzerWorld>("the train {string} to {string} is not detected", fu
     const sameDestination = route.to === destination;
     assert.isFalse(sameLine && sameDestination, `The train ${line} to ${destination} is detected, but should not be.`);
 });
+
+async function loadAllRoutesTo(locationAnalyzer: LocationAnalyzer): Promise<void> {
+    const allRoutes = await getVrrRoutes();
+    locationAnalyzer.updatePOIs(allRoutes);
+}
 
 function getFirstRoute(world: LocationAnalyzerWorld): Route {
     const status = world.locationAnalyzer.getStatus();

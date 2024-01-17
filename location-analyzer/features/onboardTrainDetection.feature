@@ -15,6 +15,12 @@ Feature: Onboard Train Detection
         Then the detected train is the "RB 43" to "Dortmund"
         And the train "RB 43" to "Dorsten" is not detected
 
+    @focus
+    Scenario: Does not detect train when I am on airline between consecutive sections
+        Given the S9 to Wuppertal leaves the area between Gladback and Essen
+        When I move along the area edge between Gladback and Essen
+        Then the train "S9" to "Wuppertal Hbf" is not detected
+
     @ignore
     Scenario: Detects the train I am currently on when it is at a station
         When I am on a train at a station
