@@ -251,9 +251,9 @@ class RouteSorter {
         const consecutiveSections = [];
 
         for (
-            let startNodeId = this.getStartNodeIdOrUndefined();
+            let startNodeId = this.getStartNodeIdOfConsecutiveSection();
             startNodeId !== undefined;
-            startNodeId = this.getStartNodeIdOrUndefined()
+            startNodeId = this.getStartNodeIdOfConsecutiveSection()
         ) {
             consecutiveSections.push([startNodeId, ...this.getNodesFollowing(startNodeId)]);
         }
@@ -263,6 +263,41 @@ class RouteSorter {
         }
 
         return consecutiveSections;
+    }
+
+    private getStartNodeIdOfConsecutiveSection(): number | undefined {
+        while (this.remainingWays.length > 0) {
+            const startNodeId = this.getStartNodeIdOrUndefined();
+            if (startNodeId !== undefined) return startNodeId;
+            console.warn(`Relation ${this.relation.tags.name} has a way that is not connected to any other way`);
+            this.remainingWays.shift();
+        }
+    }
+
+    private getStartNodeIdOrUndefined(): number | undefined {
+        try {
+            return this.getStartNodeIdOrThrow();
+        } catch (e) {
+            return undefined;
+        }
+    }
+
+    private getStartNodeIdOrThrow(): number {
+        const firstWay = this.remainingWays[0];
+        if (!firstWay) throw new Error(`Relation ${this.relation.tags.name} has no ways`);
+
+        const startNodeId = firstWay.refs?.[0];
+        const endNodeId = firstWay.refs?.[firstWay.refs.length - 1];
+        if (!startNodeId) throw new Error(`No start Node`);
+        if (!endNodeId) throw new Error(`No end Node`);
+
+        const nonFirstWays = this.remainingWays.slice(1);
+        const startFoundInOthers = nonFirstWays.find(way => way.refs?.includes(startNodeId));
+        const endFoundInOthers = nonFirstWays.find(way => way.refs?.includes(endNodeId));
+
+        const endIsStart = startFoundInOthers && !endFoundInOthers;
+        if (!endFoundInOthers && !startFoundInOthers) throw new Error(`Start node ${startNodeId} not found in any other way`);
+        return endIsStart ? endNodeId : startNodeId;
     }
 
     private getNodesFollowing(startNodeId: number): number[] {
@@ -303,32 +338,6 @@ class RouteSorter {
 
     private removeFromRemaining(way: Way): void {
         this.remainingWays = this.remainingWays.filter(remainingWay => remainingWay.id !== way.id);
-    }
-
-    private getStartNodeIdOrUndefined(): number | undefined {
-        try {
-            return this.getStartNodeIdOrThrow();
-        } catch (e) {
-            return undefined;
-        }
-    }
-
-    private getStartNodeIdOrThrow(): number {
-        const firstWay = this.remainingWays[0];
-        if (!firstWay) throw new Error(`Relation ${this.relation.tags.name} has no ways`);
-
-        const startNodeId = firstWay.refs?.[0];
-        const endNodeId = firstWay.refs?.[firstWay.refs.length - 1];
-        if (!startNodeId) throw new Error(`No start Node`);
-        if (!endNodeId) throw new Error(`No end Node`);
-
-        const nonFirstWays = this.remainingWays.slice(1);
-        const startFoundInOthers = nonFirstWays.find(way => way.refs?.includes(startNodeId));
-        const endFoundInOthers = nonFirstWays.find(way => way.refs?.includes(endNodeId));
-
-        const endIsStart = startFoundInOthers && !endFoundInOthers;
-        if (!endFoundInOthers && !startFoundInOthers) throw new Error(`Start node ${startNodeId} not found in any other way`);
-        return endIsStart ? endNodeId : startNodeId;
     }
 
     private findWayIntersecting(nodeIds: number[]): Way | undefined {

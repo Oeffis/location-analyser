@@ -64,14 +64,14 @@ suite("extractOsmData", () => {
         })).toMatchSnapshot();
     });
 
-    test("ignores route with consecutive sections at start where it cannot determine a start node, because there is only one way", () => {
+    test("ignores consecutive section at start of route where it cannot determine a start node, because there is only one way", () => {
         const transformer = new OsmTransformer(extraction);
         expect(transformer.getTransformed({
             routes: [MonorailH1WithSingleWayConsecutiveSectionAtStart]
         })).toMatchSnapshot();
     });
 
-    test("ignores route with consecutive sections at end where it cannot determine a start node, because there is only one way", () => {
+    test("ignores consecutive section at end of route where it cannot determine a start node, because there is only one way", () => {
         const transformer = new OsmTransformer(extraction);
         expect(transformer.getTransformed({
             routes: [MonorailH1WithSingleWayConsecutiveSectionAtEnd]
