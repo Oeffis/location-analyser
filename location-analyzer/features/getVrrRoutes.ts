@@ -74,8 +74,8 @@ function lineToRoute(line: string): Route {
 function lineToSection(line: string): Section {
     return {
         routeId: line.split(",")[0]!,
-        sequence: Number(line.split(",")[1]),
-        lat: Number(line.split(",")[2]),
-        lon: Number(line.split(",")[3])
+        sequence: Number(line.split(",")[2]),
+        lat: Number(line.split(",")[3]),
+        lon: Number(line.split(",")[4])
     };
 }
