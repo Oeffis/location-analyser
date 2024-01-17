@@ -216,9 +216,9 @@ export class OsmTransformer {
     }
 
     private async zipAndWrite(data: string, dataName: string): Promise<void> {
-        const zippedSections = deflate(data);
+        const zippedData = deflate(data);
         await Promise.all([
-            writeFile(`../location-analyzer/features/data/${dataName}.csv.zlib`, zippedSections),
+            writeFile(`../location-analyzer/features/data/${dataName}.csv.zlib`, zippedData),
             writeFile(`../raw/no-git/${dataName}.csv`, data)
         ]);
     }
@@ -337,7 +337,8 @@ class RouteSorter {
     }
 
     private removeFromRemaining(way: Way): void {
-        this.remainingWays = this.remainingWays.filter(remainingWay => remainingWay.id !== way.id);
+        const find = this.remainingWays.findIndex(remainingWay => remainingWay.id === way.id);
+        this.remainingWays.splice(find, 1);
     }
 
     private findWayIntersecting(nodeIds: number[]): Way | undefined {
