@@ -20,6 +20,11 @@ Feature: Onboard Train Detection
         When I move along the area edge between Gladback and Essen
         Then the train "S9" to "Wuppertal Hbf" is not detected
 
+    Scenario: Detects the train I am currently on when I am on the track section that enters the area again
+        Given the S9 to Wuppertal leaves the area between Gladback and Essen
+        When I am on the S9 to Wuppertal between Essen and Wuppertal
+        Then the detected train is the "S9" to "Wuppertal Hbf"
+
     @ignore
     Scenario: Detects the train I am currently on when it is at a station
         When I am on a train at a station

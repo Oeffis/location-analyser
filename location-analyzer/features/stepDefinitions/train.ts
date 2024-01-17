@@ -64,6 +64,13 @@ When<LocationAnalyzerWorld>("I move along the area edge between Gladback and Ess
     });
 });
 
+When<LocationAnalyzerWorld>("I am on the S9 to Wuppertal between Essen and Wuppertal", function () {
+    this.locationAnalyzer.updateLocation({
+        latitude: 51.34504,
+        longitude: 7.10074
+    });
+});
+
 Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", function (line: string, destination: string) {
     const route = getFirstRoute(this);
     assert.strictEqual(route.ref, line);
