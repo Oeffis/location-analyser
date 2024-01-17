@@ -188,7 +188,7 @@ export class OsmTransformer {
                 const routeRef = relation.tags.ref ?? "";
                 const routeFrom = relation.tags.from ?? "";
                 const routeTo = relation.tags.to ?? "";
-                return `${routeId}, ${routeFrom}, ${routeTo}, ${routeRef}`;
+                return [routeId, routeFrom, routeTo, routeRef].join(",");
             });
         return [header, ...output].join("\n") + "\n";
     }
@@ -203,7 +203,7 @@ export class OsmTransformer {
                 .flatMap((cSection, cSectionIndex) =>
                     cSection
                         .map(nodeId => this.getNodeOrThrow(nodeId))
-                        .map((node, sectionIndex) => `${relation.id}, ${cSectionIndex}, ${sectionIndex}, ${node.lat}, ${node.lon}`)
+                        .map((node, sectionIndex) => [relation.id, cSectionIndex, sectionIndex, node.lat, node.lon].join(","))
                 )
         );
         return [header, ...sections].join("\n") + "\n";
