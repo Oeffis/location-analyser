@@ -67,29 +67,15 @@ export class LocationAnalyzer {
             }
 
             if (isRoute(poi) && isRoute(lastPoi)) {
-                const label = `${poi.ref} (${poi.from} -> ${poi.to})`;
                 const atSameSection = (poi.distance as SectionDistance).section === (lastPoi.distance as SectionDistance).section;
                 if (atSameSection) {
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                     const sectionEnd = poi.sections[(poi.distance as SectionDistance).section]!;
                     const lastDistanceToSectionEnd = getDistance(lastLocation, sectionEnd);
                     const currentDistanceToSectionEnd = getDistance(currentLocation, sectionEnd);
-                    if (currentDistanceToSectionEnd < lastDistanceToSectionEnd) {
-                        console.log(`${label}: Position  is closer to section end than last time and therefore considered right direction`);
-                    } else {
-                        console.log(`${label}: Position is further away from section end than last time and therefore considered wrong direction`);
-                    }
                     return currentDistanceToSectionEnd < lastDistanceToSectionEnd;
                 } else {
-                    const result = (poi.distance as SectionDistance).section > (lastPoi.distance as SectionDistance).section;
-                    if (result) {
-                        const lastSection = poi.sections[(lastPoi.distance as SectionDistance).section];
-                        const currentSection = poi.sections[(poi.distance as SectionDistance).section];
-                        console.log(`${label}: Position (${currentLocation.latitude}, ${currentLocation.longitude}) is further along the route (${(poi.distance as SectionDistance).section}, ${currentSection?.lat}, ${currentSection?.lon}) than last time (${(lastPoi.distance as SectionDistance).section}, ${lastSection?.lat}, ${lastSection?.lon}) (${lastLocation.latitude}, ${lastLocation.longitude}) and therefore considered right direction`);
-                    } else {
-                        console.log(`${label}: Position is further back on the route (${(poi.distance as SectionDistance).section}) than last time (${(lastPoi.distance as SectionDistance).section}) and therefore considered wrong direction`);
-                    }
-                    return result;
+                    return (poi.distance as SectionDistance).section > (lastPoi.distance as SectionDistance).section;
                 }
             }
             return true;
