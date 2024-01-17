@@ -6,7 +6,7 @@ suite("extractOsmData", () => {
     const RailRB43ToDorsten = 1998588;
     const RailRB43ToDortmundWithSingleNodeWay = 2455435;
     const Bus390LindenToHerneHasRoundabout = 16335332;
-    const BusNE12ThatLeavesTheArea = 173344;
+    const S9ToWuppertalThatLeavesTheArea = 60374;
     const Bus381ToBuerRathausCrossesSameWayTwice = 30609;
     const MonorailH1WithSingleWayConsecutiveSectionAtStart = 1901043;
     const MonorailH1WithSingleWayConsecutiveSectionAtEnd = 93947;
@@ -69,7 +69,7 @@ suite("extractOsmData", () => {
     test("transforms route that partially leaves the area", () => {
         const transformer = new OsmTransformer(extraction);
         expect(transformer.getTransformed({
-            routes: [BusNE12ThatLeavesTheArea]
+            routes: [S9ToWuppertalThatLeavesTheArea]
         })).toMatchSnapshot();
     });
 
