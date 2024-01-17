@@ -4,6 +4,7 @@ import { ExtractionResult, Node, OsmExtractor, OsmTransformer, Relation, Way } f
 
 suite("extractOsmData", () => {
     const RailRB43ToDorsten = 1998588;
+    const RailRB43ToDortmundWithSingleNodeWay = 2455435;
     const Bus390LindenToHerneHasRoundabout = 16335332;
     const BusNE12ThatLeavesTheArea = 173344;
     const MonorailH1WithSingleWayConsecutiveSectionAtStart = 1901043;
@@ -47,6 +48,13 @@ suite("extractOsmData", () => {
         const transformer = new OsmTransformer(extraction);
         expect(transformer.getTransformed({
             routes: [RailRB43ToDorsten]
+        })).toMatchSnapshot();
+    });
+
+    test("transforms simple rail line with a single node way", () => {
+        const transformer = new OsmTransformer(extraction);
+        expect(transformer.getTransformed({
+            routes: [RailRB43ToDortmundWithSingleNodeWay]
         })).toMatchSnapshot();
     });
 

@@ -321,7 +321,7 @@ class RouteSorter {
 
                 const nodesToPrint = wayNodeIds.slice(1);
                 nodeIds.push(...nodesToPrint);
-                startNodeId = nodesToPrint[nodesToPrint.length - 1] ?? -1;
+                startNodeId = nodesToPrint[nodesToPrint.length - 1] ?? startNodeId;
             } else {
                 if (nodes[0] === startNodeId) {
                     nodeIds.push(...nodes.slice(1));
