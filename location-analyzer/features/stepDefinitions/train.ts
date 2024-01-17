@@ -85,7 +85,7 @@ async function loadAllRoutesTo(locationAnalyzer: LocationAnalyzer): Promise<void
 
 function getFirstRoute(world: LocationAnalyzerWorld): Route {
     const status = world.locationAnalyzer.getStatus();
-    const route = status.pois[0] as Route;
+    const route = status.pois[0] as unknown as Route;
     assert.exists(route, "There is no route to check against.");
     return route;
 }

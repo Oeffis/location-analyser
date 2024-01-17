@@ -23,7 +23,11 @@ export class RouteMap {
     }
 
     protected addRoute(route: Route): void {
-        route.sections.forEach(section => this.addSection(section, route));
+        route.sections.forEach(consecutiveSection => this.addConsecutiveSection(consecutiveSection, route));
+    }
+
+    protected addConsecutiveSection(consecutiveSection: Section[], route: Route): void {
+        consecutiveSection.forEach(section => this.addSection(section, route));
     }
 
     protected addSection(section: Section, route: Route): void {

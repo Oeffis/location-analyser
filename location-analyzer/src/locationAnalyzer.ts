@@ -4,6 +4,7 @@ import { RouteMap, TransitPOI, isRoute } from "./routeMap.js";
 
 interface SectionDistance {
     poiId: string;
+    consecutiveSection: number;
     section: number;
     value: number;
 }
@@ -70,7 +71,7 @@ export class LocationAnalyzer {
                 const atSameSection = (poi.distance as SectionDistance).section === (lastPoi.distance as SectionDistance).section;
                 if (atSameSection) {
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    const sectionEnd = poi.sections[(poi.distance as SectionDistance).section]!;
+                    const sectionEnd = poi.sections[(poi.distance as SectionDistance).consecutiveSection]![(poi.distance as SectionDistance).section]!;
                     const lastDistanceToSectionEnd = getDistance(lastLocation, sectionEnd);
                     const currentDistanceToSectionEnd = getDistance(currentLocation, sectionEnd);
                     return currentDistanceToSectionEnd < lastDistanceToSectionEnd;
@@ -107,28 +108,30 @@ export class LocationAnalyzer {
     }
 
     private routeDistance(poi: Route, base: GeoLocation): SectionDistance {
-        const distance = poi.sections.reduce((min, section, index, sections) => {
-            const previous = sections[index - 1];
-            if (previous === undefined) {
-                return min;
-            }
-            const value = getDistanceFromLine(base, {
-                lat: section.lat,
-                lon: section.lon
-            }, {
-                lat: previous.lat,
-                lon: previous.lon
-            }, 0.1);
+        const distance = poi.sections.reduce((min, consecutiveSection, consecutiveSectionIndex) =>
+            consecutiveSection.reduce((min, section, index, sections) => {
+                const previous = sections[index - 1];
+                if (previous === undefined) {
+                    return min;
+                }
+                const value = getDistanceFromLine(base, {
+                    lat: section.lat,
+                    lon: section.lon
+                }, {
+                    lat: previous.lat,
+                    lon: previous.lon
+                }, 0.1);
 
-            if (value < min.value) {
-                return {
-                    section: index,
-                    value
-                };
-            }
-            return min;
-        }, {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                if (value < min.value) {
+                    return {
+                        consecutiveSection: consecutiveSectionIndex,
+                        section: index,
+                        value
+                    };
+                }
+                return min;
+            }, min), {
+            consecutiveSection: -1,
             section: -1,
             value: Number.MAX_SAFE_INTEGER
         });
@@ -136,6 +139,7 @@ export class LocationAnalyzer {
         return {
             poiId: poi.id,
             section: distance.section,
+            consecutiveSection: distance.consecutiveSection,
             value: distance.value
         };
     }
@@ -180,7 +184,7 @@ export interface Route {
     from: string;
     to: string;
     ref: string;
-    sections: Section[];
+    sections: Section[][];
 }
 
 export interface Section {

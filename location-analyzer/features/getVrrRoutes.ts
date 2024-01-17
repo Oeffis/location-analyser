@@ -18,8 +18,18 @@ async function loadFullRoutes(): Promise<Route[]> {
     const sections = await loadSections();
     let sectionIndex = 0;
     for (const route of routes) {
+        let consecutiveSection = 0;
+        let consecutiveSectionSections: Section[] = [];
+        route.sections.push(consecutiveSectionSections);
+
         while (sectionIndex < sections.length && sections[sectionIndex]?.routeId === route.id) {
-            route.sections.push(sections[sectionIndex]!);
+            const section = sections[sectionIndex]!;
+            if (section.consecutiveSection !== consecutiveSection) {
+                consecutiveSection++;
+                consecutiveSectionSections = [];
+                route.sections.push(consecutiveSectionSections);
+            }
+            consecutiveSectionSections.push(section);
             sectionIndex++;
         }
     }
@@ -41,11 +51,12 @@ export interface Route {
     from: string;
     to: string;
     ref: string;
-    sections: Section[];
+    sections: Section[][];
 }
 
 export interface Section {
     routeId: string;
+    consecutiveSection: number;
     sequence: number;
     lat: number;
     lon: number;
@@ -74,6 +85,7 @@ function lineToRoute(line: string): Route {
 function lineToSection(line: string): Section {
     return {
         routeId: line.split(",")[0]!,
+        consecutiveSection: Number(line.split(",")[1]),
         sequence: Number(line.split(",")[2]),
         lat: Number(line.split(",")[3]),
         lon: Number(line.split(",")[4])
