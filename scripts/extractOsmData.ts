@@ -269,7 +269,7 @@ class RouteSorter {
         while (this.remainingWays.length > 0) {
             const startNodeId = this.getStartNodeIdOrUndefined();
             if (startNodeId !== undefined) return startNodeId;
-            console.warn(`Relation ${this.relation.tags.name} has a way that is not connected to any other way`);
+            console.warn(`Relation ${this.relation.tags.name}(${this.relation.id}) has a way that is not connected to any other way`);
             this.remainingWays.shift();
         }
     }
