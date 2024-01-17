@@ -7,6 +7,7 @@ suite("extractOsmData", () => {
     const RailRB43ToDortmundWithSingleNodeWay = 2455435;
     const Bus390LindenToHerneHasRoundabout = 16335332;
     const BusNE12ThatLeavesTheArea = 173344;
+    const Bus381ToBuerRathausCrossesSameWayTwice = 30609;
     const MonorailH1WithSingleWayConsecutiveSectionAtStart = 1901043;
     const MonorailH1WithSingleWayConsecutiveSectionAtEnd = 93947;
 
@@ -69,6 +70,13 @@ suite("extractOsmData", () => {
         const transformer = new OsmTransformer(extraction);
         expect(transformer.getTransformed({
             routes: [BusNE12ThatLeavesTheArea]
+        })).toMatchSnapshot();
+    });
+
+    test("transforms route that uses the same way twice", () => {
+        const transformer = new OsmTransformer(extraction);
+        expect(transformer.getTransformed({
+            routes: [Bus381ToBuerRathausCrossesSameWayTwice]
         })).toMatchSnapshot();
     });
 
