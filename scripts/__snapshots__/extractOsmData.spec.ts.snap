@@ -2976,7 +2976,7 @@ exports[`extractOsmData > transforms simple rail line 1`] = `
 }
 `;
 
-exports[`extractOsmData > transforms simple rail line with a single node way 1`] = `
+exports[`extractOsmData > transforms simple rail line in reverse 1`] = `
 {
   "routes": "id,from,to,ref
 2455435,Dorsten,Dortmund,RB 43
