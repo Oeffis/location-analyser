@@ -1,5 +1,216 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 1`] = `
+{
+  "id": 4250656,
+  "members": [
+    {
+      "ref": 315907141,
+      "role": "inner",
+      "type": "way",
+    },
+    {
+      "ref": 320974798,
+      "role": "inner",
+      "type": "way",
+    },
+    {
+      "ref": 230235159,
+      "role": "outer",
+      "type": "way",
+    },
+  ],
+  "tags": {
+    "description": "Gelsenkirchen Hauptbahnhof, Bahnsteig 5+4",
+    "height": "0.76",
+    "layer": "2",
+    "level": "2",
+    "local_ref": "4;5",
+    "name": "Gelsenkirchen Hbf",
+    "public_transport": "platform",
+    "railway": "platform",
+    "ref": "4;5",
+    "tactile_paving": "yes",
+    "train": "yes",
+    "type": "multipolygon",
+    "wheelchair": "yes",
+  },
+  "type": "relation",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 2`] = `
+{
+  "id": 230235159,
+  "refs": [
+    454217531,
+    1215879965,
+    1215879908,
+    2388241516,
+    5038572467,
+    454217532,
+    454217533,
+    454217534,
+    454217536,
+    454217537,
+    5038572466,
+    2388241500,
+    454217538,
+    454217539,
+    454217530,
+    454217531,
+  ],
+  "tags": {
+    "level": "2",
+  },
+  "type": "way",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 3`] = `
+{
+  "id": 454217531,
+  "lat": 51.5046342,
+  "lon": 7.1006935,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 4`] = `
+{
+  "id": 1215879965,
+  "lat": 51.504706,
+  "lon": 7.1010485,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 5`] = `
+{
+  "id": 1215879908,
+  "lat": 51.5047347,
+  "lon": 7.101034,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 6`] = `
+{
+  "id": 2388241516,
+  "lat": 51.5049401,
+  "lon": 7.1020459,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 7`] = `
+{
+  "id": 5038572467,
+  "lat": 51.505084,
+  "lon": 7.1027538,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 8`] = `
+{
+  "id": 454217532,
+  "lat": 51.5053097,
+  "lon": 7.1038591,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 9`] = `
+{
+  "id": 454217533,
+  "lat": 51.5058412,
+  "lon": 7.1064241,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 10`] = `
+{
+  "id": 454217534,
+  "lat": 51.5057852,
+  "lon": 7.1064546,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 11`] = `
+{
+  "id": 454217536,
+  "lat": 51.5053964,
+  "lon": 7.1047479,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 12`] = `
+{
+  "id": 454217537,
+  "lat": 51.5052248,
+  "lon": 7.1039268,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 13`] = `
+{
+  "id": 5038572466,
+  "lat": 51.5049937,
+  "lon": 7.1028012,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 14`] = `
+{
+  "id": 2388241500,
+  "lat": 51.5048476,
+  "lon": 7.1020934,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 15`] = `
+{
+  "id": 454217538,
+  "lat": 51.5046257,
+  "lon": 7.1010172,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 16`] = `
+{
+  "id": 454217539,
+  "lat": 51.5046478,
+  "lon": 7.1010054,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 17`] = `
+{
+  "id": 454217530,
+  "lat": 51.5045887,
+  "lon": 7.1007162,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts outer section of a train station platform 18`] = `
+{
+  "id": 454217531,
+  "lat": 51.5046342,
+  "lon": 7.1006935,
+  "type": "node",
+}
+`;
+
 exports[`extractOsmPlatforms > extracts simple bus stop 1`] = `
 {
   "id": 6107133039,

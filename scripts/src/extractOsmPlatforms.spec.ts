@@ -5,6 +5,7 @@ import { ExtractionResult, Node, OsmExtractor, Relation, Way } from "./osmPlatfo
 suite("extractOsmPlatforms", () => {
     const BusStopRheinelbestraße = 6107133039;
     const TramStopRheinelbestraße = 125776045;
+    const TrainStationGelsenkirchenPlatforms4and5 = 4250656;
 
     let extractor: OsmExtractor;
     let extraction: ExtractionResult;
@@ -51,6 +52,29 @@ suite("extractOsmPlatforms", () => {
             const node = extraction.nodes.get(nodeId);
             expect(node).not.toBeUndefined();
             expect(node).toMatchSnapshot();
+        }
+    });
+
+    test("extracts outer section of a train station platform", () => {
+        const relation = extraction.relations.get(TrainStationGelsenkirchenPlatforms4and5);
+
+        expect(relation).not.toBeUndefined();
+        expect(relation).toMatchSnapshot();
+
+        for (const wayId of relation?.members.filter(member => member.role === "outer").map(m => m.ref) ?? []) {
+            const way = extraction.ways.get(wayId);
+
+            expect(way, `Way ${wayId} not found`).not.toBeUndefined();
+            expect(way).toMatchSnapshot();
+            for (const nodeId of way?.refs ?? []) {
+                const node = extraction.nodes.get(nodeId);
+                expect(node).not.toBeUndefined();
+                expect(node).toMatchSnapshot();
+            }
+        }
+
+        for (const wayId of relation?.members.filter(member => member.role === "inner").map(m => m.ref) ?? []) {
+            expect(extraction.ways.has(wayId)).toBeFalsy();
         }
     });
 });

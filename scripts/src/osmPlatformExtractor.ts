@@ -48,7 +48,7 @@ export class OsmExtractor {
                 .members
                 .filter(
                     member => member.type === "way"
-                        && member.role === ""
+                        && member.role === "outer"
                 )
                 .map(member => member.ref);
             ways.forEach(way => wayIds.add(way));
