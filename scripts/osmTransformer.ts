@@ -1,8 +1,7 @@
 import { writeFile } from "fs/promises";
 import { deflate } from "pako";
-import { RouteSorter } from "./RouteSorter";
 import { ExtractionResult, Node, Relation, RouteFilter, Way } from "./osmExtractor";
-
+import { RouteSorter } from "./routeSorter";
 
 export class OsmTransformer {
     private readonly relations: Map<number, Relation>;
