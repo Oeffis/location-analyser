@@ -7,5 +7,6 @@
         "types": [
             "@oeffis/location-analyzer"
         ],
+        "baseUrl": "src"
     }
 }
