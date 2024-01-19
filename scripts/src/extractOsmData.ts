@@ -1,9 +1,9 @@
-import { OsmExtractor } from "./osmExtractor";
+import { OsmTrackExtractor } from "./osmTrackExtractor";
 import { OsmTransformer } from "./osmTransformer";
 
 async function run(): Promise<void> {
     console.log("Extracting OSM data");
-    const extractor = new OsmExtractor();
+    const extractor = new OsmTrackExtractor();
     const extraction = await extractor.extract();
 
     console.log("Done extracting, transforming");

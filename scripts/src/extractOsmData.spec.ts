@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { beforeAll, expect, suite, test } from "vitest";
-import { ExtractionResult, Node, OsmExtractor, Relation, Way } from "./osmExtractor";
+import { ExtractionResult, Node, OsmTrackExtractor, Relation, Way } from "./osmTrackExtractor";
 import { OsmTransformer } from "./osmTransformer";
 
 suite("extractOsmData", () => {
@@ -12,11 +12,11 @@ suite("extractOsmData", () => {
     const MonorailH1WithSingleWayConsecutiveSectionAtStart = 1901043;
     const MonorailH1WithSingleWayConsecutiveSectionAtEnd = 93947;
 
-    let extractor: OsmExtractor;
+    let extractor: OsmTrackExtractor;
     let extraction: ExtractionResult;
 
     beforeAll(async () => {
-        extractor = new OsmExtractor();
+        extractor = new OsmTrackExtractor();
 
         try {
             const cachedExtraction = await readFile("./test-cache/extracted.json", "utf-8");

@@ -1,6 +1,6 @@
 import { createOSMStream } from "osm-pbf-parser-node";
 
-export class OsmExtractor {
+export class OsmTrackExtractor {
     private readonly routeTypes = [
         "bus",
         "trolleybus",

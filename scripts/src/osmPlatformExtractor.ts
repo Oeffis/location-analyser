@@ -1,6 +1,6 @@
 import { createOSMStream } from "osm-pbf-parser-node";
 
-export class OsmExtractor {
+export class OsmPlatformExtractor {
     public async extract(filter?: RouteFilter): Promise<ExtractionResult> {
         const relations = await this.getRelations(filter?.routes);
         const wayIdsToKeep = this.getWayIds(relations);
