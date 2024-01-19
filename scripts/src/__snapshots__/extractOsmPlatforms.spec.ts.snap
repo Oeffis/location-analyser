@@ -15,3 +15,98 @@ exports[`extractOsmPlatforms > extracts simple bus stop 1`] = `
   "type": "node",
 }
 `;
+
+exports[`extractOsmPlatforms > extracts simple tram platform 1`] = `
+{
+  "id": 125776045,
+  "refs": [
+    1396187856,
+    1396187866,
+    2501560574,
+    1396187880,
+    4952536446,
+    4952536445,
+    4952536444,
+    1396187856,
+  ],
+  "tags": {
+    "name": "Rheinelbestraße",
+    "public_transport": "platform",
+    "railway": "platform",
+    "tram": "yes",
+  },
+  "type": "way",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts simple tram platform 2`] = `
+{
+  "id": 1396187856,
+  "lat": 51.5014985,
+  "lon": 7.1060283,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts simple tram platform 3`] = `
+{
+  "id": 1396187866,
+  "lat": 51.501604,
+  "lon": 7.1058787,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts simple tram platform 4`] = `
+{
+  "id": 2501560574,
+  "lat": 51.5017633,
+  "lon": 7.1056881,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts simple tram platform 5`] = `
+{
+  "id": 1396187880,
+  "lat": 51.5018069,
+  "lon": 7.105636,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts simple tram platform 6`] = `
+{
+  "id": 4952536446,
+  "lat": 51.501819,
+  "lon": 7.1056639,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts simple tram platform 7`] = `
+{
+  "id": 4952536445,
+  "lat": 51.5016136,
+  "lon": 7.10592,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts simple tram platform 8`] = `
+{
+  "id": 4952536444,
+  "lat": 51.5015176,
+  "lon": 7.1060581,
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > extracts simple tram platform 9`] = `
+{
+  "id": 1396187856,
+  "lat": 51.5014985,
+  "lon": 7.1060283,
+  "type": "node",
+}
+`;

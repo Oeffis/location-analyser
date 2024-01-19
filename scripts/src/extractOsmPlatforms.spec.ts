@@ -3,6 +3,9 @@ import { beforeAll, expect, suite, test } from "vitest";
 import { ExtractionResult, Node, OsmExtractor, Relation, Way } from "./osmPlatformExtractor";
 
 suite("extractOsmPlatforms", () => {
+    const BusStopRheinelbestraße = 6107133039;
+    const TramStopRheinelbestraße = 125776045;
+
     let extractor: OsmExtractor;
     let extraction: ExtractionResult;
 
@@ -33,7 +36,21 @@ suite("extractOsmPlatforms", () => {
     }, 60000);
 
     test("extracts simple bus stop", () => {
-        console.log(extraction.nodes.size);
-        expect(extraction.nodes.get(6107133039)).toMatchSnapshot();
+        const node = extraction.nodes.get(BusStopRheinelbestraße);
+
+        expect(node).not.toBeUndefined();
+        expect(node).toMatchSnapshot();
+    });
+
+    test("extracts simple tram platform", () => {
+        const way = extraction.ways.get(TramStopRheinelbestraße);
+
+        expect(way).not.toBeUndefined();
+        expect(way).toMatchSnapshot();
+        for (const nodeId of way?.refs ?? []) {
+            const node = extraction.nodes.get(nodeId);
+            expect(node).not.toBeUndefined();
+            expect(node).toMatchSnapshot();
+        }
     });
 });
