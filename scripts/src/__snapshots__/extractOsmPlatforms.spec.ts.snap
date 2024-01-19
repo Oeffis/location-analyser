@@ -1,0 +1,17 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`extractOsmPlatforms > extracts simple bus stop 1`] = `
+{
+  "id": 6107133039,
+  "lat": 51.501452,
+  "lon": 7.105743,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "Rheinelbestraße",
+    "public_transport": "platform",
+    "shelter": "yes",
+  },
+  "type": "node",
+}
+`;
