@@ -1,6 +1,6 @@
 import { writeFile } from "fs/promises";
 import { deflate } from "pako";
-import { ExtractionResult, Node, Relation, RouteFilter, Way } from "./osmTrackExtractor";
+import { ExtractionResult, Node, Relation, RouteFilter, Way } from "./osmExtractor";
 import { RouteSorter } from "./routeSorter";
 
 export class OsmTransformer {

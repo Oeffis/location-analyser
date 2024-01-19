@@ -1,5 +1,4 @@
-import { Relation, Way } from "./osmTrackExtractor";
-
+import { Relation, Way } from "./osmExtractor";
 
 export class RouteSorter {
     private remainingWays: Way[];

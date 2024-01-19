@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { beforeAll, expect, suite, test } from "vitest";
-import { ExtractionResult, Node, OsmPlatformExtractor, Relation, Way } from "./osmPlatformExtractor";
+import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";
+import { OsmPlatformExtractor } from "./osmPlatformExtractor";
 
 suite("extractOsmPlatforms", () => {
     const BusStopRheinelbestraße = 6107133039;

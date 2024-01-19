@@ -1,4 +1,4 @@
-import { OsmPlatformExtractor } from "./osmPlatformExtractor";
+import { OsmPlatformExtractor } from "osmPlatformExtractor";
 
 async function run(): Promise<void> {
     console.log("Extracting OSM data");

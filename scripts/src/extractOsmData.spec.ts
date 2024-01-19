@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { beforeAll, expect, suite, test } from "vitest";
-import { ExtractionResult, Node, OsmTrackExtractor, Relation, Way } from "./osmTrackExtractor";
+import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";
+import { OsmTrackExtractor } from "./osmTrackExtractor";
 import { OsmTransformer } from "./osmTransformer";
 
 suite("extractOsmData", () => {

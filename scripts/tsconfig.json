@@ -1,12 +1,11 @@
 {
     "extends": "../tsconfig.json",
     "include": [
-        "./**/*.ts"
+        "./src/**/*.ts"
     ],
     "compilerOptions": {
         "types": [
             "@oeffis/location-analyzer"
-        ],
-        "baseUrl": "src"
+        ]
     }
 }
