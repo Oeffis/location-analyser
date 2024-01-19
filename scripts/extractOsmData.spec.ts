@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { beforeAll, expect, suite, test } from "vitest";
-import { ExtractionResult, Node, OsmExtractor, OsmTransformer, Relation, Way } from "./extractOsmData";
+import { ExtractionResult, Node, OsmTransformer, Relation, Way } from "./extractOsmData";
+import { OsmExtractor } from "./osmExtractor";
 
 suite("extractOsmData", () => {
     const RailRB43ToDorsten = 1998588;
