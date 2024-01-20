@@ -8,8 +8,8 @@ export class OsmExtractor {
         protected readonly additionalNodesFilter: Filter<Node>
     ) { }
 
-    public async extract(filter?: RouteFilter): Promise<ExtractionResult> {
-        const relations = await this.getRelations(filter?.routes);
+    public async extract(): Promise<ExtractionResult> {
+        const relations = await this.getRelations();
         const wayIdsToKeep = this.getWayIds(relations);
         const ways = await this.getWays(wayIdsToKeep);
         const nodeIdsToKeep = this.getNodeIds(ways);
@@ -27,20 +27,12 @@ export class OsmExtractor {
         };
     }
 
-    protected async getRelations(relationIds?: number[]): Promise<Map<number, Relation>> {
+    protected async getRelations(): Promise<Map<number, Relation>> {
         const relations = new Map<number, Relation>();
-
-        let filter = this.relationFilter;
-
-        if (relationIds) {
-            const relationIdsToKeep = new Set(relationIds);
-            filter = relation => relationIdsToKeep.has(relation.id)
-                && this.relationFilter(relation);
-        }
 
         await this.filterStream({
             typeGuard: isRelation,
-            filter,
+            filter: this.relationFilter,
             onMatch: relation => void relations.set(relation.id, relation)
         });
 
