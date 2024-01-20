@@ -1,6 +1,13 @@
 import { createOSMStream } from "osm-pbf-parser-node";
 
-export abstract class OsmExtractor {
+export class OsmExtractor {
+    public constructor(
+        protected readonly relationFilter: Filter<Relation>,
+        protected readonly wayIdFilter: Filter<Member>,
+        protected readonly wayFilter: Filter<Way>,
+        protected readonly nodeFilter: Filter<Node>
+    ) { }
+
     public async extract(filter?: RouteFilter): Promise<ExtractionResult> {
         const relations = await this.getRelations(filter?.routes);
         const wayIdsToKeep = this.getWayIds(relations);
@@ -20,15 +27,66 @@ export abstract class OsmExtractor {
         };
     }
 
-    protected abstract getRelations(routes: number[] | undefined): Promise<Map<number, Relation>>;
-    protected abstract getWayIds(relations: Map<number, Relation>): Set<number>;
-    protected abstract getWays(wayIdsToKeep: Set<number>): Promise<Map<number, Way>>;
-    protected abstract getNodes(nodeIdsToKeep: Set<number>): Promise<Map<number, Node>>;
-
     protected getNodeIds(ways: Map<number, Way>): Set<number> {
         const nodesToKeep = new Set<number>();
         ways.forEach(way => way.refs?.forEach(node => nodesToKeep.add(node)));
         return nodesToKeep;
+    }
+
+    protected async getRelations(relationIds?: number[]): Promise<Map<number, Relation>> {
+        const relations = new Map<number, Relation>();
+
+        let filter = this.relationFilter;
+
+        if (relationIds) {
+            const relationIdsToKeep = new Set(relationIds);
+            filter = relation => relationIdsToKeep.has(relation.id)
+                && this.relationFilter(relation);
+        }
+
+        await this.filterStream({
+            typeGuard: isRelation,
+            filter,
+            onMatch: relation => void relations.set(relation.id, relation)
+        });
+
+        return relations;
+    }
+
+    protected getWayIds(relations: Map<number, Relation>): Set<number> {
+        const wayIds = new Set<number>();
+        relations.forEach(relation => {
+            const ways = relation
+                .members
+                .filter(this.wayIdFilter)
+                .map(member => member.ref);
+            ways.forEach(way => wayIds.add(way));
+        });
+        return wayIds;
+    }
+
+    protected async getWays(wayIdsToKeep: Set<number>): Promise<Map<number, Way>> {
+        const ways = new Map<number, Way>();
+
+        await this.filterStream({
+            typeGuard: isWay,
+            filter: way => wayIdsToKeep.has(way.id) || this.wayFilter(way),
+            onMatch: way => void ways.set(way.id, way)
+        });
+
+        return ways;
+    }
+
+    protected async getNodes(nodeIdsToKeep: Set<number>): Promise<Map<number, Node>> {
+        const nodes = new Map<number, Node>();
+
+        await this.filterStream({
+            typeGuard: isNode,
+            filter: node => nodeIdsToKeep.has(node.id) || this.nodeFilter(node),
+            onMatch: node => void nodes.set(node.id, node)
+        });
+
+        return nodes;
     }
 
     protected async filterStream<C extends OSMType>({ typeGuard: typeFilter, filter: filterFunction, onMatch: doFunction }: StreamFilter<C>): Promise<void> {
@@ -57,6 +115,38 @@ export abstract class OsmExtractor {
         if (areMissing) {
             throw new Error(`Missing ${missing.length} nodes: ${missing.join(", ")}`);
         }
+    }
+
+    public static forTracks(): OsmExtractor {
+        const routeTypes = [
+            "bus",
+            "trolleybus",
+            "minibus",
+            "share_taxi",
+            "train",
+            "light_rail",
+            "subway",
+            "tram",
+            "monorail",
+            "ferry",
+            "funicular"
+        ];
+        return new OsmExtractor(
+            r => r.tags?.type === "route"
+                && routeTypes.includes(r.tags.route ?? ""),
+            m => m.type === "way" && m.role === "",
+            () => false,
+            () => false
+        );
+    }
+
+    public static forPlatforms(): OsmExtractor {
+        return new OsmExtractor(
+            r => r.tags?.public_transport === "platform",
+            m => m.type === "way" && m.role === "outer",
+            w => w.tags?.public_transport === "platform",
+            n => n.tags?.public_transport === "platform"
+        );
     }
 }
 
@@ -105,12 +195,14 @@ export interface Way {
 export interface Relation {
     type: "relation";
     id: number;
-    members: {
-        type: "node" | "way" | "relation";
-        ref: number;
-        role: string;
-    }[];
+    members: Member[];
     tags?: Record<string, string>;
+}
+
+export interface Member {
+    type: "node" | "way" | "relation";
+    ref: number;
+    role: string;
 }
 
 export function isNode(item: OSMType): item is Node {
@@ -124,3 +216,5 @@ export function isWay(item: OSMType): item is Way {
 export function isRelation(item: OSMType): item is Relation {
     return (item as OSMNonRootType).type === "relation";
 }
+
+export type Filter<T> = (item: T) => boolean;

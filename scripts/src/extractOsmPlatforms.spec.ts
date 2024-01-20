@@ -1,18 +1,17 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { beforeAll, expect, suite, test } from "vitest";
-import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";
-import { OsmPlatformExtractor } from "./osmPlatformExtractor";
+import { ExtractionResult, Node, OsmExtractor, Relation, Way } from "./osmExtractor";
 
 suite("extractOsmPlatforms", () => {
     const BusStopRheinelbestraße = 6107133039;
     const TramStopRheinelbestraße = 125776045;
     const TrainStationGelsenkirchenPlatforms4and5 = 4250656;
 
-    let extractor: OsmPlatformExtractor;
+    let extractor: OsmExtractor;
     let extraction: ExtractionResult;
 
     beforeAll(async () => {
-        extractor = new OsmPlatformExtractor();
+        extractor = OsmExtractor.forPlatforms();
 
         try {
             const cachedExtraction = await readFile("./test-cache/extractedPlatforms.json", "utf-8");
