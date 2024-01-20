@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "fs/promises";
 import { beforeAll, expect, suite, test } from "vitest";
 import { ExtractionResult, Node, OsmExtractor, Relation, Way } from "./osmExtractor";
+import { OsmPlatformTransformer } from "./osmPlatformTransformer";
 
 suite("extractOsmPlatforms", () => {
     const BusStopRheinelbestraße = 6107133039;
@@ -36,45 +37,56 @@ suite("extractOsmPlatforms", () => {
         }
     }, 60000);
 
-    test("extracts simple bus stop", () => {
-        const node = extraction.nodes.get(BusStopRheinelbestraße);
+    suite("extracts", () => {
+        test("extracts simple bus stop", () => {
+            const node = extraction.nodes.get(BusStopRheinelbestraße);
 
-        expect(node).not.toBeUndefined();
-        expect(node).toMatchSnapshot();
-    });
-
-    test("extracts simple tram platform", () => {
-        const way = extraction.ways.get(TramStopRheinelbestraße);
-
-        expect(way).not.toBeUndefined();
-        expect(way).toMatchSnapshot();
-        for (const nodeId of way?.refs ?? []) {
-            const node = extraction.nodes.get(nodeId);
             expect(node).not.toBeUndefined();
             expect(node).toMatchSnapshot();
-        }
-    });
+        });
 
-    test("extracts outer section of a train station platform", () => {
-        const relation = extraction.relations.get(TrainStationGelsenkirchenPlatforms4and5);
+        test("extracts simple tram platform", () => {
+            const way = extraction.ways.get(TramStopRheinelbestraße);
 
-        expect(relation).not.toBeUndefined();
-        expect(relation).toMatchSnapshot();
-
-        for (const wayId of relation?.members.filter(member => member.role === "outer").map(m => m.ref) ?? []) {
-            const way = extraction.ways.get(wayId);
-
-            expect(way, `Way ${wayId} not found`).not.toBeUndefined();
+            expect(way).not.toBeUndefined();
             expect(way).toMatchSnapshot();
             for (const nodeId of way?.refs ?? []) {
                 const node = extraction.nodes.get(nodeId);
                 expect(node).not.toBeUndefined();
                 expect(node).toMatchSnapshot();
             }
-        }
+        });
 
-        for (const wayId of relation?.members.filter(member => member.role === "inner").map(m => m.ref) ?? []) {
-            expect(extraction.ways.has(wayId)).toBeFalsy();
-        }
+        test("extracts outer section of a train station platform", () => {
+            const relation = extraction.relations.get(TrainStationGelsenkirchenPlatforms4and5);
+
+            expect(relation).not.toBeUndefined();
+            expect(relation).toMatchSnapshot();
+
+            for (const wayId of relation?.members.filter(member => member.role === "outer").map(m => m.ref) ?? []) {
+                const way = extraction.ways.get(wayId);
+
+                expect(way, `Way ${wayId} not found`).not.toBeUndefined();
+                expect(way).toMatchSnapshot();
+                for (const nodeId of way?.refs ?? []) {
+                    const node = extraction.nodes.get(nodeId);
+                    expect(node).not.toBeUndefined();
+                    expect(node).toMatchSnapshot();
+                }
+            }
+
+            for (const wayId of relation?.members.filter(member => member.role === "inner").map(m => m.ref) ?? []) {
+                expect(extraction.ways.has(wayId)).toBeFalsy();
+            }
+        });
+    });
+
+    suite("transforms", () => {
+        test("transforms platforms", () => {
+            const transformer = new OsmPlatformTransformer(extraction);
+            const { platforms } = transformer.getTransformed({ platforms: [BusStopRheinelbestraße] });
+
+            expect(platforms).toMatchSnapshot();
+        });
     });
 });

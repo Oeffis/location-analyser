@@ -141,18 +141,10 @@ export class OsmExtractor {
     }
 }
 
-export interface RouteFilter {
-    routes?: number[];
-}
-
 export interface ExtractionResult {
     relations: Map<number, Relation>;
     ways: Map<number, Way>;
     nodes: Map<number, Node>;
-}
-
-export interface RouteFilter {
-    routes?: number[];
 }
 
 export interface StreamFilter<C extends OSMType> {

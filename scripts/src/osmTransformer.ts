@@ -1,6 +1,6 @@
 import { writeFile } from "fs/promises";
 import { deflate } from "pako";
-import { ExtractionResult, Node, Relation, RouteFilter, Way } from "./osmExtractor";
+import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";
 import { RouteSorter } from "./routeSorter";
 
 export class OsmTransformer {
@@ -72,4 +72,8 @@ export class OsmTransformer {
             writeFile(`../raw/no-git/${dataName}.csv`, data)
         ]);
     }
+}
+
+export interface RouteFilter {
+    routes?: number[];
 }

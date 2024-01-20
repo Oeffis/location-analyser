@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 1`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 1`] = `
 {
   "id": 4250656,
   "members": [
@@ -39,7 +39,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 2`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 2`] = `
 {
   "id": 230235159,
   "refs": [
@@ -67,7 +67,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 3`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 3`] = `
 {
   "id": 454217531,
   "lat": 51.5046342,
@@ -76,7 +76,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 4`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 4`] = `
 {
   "id": 1215879965,
   "lat": 51.504706,
@@ -85,7 +85,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 5`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 5`] = `
 {
   "id": 1215879908,
   "lat": 51.5047347,
@@ -94,7 +94,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 6`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 6`] = `
 {
   "id": 2388241516,
   "lat": 51.5049401,
@@ -103,7 +103,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 7`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 7`] = `
 {
   "id": 5038572467,
   "lat": 51.505084,
@@ -112,7 +112,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 8`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 8`] = `
 {
   "id": 454217532,
   "lat": 51.5053097,
@@ -121,7 +121,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 9`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 9`] = `
 {
   "id": 454217533,
   "lat": 51.5058412,
@@ -130,7 +130,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 10`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 10`] = `
 {
   "id": 454217534,
   "lat": 51.5057852,
@@ -139,7 +139,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 11`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 11`] = `
 {
   "id": 454217536,
   "lat": 51.5053964,
@@ -148,7 +148,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 12`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 12`] = `
 {
   "id": 454217537,
   "lat": 51.5052248,
@@ -157,7 +157,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 13`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 13`] = `
 {
   "id": 5038572466,
   "lat": 51.5049937,
@@ -166,7 +166,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 14`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 14`] = `
 {
   "id": 2388241500,
   "lat": 51.5048476,
@@ -175,7 +175,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 15`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 15`] = `
 {
   "id": 454217538,
   "lat": 51.5046257,
@@ -184,7 +184,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 16`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 16`] = `
 {
   "id": 454217539,
   "lat": 51.5046478,
@@ -193,7 +193,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 17`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 17`] = `
 {
   "id": 454217530,
   "lat": 51.5045887,
@@ -202,7 +202,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts outer section of a train station platform 18`] = `
+exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 18`] = `
 {
   "id": 454217531,
   "lat": 51.5046342,
@@ -211,7 +211,7 @@ exports[`extractOsmPlatforms > extracts outer section of a train station platfor
 }
 `;
 
-exports[`extractOsmPlatforms > extracts simple bus stop 1`] = `
+exports[`extractOsmPlatforms > extracts > extracts simple bus stop 1`] = `
 {
   "id": 6107133039,
   "lat": 51.501452,
@@ -227,7 +227,7 @@ exports[`extractOsmPlatforms > extracts simple bus stop 1`] = `
 }
 `;
 
-exports[`extractOsmPlatforms > extracts simple tram platform 1`] = `
+exports[`extractOsmPlatforms > extracts > extracts simple tram platform 1`] = `
 {
   "id": 125776045,
   "refs": [
@@ -250,7 +250,7 @@ exports[`extractOsmPlatforms > extracts simple tram platform 1`] = `
 }
 `;
 
-exports[`extractOsmPlatforms > extracts simple tram platform 2`] = `
+exports[`extractOsmPlatforms > extracts > extracts simple tram platform 2`] = `
 {
   "id": 1396187856,
   "lat": 51.5014985,
@@ -259,7 +259,7 @@ exports[`extractOsmPlatforms > extracts simple tram platform 2`] = `
 }
 `;
 
-exports[`extractOsmPlatforms > extracts simple tram platform 3`] = `
+exports[`extractOsmPlatforms > extracts > extracts simple tram platform 3`] = `
 {
   "id": 1396187866,
   "lat": 51.501604,
@@ -268,7 +268,7 @@ exports[`extractOsmPlatforms > extracts simple tram platform 3`] = `
 }
 `;
 
-exports[`extractOsmPlatforms > extracts simple tram platform 4`] = `
+exports[`extractOsmPlatforms > extracts > extracts simple tram platform 4`] = `
 {
   "id": 2501560574,
   "lat": 51.5017633,
@@ -277,7 +277,7 @@ exports[`extractOsmPlatforms > extracts simple tram platform 4`] = `
 }
 `;
 
-exports[`extractOsmPlatforms > extracts simple tram platform 5`] = `
+exports[`extractOsmPlatforms > extracts > extracts simple tram platform 5`] = `
 {
   "id": 1396187880,
   "lat": 51.5018069,
@@ -286,7 +286,7 @@ exports[`extractOsmPlatforms > extracts simple tram platform 5`] = `
 }
 `;
 
-exports[`extractOsmPlatforms > extracts simple tram platform 6`] = `
+exports[`extractOsmPlatforms > extracts > extracts simple tram platform 6`] = `
 {
   "id": 4952536446,
   "lat": 51.501819,
@@ -295,7 +295,7 @@ exports[`extractOsmPlatforms > extracts simple tram platform 6`] = `
 }
 `;
 
-exports[`extractOsmPlatforms > extracts simple tram platform 7`] = `
+exports[`extractOsmPlatforms > extracts > extracts simple tram platform 7`] = `
 {
   "id": 4952536445,
   "lat": 51.5016136,
@@ -304,7 +304,7 @@ exports[`extractOsmPlatforms > extracts simple tram platform 7`] = `
 }
 `;
 
-exports[`extractOsmPlatforms > extracts simple tram platform 8`] = `
+exports[`extractOsmPlatforms > extracts > extracts simple tram platform 8`] = `
 {
   "id": 4952536444,
   "lat": 51.5015176,
@@ -313,7 +313,7 @@ exports[`extractOsmPlatforms > extracts simple tram platform 8`] = `
 }
 `;
 
-exports[`extractOsmPlatforms > extracts simple tram platform 9`] = `
+exports[`extractOsmPlatforms > extracts > extracts simple tram platform 9`] = `
 {
   "id": 1396187856,
   "lat": 51.5014985,
@@ -321,3 +321,5 @@ exports[`extractOsmPlatforms > extracts simple tram platform 9`] = `
   "type": "node",
 }
 `;
+
+exports[`extractOsmPlatforms > transforms > transforms platforms 1`] = `"6107133039,Rheinelbestraße"`;
