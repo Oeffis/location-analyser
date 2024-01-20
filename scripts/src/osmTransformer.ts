@@ -37,9 +37,9 @@ export class OsmTransformer {
             .filter(relation => !filter?.routes || filter.routes.includes(relation.id))
             .map(relation => {
                 const routeId = relation.id;
-                const routeRef = relation.tags.ref ?? "";
-                const routeFrom = relation.tags.from ?? "";
-                const routeTo = relation.tags.to ?? "";
+                const routeRef = relation.tags?.ref ?? "";
+                const routeFrom = relation.tags?.from ?? "";
+                const routeTo = relation.tags?.to ?? "";
                 return [routeId, routeFrom, routeTo, routeRef].join(",");
             });
         return [header, ...output].join("\n") + "\n";
