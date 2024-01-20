@@ -4,8 +4,8 @@ export class OsmExtractor {
     public constructor(
         protected readonly relationFilter: Filter<Relation>,
         protected readonly wayIdFilter: Filter<Member>,
-        protected readonly wayFilter: Filter<Way>,
-        protected readonly nodeFilter: Filter<Node>
+        protected readonly additionalWaysFilter: Filter<Way>,
+        protected readonly additionalNodesFilter: Filter<Node>
     ) { }
 
     public async extract(filter?: RouteFilter): Promise<ExtractionResult> {
@@ -25,12 +25,6 @@ export class OsmExtractor {
             ways,
             nodes
         };
-    }
-
-    protected getNodeIds(ways: Map<number, Way>): Set<number> {
-        const nodesToKeep = new Set<number>();
-        ways.forEach(way => way.refs?.forEach(node => nodesToKeep.add(node)));
-        return nodesToKeep;
     }
 
     protected async getRelations(relationIds?: number[]): Promise<Map<number, Relation>> {
@@ -70,11 +64,17 @@ export class OsmExtractor {
 
         await this.filterStream({
             typeGuard: isWay,
-            filter: way => wayIdsToKeep.has(way.id) || this.wayFilter(way),
+            filter: way => wayIdsToKeep.has(way.id) || this.additionalWaysFilter(way),
             onMatch: way => void ways.set(way.id, way)
         });
 
         return ways;
+    }
+
+    protected getNodeIds(ways: Map<number, Way>): Set<number> {
+        const nodesToKeep = new Set<number>();
+        ways.forEach(way => way.refs?.forEach(node => nodesToKeep.add(node)));
+        return nodesToKeep;
     }
 
     protected async getNodes(nodeIdsToKeep: Set<number>): Promise<Map<number, Node>> {
@@ -82,7 +82,7 @@ export class OsmExtractor {
 
         await this.filterStream({
             typeGuard: isNode,
-            filter: node => nodeIdsToKeep.has(node.id) || this.nodeFilter(node),
+            filter: node => nodeIdsToKeep.has(node.id) || this.additionalNodesFilter(node),
             onMatch: node => void nodes.set(node.id, node)
         });
 
@@ -132,8 +132,7 @@ export class OsmExtractor {
             "funicular"
         ];
         return new OsmExtractor(
-            r => r.tags?.type === "route"
-                && routeTypes.includes(r.tags.route ?? ""),
+            r => r.tags?.type === "route" && routeTypes.includes(r.tags.route ?? ""),
             m => m.type === "way" && m.role === "",
             () => false,
             () => false
