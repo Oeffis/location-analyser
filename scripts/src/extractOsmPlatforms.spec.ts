@@ -38,7 +38,7 @@ suite("extractOsmPlatforms", () => {
     }, 60000);
 
     suite("extracts", () => {
-        test("extracts simple bus stop", () => {
+        test("extracts single point bus stop", () => {
             const node = extraction.nodes.get(BusStopRheinelbestraße);
 
             expect(node).not.toBeUndefined();
@@ -82,7 +82,7 @@ suite("extractOsmPlatforms", () => {
     });
 
     suite("transforms", () => {
-        test("transforms platforms", () => {
+        test("transforms a single point bus stop", () => {
             const transformer = new OsmPlatformTransformer(extraction);
             const transformed = transformer.getTransformed({ platforms: [BusStopRheinelbestraße] });
 

@@ -322,7 +322,23 @@ exports[`extractOsmPlatforms > extracts > extracts simple tram platform 9`] = `
 }
 `;
 
-exports[`extractOsmPlatforms > transforms > transforms platforms 1`] = `
+exports[`extractOsmPlatforms > extracts > extracts single point bus stop 1`] = `
+{
+  "id": 6107133039,
+  "lat": 51.501452,
+  "lon": 7.105743,
+  "tags": {
+    "bus": "yes",
+    "highway": "bus_stop",
+    "name": "Rheinelbestraße",
+    "public_transport": "platform",
+    "shelter": "yes",
+  },
+  "type": "node",
+}
+`;
+
+exports[`extractOsmPlatforms > transforms > transforms a single point bus stop 1`] = `
 {
   "platformBounds": "id,lat,lon
 6107133039,51.501452,7.105743
@@ -332,3 +348,5 @@ exports[`extractOsmPlatforms > transforms > transforms platforms 1`] = `
 ",
 }
 `;
+
+exports[`extractOsmPlatforms > transforms > transforms platforms 1`] = `"6107133039,Rheinelbestraße"`;
