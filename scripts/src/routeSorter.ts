@@ -18,7 +18,7 @@ export class RouteSorter {
             .map(wayId => this.ways.get(wayId));
 
         if (waysInRelation.some(way => !way))
-            throw new Error(`Relation ${this.relation.tags.name} has missing ways`);
+            throw new Error(`Relation ${this.relation.tags?.name} has missing ways`);
 
         return waysInRelation as Way[];
     }
@@ -31,7 +31,7 @@ export class RouteSorter {
         }
 
         if (consecutiveSections.length === 0) {
-            console.warn(`Relation ${this.relation.tags.name}(${this.relation.id}) has not a single section`);
+            console.warn(`Relation ${this.relation.tags?.name}(${this.relation.id}) has not a single section`);
         }
 
         return consecutiveSections;
@@ -41,7 +41,7 @@ export class RouteSorter {
         while (this.remainingWays.length > 0) {
             const startNodeId = this.getStartNodeIdOrUndefined();
             if (startNodeId !== undefined) return startNodeId;
-            console.warn(`Relation ${this.relation.tags.name}(${this.relation.id}) has a way that is not connected to any other way`);
+            console.warn(`Relation ${this.relation.tags?.name}(${this.relation.id}) has a way that is not connected to any other way`);
             this.remainingWays.shift();
         }
     }
@@ -56,7 +56,7 @@ export class RouteSorter {
 
     private getStartNodeIdOrThrow(): number {
         const firstWay = this.remainingWays[0];
-        if (!firstWay) throw new Error(`Relation ${this.relation.tags.name} has no ways`);
+        if (!firstWay) throw new Error(`Relation ${this.relation.tags?.name} has no ways`);
 
         const startNodeId = firstWay.refs?.[0];
         const endNodeId = firstWay.refs?.[firstWay.refs.length - 1];

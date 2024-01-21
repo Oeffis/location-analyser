@@ -47,6 +47,15 @@ export class OsmPlatformTransformer {
                 const platformName = way.tags?.name;
                 return [platformId, platformName].join(",");
             }));
+
+        output = output.concat(Array.from(this.relations.values())
+            .filter(relation => relation.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(relation.id)))
+            .map(relation => {
+                const platformId = relation.id;
+                const platformName = relation.tags?.name;
+                return [platformId, platformName].join(",");
+            }));
+
         return [header, ...output].join("\n") + "\n";
     }
 
@@ -68,8 +77,30 @@ export class OsmPlatformTransformer {
                 const nodes = way.refs?.map(nodeId => this.getNodeOrThrow(nodeId)) ?? [];
                 return nodes.map(node => [platformId, node.lat, node.lon].join(","));
             }));
+
+        output = output.concat(Array.from(this.relations.values())
+            .filter(relation => relation.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(relation.id)))
+            .flatMap(relation => {
+                const platformId = relation.id;
+                const filteredWays = relation.members
+                    .filter(member => member.role === "outer")
+                    .map(member => this.getWayOrThrow(member.ref));
+
+                if (filteredWays.length > 1) {
+                    throw new Error(`Relation ${relation.tags?.name} has more than one outer way`);
+                }
+                const nodes = filteredWays[0]?.refs?.map(nodeId => this.getNodeOrThrow(nodeId)) ?? [];
+                return nodes.map(node => [platformId, node.lat, node.lon].join(","));
+            }));
+
         return [header, ...output].join("\n") + "\n";
 
+    }
+
+    private getWayOrThrow(wayId: number): Way {
+        const way = this.ways.get(wayId);
+        if (!way) throw new Error(`Way ${wayId} not found`);
+        return way;
     }
 
     private getNodeOrThrow(nodeId: number): Node {
