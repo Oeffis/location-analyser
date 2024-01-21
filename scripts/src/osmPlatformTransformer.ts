@@ -32,19 +32,27 @@ export class OsmPlatformTransformer {
 
     private getTransformedPlatforms(filter?: PlatformFilter): string {
         const header = ["id", "name"].join(",");
-        const output = Array.from(this.nodes.values())
+        let output = Array.from(this.nodes.values())
             .filter(node => node.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(node.id)))
             .map(node => {
                 const platformId = node.id;
                 const platformName = node.tags?.name;
                 return [platformId, platformName].join(",");
             });
+
+        output = output.concat(Array.from(this.ways.values())
+            .filter(way => way.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(way.id)))
+            .map(way => {
+                const platformId = way.id;
+                const platformName = way.tags?.name;
+                return [platformId, platformName].join(",");
+            }));
         return [header, ...output].join("\n") + "\n";
     }
 
     private getTransformedPlatformBounds(filter?: PlatformFilter): string {
         const header = ["id", "lat", "lon"].join(",");
-        const output = Array.from(this.nodes.values())
+        let output = Array.from(this.nodes.values())
             .filter(node => node.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(node.id)))
             .map(node => {
                 const platformId = node.id;
@@ -52,6 +60,14 @@ export class OsmPlatformTransformer {
                 const platformLon = node.lon;
                 return [platformId, platformLat, platformLon].join(",");
             });
+
+        output = output.concat(Array.from(this.ways.values())
+            .filter(way => way.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(way.id)))
+            .flatMap(way => {
+                const platformId = way.id;
+                const nodes = way.refs?.map(nodeId => this.getNodeOrThrow(nodeId)) ?? [];
+                return nodes.map(node => [platformId, node.lat, node.lon].join(","));
+            }));
         return [header, ...output].join("\n") + "\n";
 
     }
