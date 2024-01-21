@@ -26,18 +26,34 @@ export class OsmPlatformTransformer {
 
     public getTransformed(filter?: PlatformFilter): { platforms: string; platformBounds: string; } {
         const platforms = this.getTransformedPlatforms(filter);
-        // const platformBounds = this.getTransformedPlatformBounds(filter);
-        return { platforms, platformBounds: "" };
+        const platformBounds = this.getTransformedPlatformBounds(filter);
+        return { platforms, platformBounds };
     }
 
-    public getTransformedPlatforms(filter?: PlatformFilter): string {
-        return Array.from(this.nodes.values())
+    private getTransformedPlatforms(filter?: PlatformFilter): string {
+        const header = ["id", "name"].join(",");
+        const output = Array.from(this.nodes.values())
             .filter(node => node.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(node.id)))
             .map(node => {
                 const platformId = node.id;
                 const platformName = node.tags?.name;
                 return [platformId, platformName].join(",");
-            }).join("\n");
+            });
+        return [header, ...output].join("\n") + "\n";
+    }
+
+    private getTransformedPlatformBounds(filter?: PlatformFilter): string {
+        const header = ["id", "lat", "lon"].join(",");
+        const output = Array.from(this.nodes.values())
+            .filter(node => node.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(node.id)))
+            .map(node => {
+                const platformId = node.id;
+                const platformLat = node.lat;
+                const platformLon = node.lon;
+                return [platformId, platformLat, platformLon].join(",");
+            });
+        return [header, ...output].join("\n") + "\n";
+
     }
 
     private getNodeOrThrow(nodeId: number): Node {

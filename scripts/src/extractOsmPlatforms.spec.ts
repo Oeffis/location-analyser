@@ -84,9 +84,9 @@ suite("extractOsmPlatforms", () => {
     suite("transforms", () => {
         test("transforms platforms", () => {
             const transformer = new OsmPlatformTransformer(extraction);
-            const { platforms } = transformer.getTransformed({ platforms: [BusStopRheinelbestraße] });
+            const transformed = transformer.getTransformed({ platforms: [BusStopRheinelbestraße] });
 
-            expect(platforms).toMatchSnapshot();
+            expect(transformed).toMatchSnapshot();
         });
     });
 });

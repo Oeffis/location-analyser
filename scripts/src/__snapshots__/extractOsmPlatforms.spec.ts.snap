@@ -322,4 +322,13 @@ exports[`extractOsmPlatforms > extracts > extracts simple tram platform 9`] = `
 }
 `;
 
-exports[`extractOsmPlatforms > transforms > transforms platforms 1`] = `"6107133039,Rheinelbestraße"`;
+exports[`extractOsmPlatforms > transforms > transforms platforms 1`] = `
+{
+  "platformBounds": "id,lat,lon
+6107133039,51.501452,7.105743
+",
+  "platforms": "id,name
+6107133039,Rheinelbestraße
+",
+}
+`;
