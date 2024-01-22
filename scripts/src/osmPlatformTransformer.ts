@@ -1,3 +1,4 @@
+import { stringify } from "csv/sync";
 import { writeFile } from "fs/promises";
 import { deflate } from "pako";
 import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";
@@ -25,50 +26,50 @@ export class OsmPlatformTransformer {
         ]);
     }
 
-    public getTransformed(filter?: PlatformFilter): { platforms: string; platformBounds: string; } {
+    public getTransformed(filter?: PlatformFilter): { platforms: (string | number)[][]; platformBounds: (string | number)[][]; } {
         const platforms = this.getTransformedPlatforms(filter);
         const platformBounds = this.getTransformedPlatformBounds(filter);
         return { platforms, platformBounds };
     }
 
-    private getTransformedPlatforms(filter?: PlatformFilter): string {
-        const header = ["id", "name"].join(",");
+    private getTransformedPlatforms(filter?: PlatformFilter): (string | number)[][] {
+        const header = ["id", "name"];
         let output = Array.from(this.nodes.values())
             .filter(node => node.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(node.id)))
             .map(node => {
                 const platformId = node.id;
-                const platformName = node.tags?.description ?? node.tags?.name;
-                return [platformId, `"${platformName}"`].join(",");
+                const platformName = node.tags?.description ?? node.tags?.name ?? "";
+                return [platformId, platformName];
             });
 
         output = output.concat(Array.from(this.ways.values())
             .filter(way => way.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(way.id)))
             .map(way => {
                 const platformId = way.id;
-                const platformName = way.tags?.description ?? way.tags?.name;
-                return [platformId, `"${platformName}"`].join(",");
+                const platformName = way.tags?.description ?? way.tags?.name ?? "";
+                return [platformId, platformName];
             }));
 
         output = output.concat(Array.from(this.relations.values())
             .filter(relation => relation.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(relation.id)))
             .map(relation => {
                 const platformId = relation.id;
-                const platformName = relation.tags?.description ?? relation.tags?.name;
-                return [platformId, `"${platformName}"`].join(",");
+                const platformName = relation.tags?.description ?? relation.tags?.name ?? "";
+                return [platformId, platformName];
             }));
 
-        return [header, ...output].join("\n") + "\n";
+        return [header, ...output];
     }
 
-    private getTransformedPlatformBounds(filter?: PlatformFilter): string {
-        const header = ["id", "lat", "lon"].join(",");
+    private getTransformedPlatformBounds(filter?: PlatformFilter): (string | number)[][] {
+        const header = ["id", "latitude", "longitude"];
         let output = Array.from(this.nodes.values())
             .filter(node => node.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(node.id)))
             .map(node => {
                 const platformId = node.id;
                 const platformLat = node.lat;
                 const platformLon = node.lon;
-                return [platformId, platformLat, platformLon].join(",");
+                return [platformId, platformLat, platformLon];
             });
 
         output = output.concat(Array.from(this.ways.values())
@@ -76,7 +77,7 @@ export class OsmPlatformTransformer {
             .flatMap(way => {
                 const platformId = way.id;
                 const nodes = way.refs?.map(nodeId => this.getNodeOrThrow(nodeId)) ?? [];
-                return nodes.map(node => [platformId, node.lat, node.lon].join(","));
+                return nodes.map(node => [platformId, node.lat, node.lon]);
             }));
 
         output = output.concat(Array.from(this.relations.values())
@@ -93,10 +94,10 @@ export class OsmPlatformTransformer {
 
                 const nodes = sections[0]?.map(nodeId => this.getNodeOrThrow(nodeId)) ?? [];
 
-                return nodes.map(node => [platformId, node.lat, node.lon].join(","));
+                return nodes.map(node => [platformId, node.lat, node.lon]);
             }));
 
-        return [header, ...output].join("\n") + "\n";
+        return [header, ...output];
 
     }
 
@@ -112,11 +113,12 @@ export class OsmPlatformTransformer {
         return node;
     }
 
-    private async zipAndWrite(data: string, dataName: string): Promise<void> {
-        const zippedData = deflate(data);
+    private async zipAndWrite(data: (string | number)[][], dataName: string): Promise<void> {
+        const csv = stringify(data);
+        const zippedData = deflate(csv);
         await Promise.all([
             writeFile(`../location-analyzer/features/data/${dataName}.csv.zlib`, zippedData),
-            writeFile(`../raw/no-git/${dataName}.csv`, data)
+            writeFile(`../raw/no-git/${dataName}.csv`, csv)
         ]);
     }
 }
