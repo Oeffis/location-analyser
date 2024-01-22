@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { IonApp, IonContent, IonHeader, IonPage, IonTitle, IonToolbar, setupIonicReact } from "@ionic/react";
 
 /* Core CSS required for Ionic components to work properly */
@@ -18,18 +19,17 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { LocationAnalyzer, POIWithDistance, Route, Stop, isRoute } from "@oeffis/location-analyzer";
+import { LocationAnalyzer, POIWithDistance, Route, Section, Stop, isRoute } from "@oeffis/location-analyzer";
+import { parse } from "csv/sync";
 import { inflate } from "pako";
 import { useEffect, useState } from "react";
 import "./theme/variables.css";
 
 setupIonicReact();
 
-type StopWithName = Stop & { name: string };
-
 const App: React.FC = () => {
   const position = usePosition();
-  const pois = useStops();
+  const pois = usePois();
   const [nearestPOI, setNearestPOI] = useState<POIWithDistance | null>(null);
   const analyzer = new LocationAnalyzer(pois);
 
@@ -37,7 +37,7 @@ const App: React.FC = () => {
     if (isRoute(poi)) {
       return (poi as Route).from + " - " + (poi as Route).to;
     }
-    return (poi as unknown as StopWithName).name;
+    return poi.name;
   }
 
   useEffect(() => {
@@ -142,35 +142,110 @@ function usePosition(): PositionResult {
   return position;
 }
 
-function useStops(): StopWithName[] {
-  const [stops, setStops] = useState<StopWithName[]>([]);
+function usePois(): (Stop | Route)[] {
+  const [stops, setStops] = useState<(Stop | Route)[]>([]);
 
   useEffect(() => {
     (async () => {
-      const response = await fetch("stopsWithNames.csv.pako");
-      const zippedCSVStopps = await response.arrayBuffer();
-      const csvStopps = inflate(zippedCSVStopps, { to: "string" });
-      const lines = csvStopps.split("\n");
-      const stopLines = lines.slice(1);
-
-      setStops(stopLines.map(lineToStop));
+      const data = await Promise.all([loadFullRoutes(), getVrrStops()]);
+      setStops(data.flat());
     })().catch(console.error);
   });
+  return stops;
+}
 
-  function lineToStop(line: string): StopWithName {
-    return {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      id: line.split(",")[0]!,
-      location: {
-        latitude: Number(line.split(",")[2]),
-        longitude: Number(line.split(",")[3])
-      },
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      name: line.split(",")[4]!
-    };
+export async function getVrrStops(): Promise<Stop[]> {
+  const platforms = await loadPlatforms();
+  const platformBounds = await loadPlatformBounds();
+
+  let platformBoundIndex = 0;
+  for (const platform of platforms) {
+    platform.boundaries = [];
+    while (platformBoundIndex < platformBounds.length && platformBounds[platformBoundIndex]?.id === platform.id) {
+      platform.boundaries.push({
+        latitude: parseFloat(platformBounds[platformBoundIndex]!.latitude as unknown as string),
+        longitude: parseFloat(platformBounds[platformBoundIndex]!.longitude as unknown as string)
+      });
+      platformBoundIndex++;
+    }
   }
 
-  return stops;
+  return platforms;
+}
+
+async function loadPlatforms(): Promise<Stop[]> {
+  const zippedCsvPlatforms = await (await fetch("./data/platforms.csv.zlib")).arrayBuffer();
+  const csvPlatforms = inflate(zippedCsvPlatforms, { to: "string" });
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  return parse(csvPlatforms, { columns: true }).toArray() as Promise<Stop[]>;
+}
+
+async function loadPlatformBounds(): Promise<{ id: string, latitude: number, longitude: number }[]> {
+  const zippedCsvPlatformBounds = await (await fetch("./data/platformBounds.csv.zlib")).arrayBuffer();
+  const csvPlatformBounds = inflate(zippedCsvPlatformBounds, { to: "string" });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  return parse(csvPlatformBounds, { columns: true }).toArray() as Promise<{ id: string, latitude: number, longitude: number }[]>;
+}
+
+async function loadFullRoutes(): Promise<Route[]> {
+  const routes = await loadRoutes();
+  const sections = await loadSections();
+  let sectionIndex = 0;
+  for (const route of routes) {
+    let consecutiveSection = 0;
+    let consecutiveSections: (Section)[] = [];
+    route.sections.push(consecutiveSections);
+
+    while (sectionIndex < sections.length && sections[sectionIndex]?.routeId === route.id) {
+      const section = sections[sectionIndex]!;
+      if (section.consecutiveSection !== consecutiveSection) {
+        consecutiveSection++;
+        consecutiveSections = [];
+        route.sections.push(consecutiveSections);
+      }
+      consecutiveSections.push(section);
+      sectionIndex++;
+    }
+  }
+  return routes;
+}
+
+async function loadSections(): Promise<(Section & { consecutiveSection: number })[]> {
+  const sectionLines = await readZippedCsv("sections");
+  return sectionLines.map(lineToSection);
+}
+
+async function loadRoutes(): Promise<Route[]> {
+  const routeLines = await readZippedCsv("routes");
+  return routeLines.map(lineToRoute);
+}
+
+async function readZippedCsv(name: string): Promise<string[]> {
+  const zippedCSV = await ((await fetch(`./data/${name}.csv.zlib`)).arrayBuffer());
+  const csv = inflate(zippedCSV, { to: "string" });
+  const lines = csv.split("\n");
+  return lines.slice(1);
+}
+
+function lineToRoute(line: string): Route {
+  return {
+    id: line.split(",")[0]!,
+    from: line.split(",")[1]!,
+    to: line.split(",")[2]!,
+    ref: line.split(",")[3]!,
+    sections: []
+  };
+}
+
+function lineToSection(line: string): Section & { consecutiveSection: number } {
+  return {
+    routeId: line.split(",")[0]!,
+    consecutiveSection: Number(line.split(",")[1]),
+    sequence: Number(line.split(",")[2]),
+    lat: Number(line.split(",")[3]),
+    lon: Number(line.split(",")[4])
+  };
 }
 
 export default App;
