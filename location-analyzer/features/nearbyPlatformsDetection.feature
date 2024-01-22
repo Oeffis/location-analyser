@@ -8,13 +8,13 @@ Feature: Nearby Platforms Detection
 
     Scenario: Detects the platform when exactly at the platform
         Given I am at 'GE Westfälische Hochschule'
-        Then the id of the nearest platform is 'de:05513:6762:0:01'
+        Then the id of the nearest platform is '379638461'
         And the distance to the nearest platform is 0.0m
 
     Scenario: Detects the platform when I am near the platform
         Given I am 10.0 m west of 'GE Westfälische Hochschule'
-        Then the distance to the nearest platform is 10.0m
-        And the id of the nearest platform is 'de:05513:6762:0:01'
+        Then the distance to the nearest platform is less than 10.0m
+        And the id of the nearest platform is '379638461'
 
     Scenario: Detects no platforms when no location was set
         Given No location was set
@@ -23,26 +23,25 @@ Feature: Nearby Platforms Detection
     Scenario: Detects multiple nearby platforms
         Given I am at "Gelsenkirchen Hbf"
         Then the ids of the nearest platforms are:
-            | de:05513:5613_Parent |
-            | de:05513:5613:2:10   |
-            | de:05513:5613:2:11   |
-            | de:05513:5613:91:6   |
-            | de:05513:5613:91:7   |
-            | de:05513:5613:98:8   |
-            | de:05513:5613:98:25  |
-            | de:05513:6687:0:02   |
-            | de:05513:6687:0:01   |
-            | de:05513:6694:0:02   |
-            | de:05513:6694:0:01   |
-            | de:05513:5204:0:01   |
-            | de:05513:5646:0:01   |
-            | de:05513:5204:0:02   |
-            | de:05513:5646:0:02   |
-            | de:05513:6684:0:02   |
-            | de:05513:6684:0:01   |
-            | de:05513:5615:0:02   |
-            | de:05513:5615:0:01   |
-            | de:05513:5034:1:01   |
+            | 230302908  |
+            | 4250656    |
+            | 4250657    |
+            | 4250655    |
+            | 293112656  |
+            | 293112785  |
+            | 293112790  |
+            | 293112817  |
+            | 293112824  |
+            | 448942759  |
+            | 448942760  |
+            | 454116273  |
+            | 454116276  |
+            | 454116278  |
+            | 3119213571 |
+            | 3826948945 |
+            | 3826948947 |
+            | 3835813457 |
+            | 3835813460 |
 
     Scenario: No stops added
         Given I do not configure any stops initially
@@ -53,10 +52,10 @@ Feature: Nearby Platforms Detection
         Given I do not configure any stops initially
         But I add the VRR stops
         And I am at 'GE Westfälische Hochschule'
-        Then the id of the nearest platform is 'de:05513:6762:0:01'
+        Then the id of the nearest platform is '379638461'
 
     Scenario: Updates status when the position changes
         Given I am 10.0 m west of 'GE Westfälische Hochschule'
-        Then the distance to the nearest platform is 10.0m
+        Then the distance to the nearest platform is less than 10.0m
         When I am at 'GE Westfälische Hochschule'
         Then the distance to the nearest platform is 0.0m

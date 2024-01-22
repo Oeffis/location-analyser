@@ -7,8 +7,8 @@ import { LocationAnalyzerWorld } from "../world.js";
 const locationMap: Record<string, GeoLocation> = {
     /* eslint-disable @typescript-eslint/naming-convention */
     "GE Westfälische Hochschule": {
-        latitude: 51.5747889,
-        longitude: 7.0311586
+        latitude: 51.5748126,
+        longitude: 7.0311269
     },
     "Gelsenkirchen Hbf": {
         latitude: 51.5049259,

@@ -145,7 +145,30 @@ export class LocationAnalyzer {
     }
 
     private stopDistance(poi: Stop, base: GeoLocation): StopDistance {
-        return { poiId: poi.id, value: getDistance(base, poi.location) };
+        return poi.boundaries.reduce((min, location, index, locations) => {
+            const next = locations[index + 1];
+            if (next === undefined) {
+                return min;
+            }
+
+            const value = getDistanceFromLine(base, {
+                lat: location.latitude,
+                lon: location.longitude
+            }, {
+                lat: next.latitude,
+                lon: next.longitude
+            }, 0.1);
+            if (value < min.value) {
+                return {
+                    poiId: poi.id,
+                    value
+                };
+            }
+            return min;
+        }, {
+            poiId: poi.id,
+            value: Number.MAX_SAFE_INTEGER
+        });
     }
 
     protected updateStatusHistory(status: Status): void {
@@ -170,7 +193,7 @@ export type POIWithDistance = TransitPOI & { distance: Distance };
 
 export interface Stop {
     id: string;
-    location: GeoLocation;
+    boundaries: Omit<GeoLocation, "altitude">[];
 }
 
 export interface GeoLocation {

@@ -11,8 +11,14 @@ Then<LocationAnalyzerWorld>("the id of the nearest platform is {string}", functi
 });
 
 Then<LocationAnalyzerWorld>("the distance to the nearest platform is {double}m", function (distance: number) {
+    // as most stops are not points, but ways, you will likely want to use the 'less than' step definition
     const stop = getFirstStop(this);
     assert.equal(stop.distance.value, distance);
+});
+
+Then<LocationAnalyzerWorld>("the distance to the nearest platform is less than {double}m", function (distance: number) {
+    const stop = getFirstStop(this);
+    assert.isOk(stop.distance.value < distance);
 });
 
 Then<LocationAnalyzerWorld>("no nearby platforms are detected", function () {

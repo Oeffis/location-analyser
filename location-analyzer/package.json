@@ -51,6 +51,7 @@
     "@vitejs/plugin-legacy": "^5.2.0",
     "chai": "^4.3.10",
     "cross-env": "^7.0.3",
+    "csv": "^6.3.6",
     "eslint": "^8.52.0",
     "eslint-plugin-import": "^2.29.0",
     "geo-position.ts": "^1.4.1",

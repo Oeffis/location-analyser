@@ -38,7 +38,11 @@ export class RouteMap {
     }
 
     protected addStop(stop: Stop): void {
-        const key = GeoMapKey.fromStop(stop).numeric();
+        stop.boundaries.forEach(location => this.addStopBoundary(location, stop));
+    }
+
+    protected addStopBoundary(location: GeoLocation, stop: Stop): void {
+        const key = GeoMapKey.fromGeoLocation(location).numeric();
         const routes = this.coordinateRouteMap.get(key) ?? [];
         routes.push(stop);
         this.coordinateRouteMap.set(key, routes);
@@ -107,8 +111,8 @@ class GeoMapKey {
         return new GeoMapKey(section.lat, section.lon);
     }
 
-    public static fromStop(stop: Stop): GeoMapKey {
-        return new GeoMapKey(stop.location.latitude, stop.location.longitude);
+    public static fromStopBoundaryPoint(boundary: Omit<GeoLocation, "altitude">): GeoMapKey {
+        return new GeoMapKey(boundary.latitude, boundary.longitude);
     }
 }
 
