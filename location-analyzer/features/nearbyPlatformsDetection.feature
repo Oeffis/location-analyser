@@ -6,9 +6,14 @@ Feature: Nearby Platforms Detection
     Background:
         Given I use a location analyzer with the VRR data
 
-    Scenario: Detects the platform when exactly at the platform
+    Scenario: Detects the platform when exactly at the bus stop
         Given I am at 'GE Westfälische Hochschule'
         Then the id of the nearest platform is '379638461'
+        And the distance to the nearest platform is 0.0m
+
+    Scenario: Detects that I am on the platform when I am on the platform
+        Given I am at 'Gelsenkirchen Hbf'
+        Then the id of the nearest platform is '230302908'
         And the distance to the nearest platform is 0.0m
 
     Scenario: Detects the platform when I am near the platform

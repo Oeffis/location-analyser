@@ -1,4 +1,4 @@
-import { getDistance } from "geolib";
+import { getDistance, isPointInPolygon } from "geolib";
 import { getDistanceFromLine } from "./getDistanceFromLine.js";
 import { RouteMap, TransitPOI, isRoute } from "./routeMap.js";
 
@@ -145,6 +145,13 @@ export class LocationAnalyzer {
     }
 
     private stopDistance(poi: Stop, base: GeoLocation): StopDistance {
+        if (isPointInPolygon(base, poi.boundaries.map(boundary => ({ latitude: boundary.latitude, longitude: boundary.longitude })))) {
+            return {
+                poiId: poi.id,
+                value: 0
+            };
+        }
+
         return poi.boundaries.reduce((min, location, index, locations) => {
             const next = locations[index + 1];
             if (next === undefined) {
