@@ -7,6 +7,7 @@ suite("extractOsmPlatforms", () => {
     const BusStopRheinelbestraße = 6107133039;
     const TramStopRheinelbestraße = 125776045;
     const TrainStationGelsenkirchenPlatforms4and5 = 4250656;
+    const TrainStationWittenPlatforms3and4WithMultipleOuterWays = 4140213;
 
     let extractor: OsmExtractor;
     let extraction: ExtractionResult;
@@ -84,7 +85,7 @@ suite("extractOsmPlatforms", () => {
     suite("transforms", () => {
         test("transforms platforms", () => {
             const transformer = new OsmPlatformTransformer(extraction);
-            const transformed = transformer.getTransformed({ platforms: [BusStopRheinelbestraße, TramStopRheinelbestraße, TrainStationGelsenkirchenPlatforms4and5] });
+            const transformed = transformer.getTransformed({ platforms: [BusStopRheinelbestraße, TramStopRheinelbestraße, TrainStationGelsenkirchenPlatforms4and5, TrainStationWittenPlatforms3and4WithMultipleOuterWays] });
 
             expect(transformed).toMatchSnapshot();
         });

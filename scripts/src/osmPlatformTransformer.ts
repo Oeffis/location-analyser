@@ -1,6 +1,7 @@
 import { writeFile } from "fs/promises";
 import { deflate } from "pako";
 import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";
+import { PlatformBoundarySorter } from "./platformBoundarySorter";
 
 export class OsmPlatformTransformer {
     private readonly relations: Map<number, Relation>;
@@ -36,24 +37,24 @@ export class OsmPlatformTransformer {
             .filter(node => node.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(node.id)))
             .map(node => {
                 const platformId = node.id;
-                const platformName = node.tags?.name;
-                return [platformId, platformName].join(",");
+                const platformName = node.tags?.description ?? node.tags?.name;
+                return [platformId, `"${platformName}"`].join(",");
             });
 
         output = output.concat(Array.from(this.ways.values())
             .filter(way => way.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(way.id)))
             .map(way => {
                 const platformId = way.id;
-                const platformName = way.tags?.name;
-                return [platformId, platformName].join(",");
+                const platformName = way.tags?.description ?? way.tags?.name;
+                return [platformId, `"${platformName}"`].join(",");
             }));
 
         output = output.concat(Array.from(this.relations.values())
             .filter(relation => relation.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(relation.id)))
             .map(relation => {
                 const platformId = relation.id;
-                const platformName = relation.tags?.name;
-                return [platformId, platformName].join(",");
+                const platformName = relation.tags?.description ?? relation.tags?.name;
+                return [platformId, `"${platformName}"`].join(",");
             }));
 
         return [header, ...output].join("\n") + "\n";
@@ -82,14 +83,16 @@ export class OsmPlatformTransformer {
             .filter(relation => relation.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(relation.id)))
             .flatMap(relation => {
                 const platformId = relation.id;
-                const filteredWays = relation.members
-                    .filter(member => member.role === "outer")
-                    .map(member => this.getWayOrThrow(member.ref));
 
-                if (filteredWays.length > 1) {
-                    throw new Error(`Relation ${relation.tags?.name} has more than one outer way`);
+                const sections = new PlatformBoundarySorter(relation, this.ways)
+                    .getConsecutiveSections();
+
+                if (sections.length === 0 || sections.length > 1) {
+                    throw new Error(`Relation ${relation.id} has ${sections.length} sections`);
                 }
-                const nodes = filteredWays[0]?.refs?.map(nodeId => this.getNodeOrThrow(nodeId)) ?? [];
+
+                const nodes = sections[0]?.map(nodeId => this.getNodeOrThrow(nodeId)) ?? [];
+
                 return nodes.map(node => [platformId, node.lat, node.lon].join(","));
             }));
 
