@@ -20,7 +20,7 @@ import "@ionic/react/css/text-transformation.css";
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
 import { LocationAnalyzer, POIWithDistance, Route, Section, Stop, isRoute } from "@oeffis/location-analyzer";
-import { parse } from "csv/sync";
+import { parse } from "csv-parse/browser/esm/sync";
 import { inflate } from "pako";
 import { useEffect, useState } from "react";
 import "./theme/variables.css";
@@ -174,18 +174,23 @@ export async function getVrrStops(): Promise<Stop[]> {
 }
 
 async function loadPlatforms(): Promise<Stop[]> {
-  const zippedCsvPlatforms = await (await fetch("./data/platforms.csv.zlib")).arrayBuffer();
+  const response = await fetch("./platforms.csv.zlib");
+  if (!response.ok) throw new Error(`Could not load platforms.csv.zlib`);
+  const zippedCsvPlatforms = await response.arrayBuffer();
   const csvPlatforms = inflate(zippedCsvPlatforms, { to: "string" });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  return parse(csvPlatforms, { columns: true }).toArray() as Promise<Stop[]>;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return parse(csvPlatforms, { columns: true });
 }
 
 async function loadPlatformBounds(): Promise<{ id: string, latitude: number, longitude: number }[]> {
-  const zippedCsvPlatformBounds = await (await fetch("./data/platformBounds.csv.zlib")).arrayBuffer();
+  const response = await fetch("./platformBounds.csv.zlib");
+  if (!response.ok) throw new Error(`Could not load platformBounds.csv.zlib`);
+  const zippedCsvPlatformBounds = await response.arrayBuffer();
   const csvPlatformBounds = inflate(zippedCsvPlatformBounds, { to: "string" });
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-  return parse(csvPlatformBounds, { columns: true }).toArray() as Promise<{ id: string, latitude: number, longitude: number }[]>;
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return parse(csvPlatformBounds, { columns: true });
 }
 
 async function loadFullRoutes(): Promise<Route[]> {
@@ -222,7 +227,9 @@ async function loadRoutes(): Promise<Route[]> {
 }
 
 async function readZippedCsv(name: string): Promise<string[]> {
-  const zippedCSV = await ((await fetch(`./data/${name}.csv.zlib`)).arrayBuffer());
+  const response = await fetch(`./${name}.csv.zlib`);
+  if (!response.ok) throw new Error(`Could not load ${name}.csv.zlib`);
+  const zippedCSV = await response.arrayBuffer();
   const csv = inflate(zippedCSV, { to: "string" });
   const lines = csv.split("\n");
   return lines.slice(1);
