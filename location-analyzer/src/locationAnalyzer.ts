@@ -200,6 +200,7 @@ export type POIWithDistance = TransitPOI & { distance: Distance };
 
 export interface Stop {
     id: string;
+    name: string;
     boundaries: Omit<GeoLocation, "altitude">[];
 }
 
