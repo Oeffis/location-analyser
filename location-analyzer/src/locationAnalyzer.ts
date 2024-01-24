@@ -52,26 +52,28 @@ export class LocationAnalyzer {
         }
         const lastPoisWithDistance = this.distanceCalculator.getSortedPOIsAt(lastLocation);
 
-        return pois.filter(poi => {
-            const lastPoi = lastPoisWithDistance.find(lastPoi => lastPoi.poi.id === poi.poi.id);
-            if (lastPoi === undefined || currentLocation === undefined) {
-                return true;
+        return pois.filter(isStopOrRightDirection);
+
+        function isStopOrRightDirection(poi: POIWithDistance): boolean {
+            if (isStopDistance(poi)) return true;
+            if (currentLocation === undefined) return true;
+            if (lastLocation === undefined) return true;
+
+            const lastPoi = lastPoisWithDistance
+                .find(lastPoi => lastPoi.poi.id === poi.poi.id) as RouteWithDistance | undefined;
+            if (lastPoi === undefined) return true;
+
+            const atSameSection = poi.distance.section === lastPoi.distance.section;
+            if (atSameSection) {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                const sectionEnd = poi.poi.sections[poi.distance.consecutiveSection]![poi.distance.section]!;
+                const lastDistanceToSectionEnd = getDistance(lastLocation, sectionEnd);
+                const currentDistanceToSectionEnd = getDistance(currentLocation, sectionEnd);
+                return currentDistanceToSectionEnd < lastDistanceToSectionEnd;
             }
 
-            if (isRouteDistance(poi) && isRouteDistance(lastPoi)) {
-                const atSameSection = poi.distance.section === lastPoi.distance.section;
-                if (atSameSection) {
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    const sectionEnd = poi.poi.sections[poi.distance.consecutiveSection]![poi.distance.section]!;
-                    const lastDistanceToSectionEnd = getDistance(lastLocation, sectionEnd);
-                    const currentDistanceToSectionEnd = getDistance(currentLocation, sectionEnd);
-                    return currentDistanceToSectionEnd < lastDistanceToSectionEnd;
-                } else {
-                    return poi.distance.section > lastPoi.distance.section;
-                }
-            }
-            return true;
-        });
+            return poi.distance.section > lastPoi.distance.section;
+        }
     }
 
     protected updateStatusHistory(status: Status): void {
@@ -89,6 +91,10 @@ export class LocationAnalyzer {
 
 export function isRouteDistance(poi: POIWithDistance): poi is RouteWithDistance {
     return isRoute(poi.poi);
+}
+
+export function isStopDistance(poi: POIWithDistance): poi is StopWithDistance {
+    return !isRoute(poi.poi);
 }
 
 export interface Status {
