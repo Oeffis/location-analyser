@@ -1,6 +1,7 @@
 import { GeoLocation } from "../../../src/locationAnalyzer.js";
 
 export const locationMap: Record<string, { location: GeoLocation; id?: string; }> = {
+    /* eslint-disable @typescript-eslint/naming-convention */
     "GE Westfälische Hochschule": {
         location: {
             latitude: 51.5748126,
@@ -20,4 +21,5 @@ export const locationMap: Record<string, { location: GeoLocation; id?: string; }
             longitude: 7.10283
         }
     }
+    /* eslint-disable @typescript-eslint/naming-convention */
 };
