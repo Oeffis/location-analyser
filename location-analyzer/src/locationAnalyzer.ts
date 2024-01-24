@@ -41,16 +41,7 @@ export class LocationAnalyzer {
 
         const rightDirectionPois = this.filterWrongDirectionPois(poisWithDistance);
         const sortedPOIs = rightDirectionPois
-            .map(poi => {
-                const lastOccurrence = this.statusHistory[this.statusHistory.length - 1]?.pois.find(lastPoi => lastPoi.poi.id === poi.poi.id);
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-                const age = lastOccurrence ? (lastOccurrence as any).age + 1 : 1;
-                return {
-                    ...poi,
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    age
-                };
-            })
+            .map(poi => this.withAge(poi))
             .sort((a, b) => {
                 const diff = b.age - a.age;
                 if (diff !== 0) return diff;
@@ -63,6 +54,15 @@ export class LocationAnalyzer {
         };
         this.updateStatusHistory(status);
         return status;
+    }
+
+    private withAge(poi: POIWithDistance): POIWithDistanceAndAge {
+        const lastOccurrence = this.statusHistory[this.statusHistory.length - 1]?.pois.find(lastPoi => lastPoi.poi.id === poi.poi.id);
+        const age = lastOccurrence ? lastOccurrence.age + 1 : 1;
+        return {
+            ...poi,
+            age
+        };
     }
 
     protected filterWrongDirectionPois(pois: POIWithDistance[]): POIWithDistance[] {
@@ -127,7 +127,7 @@ export interface NoResultStatus {
 
 export interface ResultStatus {
     location: GeoLocation;
-    pois: POIWithDistance[]
+    pois: POIWithDistanceAndAge[]
 }
 
 interface SectionDistance {
@@ -145,6 +145,7 @@ interface StopDistance {
 export type DistanceTypeOf<T extends TransitPOI> = T extends Route ? SectionDistance : StopDistance;
 
 export type POIWithDistance = StopWithDistance | RouteWithDistance;
+export type POIWithDistanceAndAge = POIWithDistance & { age: number };
 
 export interface StopWithDistance {
     poi: Stop;
