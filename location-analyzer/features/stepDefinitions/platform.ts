@@ -1,7 +1,7 @@
 import { Then } from "@cucumber/cucumber";
 import { assert } from "chai";
-import { StopWithDistance } from "../../src/locationAnalyzer.js";
 import { LocationAnalyzerWorld } from "../world.js";
+import { getFirstStop } from "./helpers/getFirstStop.js";
 
 interface RawDataTable { rawTable: string[][] }
 
@@ -33,10 +33,3 @@ Then<LocationAnalyzerWorld>("the ids of the nearest platforms are:", function (d
     const expectedIds = dataTable.rawTable.map(row => row[0]);
     assert.deepEqual(ids, expectedIds);
 });
-
-function getFirstStop(world: LocationAnalyzerWorld): StopWithDistance {
-    const status = world.locationAnalyzer.getStatus();
-    const stop = status.pois[0] as StopWithDistance;
-    assert.isDefined(stop, "No stop found");
-    return stop;
-}
