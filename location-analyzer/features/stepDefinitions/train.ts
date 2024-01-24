@@ -2,8 +2,8 @@ import { Given, Then, When } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
 import { assert } from "chai";
-import { LocationAnalyzer, Stop } from "../../src";
-import { Route, getVrrRoutes } from "../getVrrRoutes.js";
+import { LocationAnalyzer, Route, RouteWithDistance, Stop } from "../../src";
+import { Route as VrrRoute, getVrrRoutes } from "../getVrrRoutes.js";
 import { getVrrStops } from "../getVrrStops.js";
 
 Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direction north of Veltins Arena", async function () {
@@ -11,7 +11,7 @@ Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direct
     const TRAM_302_BUER_TO_LANGENDREER = "3720902989";
 
     // 302 serves this line twice in this direction, with different start locations. As this currently cannot be detected, we filter out these to the others will be detected.
-    const hasNoDuplicateAtThisLocation = (route: Route | Stop): boolean => ![
+    const hasNoDuplicateAtThisLocation = (route: VrrRoute | Stop): boolean => ![
         TRAM_302_LANGENDREER_TO_BUER,
         TRAM_302_BUER_TO_LANGENDREER
     ].includes(route.id);
@@ -92,7 +92,7 @@ async function loadAllRoutesTo(locationAnalyzer: LocationAnalyzer): Promise<void
 
 function getFirstRoute(world: LocationAnalyzerWorld): Route {
     const status = world.locationAnalyzer.getStatus();
-    const route = status.pois[0] as unknown as Route;
+    const route = status.pois[0] as RouteWithDistance;
     assert.exists(route, "There is no route to check against.");
-    return route;
+    return route.poi;
 }

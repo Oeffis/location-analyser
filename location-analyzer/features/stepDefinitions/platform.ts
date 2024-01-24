@@ -7,7 +7,7 @@ interface RawDataTable { rawTable: string[][] }
 
 Then<LocationAnalyzerWorld>("the id of the nearest platform is {string}", function (id: string) {
     const stop = getFirstStop(this);
-    assert.equal(stop.id, id);
+    assert.equal(stop.poi.id, id);
 });
 
 Then<LocationAnalyzerWorld>("the distance to the nearest platform is {double}m", function (distance: number) {
@@ -29,7 +29,7 @@ Then<LocationAnalyzerWorld>("no nearby platforms are detected", function () {
 Then<LocationAnalyzerWorld>("the ids of the nearest platforms are:", function (dataTable: RawDataTable) {
     const status = this.locationAnalyzer.getStatus();
     const relevantSlice = status.pois.slice(0, dataTable.rawTable.length);
-    const ids = relevantSlice.map(stop => stop.id);
+    const ids = relevantSlice.map(stop => stop.poi.id);
     const expectedIds = dataTable.rawTable.map(row => row[0]);
     assert.deepEqual(ids, expectedIds);
 });

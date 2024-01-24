@@ -48,16 +48,16 @@ export class LocationAnalyzer {
         const lastPoisWithDistance = this.getSortedPOIsAt(lastLocation);
 
         const rightDirectionPois = poisWithDistance.filter(poi => {
-            const lastPoi = lastPoisWithDistance.find(lastPoi => lastPoi.id === poi.id);
+            const lastPoi = lastPoisWithDistance.find(lastPoi => lastPoi.poi.id === poi.poi.id);
             if (lastPoi === undefined) {
                 return true;
             }
 
-            if (isRoute(poi) && isRoute(lastPoi)) {
+            if (isRouteDistance(poi) && isRouteDistance(lastPoi)) {
                 const atSameSection = poi.distance.section === lastPoi.distance.section;
                 if (atSameSection) {
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    const sectionEnd = poi.sections[poi.distance.consecutiveSection]![poi.distance.section]!;
+                    const sectionEnd = poi.poi.sections[poi.distance.consecutiveSection]![poi.distance.section]!;
                     const lastDistanceToSectionEnd = getDistance(lastLocation, sectionEnd);
                     const currentDistanceToSectionEnd = getDistance(currentLocation, sectionEnd);
                     return currentDistanceToSectionEnd < lastDistanceToSectionEnd;
@@ -84,12 +84,12 @@ export class LocationAnalyzer {
     protected withDistance<T extends Stop | Route>(base: GeoLocation, poi: T): StopWithDistance | RouteWithDistance {
         if (isRoute(poi)) {
             return {
-                ...poi,
+                poi,
                 distance: this.routeDistance(poi, base)
             };
         }
         return {
-            ...poi,
+            poi,
             distance: this.stopDistance(poi, base)
         };
     }
@@ -178,6 +178,10 @@ export class LocationAnalyzer {
     }
 }
 
+export function isRouteDistance(poi: POIWithDistance): poi is RouteWithDistance {
+    return isRoute(poi.poi);
+}
+
 export interface Status {
     pois: POIWithDistance[]
 }
@@ -198,11 +202,13 @@ export type DistanceTypeOf<T extends TransitPOI> = T extends Route ? SectionDist
 
 export type POIWithDistance = StopWithDistance | RouteWithDistance;
 
-export interface StopWithDistance extends Stop {
+export interface StopWithDistance {
+    poi: Stop;
     distance: StopDistance;
 }
 
-export interface RouteWithDistance extends Route {
+export interface RouteWithDistance {
+    poi: Route;
     distance: SectionDistance;
 }
 

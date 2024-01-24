@@ -3,7 +3,7 @@ import { assert } from "chai";
 import { parse, stringify } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
-import { GeoLocation, Route, Stop } from "../../src/locationAnalyzer.js";
+import { GeoLocation, RouteWithDistance, StopWithDistance } from "../../src/locationAnalyzer.js";
 import { LocationAnalyzerWorld } from "../world.js";
 
 const locationMap: Record<string, GeoLocation> = {
@@ -46,7 +46,7 @@ Then<LocationAnalyzerWorld>("the data output over time is correct", function () 
     const results = this.statusList.map((status, index) => ({
         latitude: this.track[index]?.latitude,
         longitude: this.track[index]?.longitude,
-        result: (status.pois[0] as Stop).name || (status.pois[0] as Route).from + " - " + (status.pois[0] as Route).to
+        result: (status.pois[0] as StopWithDistance).poi.name || (status.pois[0] as RouteWithDistance).poi.from + " - " + (status.pois[0] as RouteWithDistance).poi.to
     }));
 
     writeFileSync("features/data/testTrackResults.csv", stringify(results, { header: true }));
