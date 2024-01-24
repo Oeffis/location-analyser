@@ -2,7 +2,7 @@ import { Given, Then, When } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
 import { assert } from "chai";
-import { LocationAnalyzer, Route, RouteWithDistance, Stop } from "../../src";
+import { LocationAnalyzer, Route, RouteWithDistance, Stop, isRouteDistance } from "../../src/locationAnalyzer.js";
 import { Route as VrrRoute, getVrrRoutes } from "../getVrrRoutes.js";
 import { getVrrStops } from "../getVrrStops.js";
 
@@ -29,6 +29,11 @@ Given<LocationAnalyzerWorld>("the RB43 travels on a single track between Buer SÃ
 
 Given<LocationAnalyzerWorld>("the S9 to Wuppertal leaves the area between Gladback and Essen", async function () {
     await loadAllRoutesTo(this.locationAnalyzer);
+});
+
+Given<LocationAnalyzerWorld>("the RE2 stops at platform 7 of Gelsenkirchen Hbf", async function () {
+    const data = await Promise.all([getVrrStops(), getVrrRoutes()]);
+    this.locationAnalyzer.updatePOIs(data.flat());
 });
 
 When<LocationAnalyzerWorld>("I am on the 302 to Buer Rathaus North of Veltins Arena", function () {
@@ -71,10 +76,32 @@ When<LocationAnalyzerWorld>("I am on the S9 to Wuppertal between Essen and Wuppe
     });
 });
 
+When<LocationAnalyzerWorld>("I am on the RE2 at platform 7 of Gelsenkirchen Hbf", function () {
+    this.locationAnalyzer.updateLocation({
+        latitude: 51.5048071,
+        longitude: 7.1028557
+    });
+});
+
 Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", function (line: string, destination: string) {
     const route = getFirstRoute(this);
     assert.strictEqual(route.ref, line);
     assert.strictEqual(route.to, destination);
+});
+
+Then<LocationAnalyzerWorld>("one of the detected trains is the {string} to {string}", function (line: string, destination: string) {
+    const exists = this.locationAnalyzer.getStatus().pois.some((poi) => {
+        if (isRouteDistance(poi)) {
+            return poi.poi.ref === line && poi.poi.to === destination;
+        }
+        return false;
+    });
+    assert.isTrue(exists, `The train ${line} to ${destination} is not detected, but should be. Options were ` + this.locationAnalyzer.getStatus().pois.map((poi) => {
+        if (isRouteDistance(poi)) {
+            return `${poi.poi.ref} to ${poi.poi.to}`;
+        }
+        return poi.poi.name;
+    }).join(", "));
 });
 
 Then<LocationAnalyzerWorld>("the train {string} to {string} is not detected", function (line: string, destination: string) {

@@ -1,4 +1,4 @@
-import { Given, Then } from "@cucumber/cucumber";
+import { Given, Then, When } from "@cucumber/cucumber";
 import { assert } from "chai";
 import { parse, stringify } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";

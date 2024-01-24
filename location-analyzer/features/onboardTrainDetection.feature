@@ -25,10 +25,10 @@ Feature: Onboard Train Detection
         When I am on the S9 to Wuppertal between Essen and Wuppertal
         Then the detected train is the "S9" to "Wuppertal Hbf"
 
-    @ignore
     Scenario: Detects the train I am currently on when it is at a station
-        When I am on a train at a station
-        Then the train I am on is detected
+        Given the RE2 stops at platform 7 of Gelsenkirchen Hbf
+        When I am on the RE2 at platform 7 of Gelsenkirchen Hbf
+        Then one of the detected trains is the "RE2" to "Osnabrück"
 
     @ignore
     Scenario: Detects the platform I am at when I am next to a train on a platform
