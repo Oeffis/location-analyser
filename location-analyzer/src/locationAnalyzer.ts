@@ -49,9 +49,9 @@ export class LocationAnalyzer {
                 };
             })
             .sort((a, b) => {
-                const diff = a.distance.value - b.distance.value;
+                const diff = a.startOfMostRecentOccurrence - b.startOfMostRecentOccurrence;
                 if (diff !== 0) return diff;
-                return a.startOfMostRecentOccurrence - b.startOfMostRecentOccurrence;
+                return a.distance.value - b.distance.value;
             });
 
         const status = {
