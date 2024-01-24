@@ -37,19 +37,24 @@ export class LocationAnalyzer {
         if (currentLocation === undefined) { return { pois: [] }; }
 
         const poisWithDistance = this.distanceCalculator.getSortedPOIsAt(currentLocation);
+        const rightDirectionPois = this.filterWrongDirectionPois(poisWithDistance);
 
+        const status = { pois: rightDirectionPois };
+        this.updateStatusHistory(status);
+        return status;
+    }
+
+    protected filterWrongDirectionPois(pois: POIWithDistance[]): POIWithDistance[] {
+        const currentLocation = this.locationHistory[this.locationHistory.length - 1];
         const lastLocation = this.locationHistory[this.locationHistory.length - 2];
         if (lastLocation === undefined) {
-            const status = { pois: poisWithDistance };
-            this.updateStatusHistory(status);
-            return status;
+            return pois;
         }
-
         const lastPoisWithDistance = this.distanceCalculator.getSortedPOIsAt(lastLocation);
 
-        const rightDirectionPois = poisWithDistance.filter(poi => {
+        return pois.filter(poi => {
             const lastPoi = lastPoisWithDistance.find(lastPoi => lastPoi.poi.id === poi.poi.id);
-            if (lastPoi === undefined) {
+            if (lastPoi === undefined || currentLocation === undefined) {
                 return true;
             }
 
@@ -67,10 +72,6 @@ export class LocationAnalyzer {
             }
             return true;
         });
-
-        const status = { pois: rightDirectionPois };
-        this.updateStatusHistory(status);
-        return status;
     }
 
     protected updateStatusHistory(status: Status): void {
