@@ -1,13 +1,13 @@
-import { getDistance, isPointInPolygon } from "geolib";
-import { getDistanceFromLine } from "./getDistanceFromLine.js";
-import { RouteMap, TransitPOI, isRoute } from "./routeMap.js";
+import { getDistance } from "geolib";
+import { DistanceCalculator } from "./distanceCalculator.js";
+import { TransitPOI, isRoute } from "./routeMap.js";
 
 export class LocationAnalyzer {
     protected status?: Status;
-    protected routeMap = new RouteMap();
     protected readonly bufferLimit = 10;
     protected statusHistory: Status[] = [];
     protected locationHistory: GeoLocation[] = [];
+    protected readonly distanceCalculator = new DistanceCalculator();
 
     public constructor(
         pois: TransitPOI[] = [],
@@ -36,7 +36,7 @@ export class LocationAnalyzer {
         const currentLocation = this.locationHistory[this.locationHistory.length - 1];
         if (currentLocation === undefined) { return { pois: [] }; }
 
-        const poisWithDistance = this.getSortedPOIsAt(currentLocation);
+        const poisWithDistance = this.distanceCalculator.getSortedPOIsAt(currentLocation);
 
         const lastLocation = this.locationHistory[this.locationHistory.length - 2];
         if (lastLocation === undefined) {
@@ -45,7 +45,7 @@ export class LocationAnalyzer {
             return status;
         }
 
-        const lastPoisWithDistance = this.getSortedPOIsAt(lastLocation);
+        const lastPoisWithDistance = this.distanceCalculator.getSortedPOIsAt(lastLocation);
 
         const rightDirectionPois = poisWithDistance.filter(poi => {
             const lastPoi = lastPoisWithDistance.find(lastPoi => lastPoi.poi.id === poi.poi.id);
@@ -73,98 +73,6 @@ export class LocationAnalyzer {
         return status;
     }
 
-    public getSortedPOIsAt(currentLocation: GeoLocation): POIWithDistance[] {
-        const nearbyPOIs = this.routeMap.getPOIsAtLocation(currentLocation);
-        const poisWithDistance = nearbyPOIs
-            .map(poi => this.withDistance(currentLocation, poi))
-            .sort((a, b) => a.distance.value - b.distance.value);
-        return poisWithDistance;
-    }
-
-    protected withDistance<T extends Stop | Route>(base: GeoLocation, poi: T): StopWithDistance | RouteWithDistance {
-        if (isRoute(poi)) {
-            return {
-                poi,
-                distance: this.routeDistance(poi, base)
-            };
-        }
-        return {
-            poi,
-            distance: this.stopDistance(poi, base)
-        };
-    }
-
-    private routeDistance(poi: Route, base: GeoLocation): SectionDistance {
-        const distance = poi.sections.reduce((min, consecutiveSection, consecutiveSectionIndex) =>
-            consecutiveSection.reduce((min, section, index, sections) => {
-                const previous = sections[index - 1];
-                if (previous === undefined) {
-                    return min;
-                }
-                const value = getDistanceFromLine(base, {
-                    lat: section.lat,
-                    lon: section.lon
-                }, {
-                    lat: previous.lat,
-                    lon: previous.lon
-                }, 0.1);
-
-                if (value < min.value) {
-                    return {
-                        consecutiveSection: consecutiveSectionIndex,
-                        section: index,
-                        value
-                    };
-                }
-                return min;
-            }, min), {
-            consecutiveSection: -1,
-            section: -1,
-            value: Number.MAX_SAFE_INTEGER
-        });
-
-        return {
-            poiId: poi.id,
-            section: distance.section,
-            consecutiveSection: distance.consecutiveSection,
-            value: distance.value
-        };
-    }
-
-    private stopDistance(poi: Stop, base: GeoLocation): StopDistance {
-        if (isPointInPolygon(base, poi.boundaries.map(boundary => ({ latitude: boundary.latitude, longitude: boundary.longitude })))) {
-            return {
-                poiId: poi.id,
-                value: 0
-            };
-        }
-
-        return poi.boundaries.reduce((min, location, index, locations) => {
-            const next = locations[index + 1];
-            if (next === undefined) {
-                return min;
-            }
-
-            const value = getDistanceFromLine(base, {
-                lat: location.latitude,
-                lon: location.longitude
-            }, {
-                lat: next.latitude,
-                lon: next.longitude
-            }, 0.1);
-            if (value < min.value) {
-                return {
-                    poiId: poi.id,
-                    value
-                };
-            }
-            return min;
-        }, {
-            poiId: poi.id,
-            value: Number.MAX_SAFE_INTEGER
-        });
-    }
-
     protected updateStatusHistory(status: Status): void {
         this.statusHistory.push(status);
         if (this.statusHistory.length > this.bufferLimit) {
@@ -173,7 +81,7 @@ export class LocationAnalyzer {
     }
 
     public updatePOIs(pois: TransitPOI[]): void {
-        this.routeMap.update(pois);
+        this.distanceCalculator.updatePOIs(pois);
         this.invalidateStatus();
     }
 }
