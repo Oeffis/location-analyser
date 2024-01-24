@@ -36,12 +36,28 @@ export class LocationAnalyzer {
         const currentLocation = this.locationHistory[this.locationHistory.length - 1];
         if (currentLocation === undefined) { return { pois: [] }; }
 
-        const poisWithDistance = this.distanceCalculator.getSortedPOIsAt(currentLocation);
+        const poisWithDistance = this.distanceCalculator.getPOIsAt(currentLocation)
+            .filter(poi => !currentLocation.accuracy || poi.distance.value < currentLocation.accuracy * 2);
+
         const rightDirectionPois = this.filterWrongDirectionPois(poisWithDistance);
+        const sortedPOIs = rightDirectionPois
+            .map(poi => {
+                let startOfMostRecentOccurence = this.statusHistory.findLastIndex(status => !status.pois.some(oldPoi => oldPoi.poi.id === poi.poi.id));
+                // startOfMostRecentOccurence = startOfMostRecentOccurence === -1 ? 0 : startOfMostRecentOccurence;
+                return {
+                    ...poi,
+                    startOfMostRecentOccurence: startOfMostRecentOccurence
+                };
+            })
+            .sort((a, b) => {
+                const diff = a.distance.value - b.distance.value;
+                if (diff !== 0) return diff;
+                return a.startOfMostRecentOccurence - b.startOfMostRecentOccurence;
+            });
 
         const status = {
             location: currentLocation,
-            pois: rightDirectionPois
+            pois: sortedPOIs
         };
         this.updateStatusHistory(status);
         return status;
@@ -54,7 +70,7 @@ export class LocationAnalyzer {
             return pois;
         }
         let lastPoisWithDistance: POIWithDistance[] = [];
-        lastPoisWithDistance = this.distanceCalculator.getSortedPOIsAt(lastLocation);
+        lastPoisWithDistance = this.distanceCalculator.getPOIsAt(lastLocation);
 
         return pois.filter(isStopOrRightDirection);
 
@@ -110,10 +126,6 @@ export interface NoResultStatus {
 export interface ResultStatus {
     location: GeoLocation;
     pois: POIWithDistance[]
-}
-
-function isResultStatus(status: Status): status is ResultStatus {
-    return Object.hasOwn(status, "location");
 }
 
 interface SectionDistance {

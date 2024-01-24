@@ -5,12 +5,10 @@ import { RouteMap, TransitPOI, isRoute } from "./routeMap.js";
 export class DistanceCalculator {
     protected routeMap = new RouteMap();
 
-    public getSortedPOIsAt(currentLocation: GeoLocation): POIWithDistance[] {
+    public getPOIsAt(currentLocation: GeoLocation): POIWithDistance[] {
         const nearbyPOIs = this.routeMap.getPOIsAtLocation(currentLocation);
         return nearbyPOIs
-            .map(poi => this.withDistance(currentLocation, poi))
-            .filter(poi => !currentLocation.accuracy || poi.distance.value < currentLocation.accuracy * 2)
-            .sort((a, b) => a.distance.value - b.distance.value);
+            .map(poi => this.withDistance(currentLocation, poi));
     }
 
     protected withDistance<T extends Stop | Route>(base: GeoLocation, poi: T): StopWithDistance | RouteWithDistance {
