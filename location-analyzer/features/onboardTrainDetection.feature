@@ -36,12 +36,6 @@ Feature: Onboard Train Detection
         Then the detected platform is "Platform 7 of Gelsenkirchen Hbf"
 
     @ignore
-    Scenario: Detects the train I am currently on when another train is passing
-        When I am on a train
-        And another train is passing in the opposite direction
-        Then the train I am on is detected
-
-    @ignore
     Scenario: Detects I am on a train when location glitched
         When my previous location was nowhere near
         And I am on a train
