@@ -39,7 +39,10 @@ export class LocationAnalyzer {
         const poisWithDistance = this.distanceCalculator.getSortedPOIsAt(currentLocation);
         const rightDirectionPois = this.filterWrongDirectionPois(poisWithDistance);
 
-        const status = { pois: rightDirectionPois };
+        const status = {
+            location: currentLocation,
+            pois: rightDirectionPois
+        };
         this.updateStatusHistory(status);
         return status;
     }
@@ -50,7 +53,13 @@ export class LocationAnalyzer {
         if (lastLocation === undefined) {
             return pois;
         }
-        const lastPoisWithDistance = this.distanceCalculator.getSortedPOIsAt(lastLocation);
+        let lastPoisWithDistance: POIWithDistance[] = [];
+        const lastStatus = this.statusHistory[this.statusHistory.length - 1];
+        if (lastStatus && isResultStatus(lastStatus) && lastStatus.location === lastLocation) {
+            lastPoisWithDistance = lastStatus.pois;
+        } else {
+            lastPoisWithDistance = this.distanceCalculator.getSortedPOIsAt(lastLocation);
+        }
 
         return pois.filter(isStopOrRightDirection);
 
@@ -97,8 +106,19 @@ export function isStopDistance(poi: POIWithDistance): poi is StopWithDistance {
     return !isRoute(poi.poi);
 }
 
-export interface Status {
+export type Status = NoResultStatus | ResultStatus;
+
+export interface NoResultStatus {
+    pois: [];
+}
+
+export interface ResultStatus {
+    location: GeoLocation;
     pois: POIWithDistance[]
+}
+
+function isResultStatus(status: Status): status is ResultStatus {
+    return Object.hasOwn(status, "location");
 }
 
 interface SectionDistance {
