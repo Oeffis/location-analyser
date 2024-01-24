@@ -54,12 +54,7 @@ export class LocationAnalyzer {
             return pois;
         }
         let lastPoisWithDistance: POIWithDistance[] = [];
-        const lastStatus = this.statusHistory[this.statusHistory.length - 1];
-        if (lastStatus && isResultStatus(lastStatus) && lastStatus.location === lastLocation) {
-            lastPoisWithDistance = lastStatus.pois;
-        } else {
-            lastPoisWithDistance = this.distanceCalculator.getSortedPOIsAt(lastLocation);
-        }
+        lastPoisWithDistance = this.distanceCalculator.getSortedPOIsAt(lastLocation);
 
         return pois.filter(isStopOrRightDirection);
 

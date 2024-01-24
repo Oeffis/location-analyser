@@ -35,6 +35,13 @@ Feature: Onboard Train Detection
         When I am on "Platform 7 of Gelsenkirchen Hbf"
         Then the detected platform is "Platform 7 of Gelsenkirchen Hbf"
 
+    @focus
+    Scenario: Detects the actual vehicle I'm on, when the alterantives are gone
+        Given the Lines 399 and 342 split at the start of the Neidenburger Straße
+        And I traveled from the Westfälische Hochschule to the Neidenburger Straße
+        When I travel further along the route of the 399
+        Then the detected train is the "399" to "Gelsenkirchen Buer Rathaus"
+
     @ignore
     Scenario: Detects I am on a train when location glitched
         When my previous location was nowhere near

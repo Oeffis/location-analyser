@@ -31,6 +31,30 @@ Given<LocationAnalyzerWorld>("the S9 to Wuppertal leaves the area between Gladba
     await loadAllRoutesTo(this.locationAnalyzer);
 });
 
+Given<LocationAnalyzerWorld>("the Lines 399 and 342 split at the start of the Neidenburger Straße", async function () {
+    await loadAllRoutesTo(this.locationAnalyzer);
+});
+
+Given<LocationAnalyzerWorld>("I traveled from the Westfälische Hochschule to the Neidenburger Straße", function () {
+    const points = [
+        [51.57478, 7.03116, 4.0],
+        [51.57467, 7.03106, 4.0],
+        [51.57406, 7.03208, 4.0],
+        [51.57278, 7.03335, 4.0]
+    ];
+
+    for (const point of points) {
+        this.locationAnalyzer.updateLocation({
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            latitude: point[0]!,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            longitude: point[1]!,
+            accuracy: point[2]
+        });
+        this.locationAnalyzer.getStatus();
+    }
+});
+
 Given<LocationAnalyzerWorld>("the RE2 stops at platform 7 of Gelsenkirchen Hbf", async function () {
     const data = await Promise.all([getVrrStops(), getVrrRoutes()]);
     this.locationAnalyzer.updatePOIs(data.flat());
@@ -80,6 +104,22 @@ When<LocationAnalyzerWorld>("I am on the RE2 at platform 7 of Gelsenkirchen Hbf"
     this.locationAnalyzer.updateLocation({
         latitude: 51.5048071,
         longitude: 7.1028557
+    });
+});
+
+When<LocationAnalyzerWorld>("I travel further along the route of the 399", function () {
+    this.locationAnalyzer.updateLocation({
+        latitude: 51.57285,
+        longitude: 7.03356,
+        accuracy: 4.0
+    });
+
+    this.locationAnalyzer.getStatus();
+
+    this.locationAnalyzer.updateLocation({
+        latitude: 51.57287,
+        longitude: 7.03364,
+        accuracy: 4.0
     });
 });
 
