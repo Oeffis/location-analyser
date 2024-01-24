@@ -120,3 +120,8 @@ export function isRoute(poi: TransitPOI): poi is Route {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     return (poi as Route).sections !== undefined;
 }
+
+export function isStop(poi: TransitPOI): poi is Stop {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    return (poi as Stop).boundaries !== undefined;
+}

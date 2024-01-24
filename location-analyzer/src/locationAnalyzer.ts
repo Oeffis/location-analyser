@@ -2,20 +2,6 @@ import { getDistance, isPointInPolygon } from "geolib";
 import { getDistanceFromLine } from "./getDistanceFromLine.js";
 import { RouteMap, TransitPOI, isRoute } from "./routeMap.js";
 
-interface SectionDistance {
-    poiId: string;
-    consecutiveSection: number;
-    section: number;
-    value: number;
-}
-
-interface StopDistance {
-    poiId: string;
-    value: number;
-}
-
-type Distance = SectionDistance | StopDistance;
-
 export class LocationAnalyzer {
     protected status?: Status;
     protected routeMap = new RouteMap();
@@ -68,15 +54,15 @@ export class LocationAnalyzer {
             }
 
             if (isRoute(poi) && isRoute(lastPoi)) {
-                const atSameSection = (poi.distance as SectionDistance).section === (lastPoi.distance as SectionDistance).section;
+                const atSameSection = poi.distance.section === lastPoi.distance.section;
                 if (atSameSection) {
                     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                    const sectionEnd = poi.sections[(poi.distance as SectionDistance).consecutiveSection]![(poi.distance as SectionDistance).section]!;
+                    const sectionEnd = poi.sections[poi.distance.consecutiveSection]![poi.distance.section]!;
                     const lastDistanceToSectionEnd = getDistance(lastLocation, sectionEnd);
                     const currentDistanceToSectionEnd = getDistance(currentLocation, sectionEnd);
                     return currentDistanceToSectionEnd < lastDistanceToSectionEnd;
                 } else {
-                    return (poi.distance as SectionDistance).section > (lastPoi.distance as SectionDistance).section;
+                    return poi.distance.section > lastPoi.distance.section;
                 }
             }
             return true;
@@ -95,16 +81,17 @@ export class LocationAnalyzer {
         return poisWithDistance;
     }
 
-    protected withDistance<T extends Stop | Route>(base: GeoLocation, poi: T): T & { distance: Distance } {
-        const distance = this.distance(base, poi);
-        return { ...poi, distance };
-    }
-
-    protected distance<T extends Stop | Route>(base: GeoLocation, poi: T): Distance {
+    protected withDistance<T extends Stop | Route>(base: GeoLocation, poi: T): StopWithDistance | RouteWithDistance {
         if (isRoute(poi)) {
-            return this.routeDistance(poi, base);
+            return {
+                ...poi,
+                distance: this.routeDistance(poi, base)
+            };
         }
-        return this.stopDistance(poi, base);
+        return {
+            ...poi,
+            distance: this.stopDistance(poi, base)
+        };
     }
 
     private routeDistance(poi: Route, base: GeoLocation): SectionDistance {
@@ -195,8 +182,29 @@ export interface Status {
     pois: POIWithDistance[]
 }
 
-export type WithDistance<T> = T & { distance: Distance };
-export type POIWithDistance = TransitPOI & { distance: Distance };
+interface SectionDistance {
+    poiId: string;
+    consecutiveSection: number;
+    section: number;
+    value: number;
+}
+
+interface StopDistance {
+    poiId: string;
+    value: number;
+}
+
+export type DistanceTypeOf<T extends TransitPOI> = T extends Route ? SectionDistance : StopDistance;
+
+export type POIWithDistance = StopWithDistance | RouteWithDistance;
+
+export interface StopWithDistance extends Stop {
+    distance: StopDistance;
+}
+
+export interface RouteWithDistance extends Route {
+    distance: SectionDistance;
+}
 
 export interface Stop {
     id: string;
