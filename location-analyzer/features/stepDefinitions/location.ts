@@ -36,6 +36,16 @@ When<LocationAnalyzerWorld>("I am on {string}", function (route: string) {
     this.locationAnalyzer.updateLocation(routeCoords!);
 });
 
+When<LocationAnalyzerWorld>("I am at the stop {string} with an accuracy of {int} meters", function (stopName: string, accuracy: number) {
+    const coords = locationMap[stopName]?.location;
+    assert.ok(coords, `Stop ${stopName} not found`);
+    this.locationAnalyzer.updateLocation({
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        ...coords!,
+        accuracy
+    });
+});
+
 Then<LocationAnalyzerWorld>("the detected platform is {string}", function (platform: string) {
     const stop = getFirstStop(this);
     const locationId = locationMap[platform]?.id;
@@ -54,6 +64,11 @@ Then<LocationAnalyzerWorld>("the data output over time is correct", function () 
     writeFileSync("features/data/testTrackResults.csv", stringify(results, { header: true }));
     // const expectedResults = parse("features/data/testTrackResults.csv", { columns: true }) as { latitude: string, longitude: string, result: string }[];
     // assert.deepEqual(results, expectedResults);
+});
+
+Then<LocationAnalyzerWorld>("there are {int} pois left", function (amount: number) {
+    const status = this.locationAnalyzer.getStatus();
+    assert.equal(status.pois.length, amount, `Expected ${amount} pois, but got ${status.pois.length}`);
 });
 
 type Direction = "north" | "east" | "south" | "west";

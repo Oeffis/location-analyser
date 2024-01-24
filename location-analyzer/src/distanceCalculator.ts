@@ -7,10 +7,10 @@ export class DistanceCalculator {
 
     public getSortedPOIsAt(currentLocation: GeoLocation): POIWithDistance[] {
         const nearbyPOIs = this.routeMap.getPOIsAtLocation(currentLocation);
-        const poisWithDistance = nearbyPOIs
+        return nearbyPOIs
             .map(poi => this.withDistance(currentLocation, poi))
+            .filter(poi => !currentLocation.accuracy || poi.distance.value < currentLocation.accuracy)
             .sort((a, b) => a.distance.value - b.distance.value);
-        return poisWithDistance;
     }
 
     protected withDistance<T extends Stop | Route>(base: GeoLocation, poi: T): StopWithDistance | RouteWithDistance {
