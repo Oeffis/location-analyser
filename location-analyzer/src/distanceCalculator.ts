@@ -9,7 +9,7 @@ export class DistanceCalculator {
         const nearbyPOIs = this.routeMap.getPOIsAtLocation(currentLocation);
         return nearbyPOIs
             .map(poi => this.withDistance(currentLocation, poi))
-            .filter(poi => !currentLocation.accuracy || poi.distance.value < currentLocation.accuracy)
+            .filter(poi => !currentLocation.accuracy || poi.distance.value < currentLocation.accuracy * 2)
             .sort((a, b) => a.distance.value - b.distance.value);
     }
 

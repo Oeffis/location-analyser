@@ -3,7 +3,7 @@ import { assert } from "chai";
 import { parse, stringify } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
-import { GeoLocation, RouteWithDistance, StopWithDistance } from "../../src/locationAnalyzer.js";
+import { GeoLocation, Status, isStopDistance } from "../../src/locationAnalyzer.js";
 import { LocationAnalyzerWorld } from "../world.js";
 import { getFirstStop } from "./helpers/getFirstStop.js";
 import { locationMap } from "./helpers/locationMap.js";
@@ -55,10 +55,21 @@ Then<LocationAnalyzerWorld>("the detected platform is {string}", function (platf
 Then<LocationAnalyzerWorld>("the data output over time is correct", function () {
     assert.equal(this.statusList.length, this.track.length);
 
+    function makeOutput(status: Status): string {
+        const stop = status.pois[0];
+        if (!stop) return "none";
+
+        if (isStopDistance(stop)) {
+            return `stop ${stop.poi.name || "without name"}`;
+        }
+
+        return `route ${stop.poi.ref} from ${stop.poi.from} to ${stop.poi.to}`;
+    }
+
     const results = this.statusList.map((status, index) => ({
         latitude: this.track[index]?.latitude,
         longitude: this.track[index]?.longitude,
-        result: (status.pois[0] as StopWithDistance).poi.name || (status.pois[0] as RouteWithDistance).poi.from + " - " + (status.pois[0] as RouteWithDistance).poi.to
+        result: makeOutput(status)
     }));
 
     writeFileSync("features/data/testTrackResults.csv", stringify(results, { header: true }));
