@@ -6,7 +6,7 @@ const defaultArgs = [
     `--import features/stepDefinitions/**/*.ts`,
     `--import features/world.ts`,
     `--tags "not @ignore"`
-]
+];
 
 export default [
     ...defaultArgs,
