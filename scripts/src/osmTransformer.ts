@@ -1,3 +1,4 @@
+import { stringify } from "csv/sync";
 import { writeFile } from "fs/promises";
 import { deflate } from "pako";
 import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";
@@ -25,14 +26,14 @@ export class OsmTransformer {
         ]);
     }
 
-    public getTransformed(filter?: RouteFilter): { routes: string; sections: string; } {
+    public getTransformed(filter?: RouteFilter): { routes: (string | number)[][]; sections: (string | number)[][]; } {
         const routes = this.getTransformedRoutes(filter);
         const sections = this.getTransformedSections(filter);
         return { routes, sections };
     }
 
-    public getTransformedRoutes(filter?: RouteFilter): string {
-        const header = "id,from,to,ref";
+    public getTransformedRoutes(filter?: RouteFilter): (string | number)[][] {
+        const header = ["id", "from", "to", "ref"];
         const output = Array.from(this.relations.values())
             .filter(relation => !filter?.routes || filter.routes.includes(relation.id))
             .map(relation => {
@@ -40,23 +41,23 @@ export class OsmTransformer {
                 const routeRef = relation.tags?.ref ?? "";
                 const routeFrom = relation.tags?.from ?? "";
                 const routeTo = relation.tags?.to ?? "";
-                return [routeId, routeFrom, routeTo, routeRef].join(",");
+                return [routeId, routeFrom, routeTo, routeRef];
             });
-        return [header, ...output].join("\n") + "\n";
+        return [header, ...output];
     }
 
-    private getTransformedSections(filter?: RouteFilter): string {
-        const header = "route_id,consecutive_section,sequence_number,lat,lon";
+    private getTransformedSections(filter?: RouteFilter): (string | number)[][] {
+        const header = ["routeId", "consecutiveSection", "section", "lat", "lon"];
         const relationsAsArray = Array.from(this.relations.values())
             .filter(relation => !filter?.routes || filter.routes.includes(relation.id));
         const sections = relationsAsArray.flatMap(relation => new RouteSorter(relation, this.ways)
             .getConsecutiveSections()
             .flatMap((cSection, cSectionIndex) => cSection
                 .map(nodeId => this.getNodeOrThrow(nodeId))
-                .map((node, sectionIndex) => [relation.id, cSectionIndex, sectionIndex, node.lat, node.lon].join(","))
+                .map((node, sectionIndex) => [relation.id, cSectionIndex, sectionIndex, node.lat, node.lon])
             )
         );
-        return [header, ...sections].join("\n") + "\n";
+        return [header, ...sections];
     }
 
     private getNodeOrThrow(nodeId: number): Node {
@@ -65,11 +66,12 @@ export class OsmTransformer {
         return node;
     }
 
-    private async zipAndWrite(data: string, dataName: string): Promise<void> {
-        const zippedData = deflate(data);
+    private async zipAndWrite(data: (string | number)[][], dataName: string): Promise<void> {
+        const csv = stringify(data);
+        const zippedData = deflate(csv);
         await Promise.all([
             writeFile(`../location-analyzer/features/data/${dataName}.csv.zlib`, zippedData),
-            writeFile(`../raw/no-git/${dataName}.csv`, data)
+            writeFile(`../raw/no-git/${dataName}.csv`, csv)
         ]);
     }
 }
