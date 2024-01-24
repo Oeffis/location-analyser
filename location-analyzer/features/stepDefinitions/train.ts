@@ -123,6 +123,43 @@ When<LocationAnalyzerWorld>("I travel further along the route of the 399", funct
     });
 });
 
+When<LocationAnalyzerWorld>("I travel more than ten seconds further along the route of the 399", function () {
+    const points = [
+        [51.573638, 7.037283, 4.866884505530313],
+        [51.573656, 7.037390, 4.915587848736882],
+        [51.573696, 7.037560, 4.92499846848061],
+        [51.573691, 7.037711, 5.062668916908621],
+        [51.573752, 7.037899, 4.828387381542608],
+        [51.573798, 7.038074, 4.843902676245343],
+        [51.573852, 7.038265, 4.881109981948338],
+        [51.573920, 7.038500, 4.912195635265518],
+        [51.573993, 7.038732, 4.899349945251498],
+        [51.574058, 7.038974, 4.982346926747279],
+        [51.574114, 7.039121, 4.917431233131508],
+        [51.574153, 7.039264, 4.905058764644977],
+        [51.574192, 7.039401, 4.935274033095836],
+        [51.574235, 7.039540, 4.945231253944659],
+        [51.574285, 7.039675, 4.984764417087805],
+        [51.574342, 7.039819, 4.942540894018994],
+        [51.574384, 7.039967, 4.969750869962438],
+        [51.574452, 7.040080, 4.923017614056573],
+        [51.574526, 7.040214, 4.893513102294873],
+        [51.574581, 7.040360, 4.927861019613368],
+        [51.574630, 7.040500, 4.92289906128469]
+    ];
+
+    for (const point of points) {
+        this.locationAnalyzer.updateLocation({
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            latitude: point[0]!,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            longitude: point[1]!,
+            accuracy: point[2]
+        });
+        this.locationAnalyzer.getStatus();
+    }
+});
+
 Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", function (line: string, destination: string) {
     const route = getFirstRoute(this);
     assert.strictEqual(route.ref, line);
