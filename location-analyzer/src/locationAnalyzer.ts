@@ -42,14 +42,17 @@ export class LocationAnalyzer {
         const rightDirectionPois = this.filterWrongDirectionPois(poisWithDistance);
         const sortedPOIs = rightDirectionPois
             .map(poi => {
-                const startOfMostRecentOccurrence = this.statusHistory.findLastIndex(status => !status.pois.some(oldPoi => oldPoi.poi.id === poi.poi.id));
+                const lastOccurrence = this.statusHistory[this.statusHistory.length - 1]?.pois.find(lastPoi => lastPoi.poi.id === poi.poi.id);
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+                const age = lastOccurrence ? (lastOccurrence as any).age + 1 : 1;
                 return {
                     ...poi,
-                    startOfMostRecentOccurrence: startOfMostRecentOccurrence
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    age
                 };
             })
             .sort((a, b) => {
-                const diff = a.startOfMostRecentOccurrence - b.startOfMostRecentOccurrence;
+                const diff = b.age - a.age;
                 if (diff !== 0) return diff;
                 return a.distance.value - b.distance.value;
             });
