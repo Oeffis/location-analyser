@@ -1,6 +1,7 @@
 {
     "cSpell.words": [
-        "pako"
+        "pako",
+        "pois"
     ],
     "eslint.workingDirectories": [
         "location-analyzer"
