@@ -2,7 +2,8 @@ import { Given, Then, When } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
 import { assert } from "chai";
-import { LocationAnalyzer, Route, RouteWithDistance, Stop, isRouteDistance } from "../../src/locationAnalyzer.js";
+import { RouteWithDistance } from "../../src/distanceCalculator";
+import { LocationAnalyzer, Route, Stop, isRouteDistance } from "../../src/locationAnalyzer.js";
 import { Route as VrrRoute, getVrrRoutes } from "../getVrrRoutes.js";
 import { getVrrStops } from "../getVrrStops.js";
 

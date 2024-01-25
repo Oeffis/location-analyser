@@ -1,10 +1,21 @@
 import { GeoLocation, Route, Section, Stop } from "./locationAnalyzer";
 
 export type TransitPOI = Route | Stop;
-export interface POIReference {
-    poi: TransitPOI;
-    start: GeoMapKey;
-    end: GeoMapKey;
+
+export type POIReference = RouteReference | StopReference;
+
+export interface StopReference {
+    poi: Stop;
+    start: GeoLocation;
+    end?: GeoLocation;
+}
+
+export interface RouteReference {
+    poi: Route;
+    consecutiveSection: number;
+    section: number;
+    start: GeoLocation;
+    end: GeoLocation;
 }
 
 export class RouteMap {
@@ -51,40 +62,40 @@ export class RouteMap {
         const routes = this.coordinateMap.get(key) ?? [];
         routes.push({
             poi: route,
-            start: GeoMapKey.fromSection(section),
-            end: GeoMapKey.fromSection(next)
-        });
+            consecutiveSection: section.consecutiveSection,
+            section: section.sequence,
+            start: {
+                latitude: section.lat,
+                longitude: section.lon
+            },
+            end: {
+                latitude: next.lat,
+                longitude: next.lon
+            }
+        } as RouteReference);
         this.coordinateMap.set(key, routes);
     }
 
     protected addStop(stop: Stop): void {
-        if (stop.boundaries.length === 1) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            this.addStopBoundary(stop.boundaries[0]!, stop.boundaries[0]!, stop);
-            return;
-        }
         stop.boundaries.forEach((section, index, others) => {
             const next = others[index + 1];
-            if (next === undefined) {
-                return;
-            }
             this.addStopBoundary(section, next, stop);
         });
     }
 
-    protected addStopBoundary(location: GeoLocation, next: GeoLocation, stop: Stop): void {
+    protected addStopBoundary(location: GeoLocation, next: GeoLocation | undefined, stop: Stop): void {
         const key = GeoMapKey.fromGeoLocation(location).numeric();
         const routes = this.coordinateMap.get(key) ?? [];
         routes.push({
             poi: stop,
-            start: GeoMapKey.fromStopBoundaryPoint(location),
-            end: GeoMapKey.fromStopBoundaryPoint(next)
+            start: location,
+            end: next
         });
         this.coordinateMap.set(key, routes);
     }
 
-    public getPOIsAtLocation(location: GeoLocation): TransitPOI[] {
-        const routeSet = new Set<TransitPOI>();
+    public getPOIsAtLocation(location: GeoLocation): POIReference[] {
+        const references = [];
         const offsetMatrix: [number, number][] = [
             [-1, -1], [-1, 0], [-1, 1],
             [0, -1], [0, 0], [-1, 1],
@@ -98,10 +109,9 @@ export class RouteMap {
                 .withLonOffset(lonOffset)
                 .numeric();
             const routes = this.coordinateMap.get(key) ?? [];
-            routes.forEach(route => routeSet.add(route.poi));
+            references.push(...routes);
         }
-
-        return Array.from(routeSet);
+        return references;
     }
 }
 
@@ -149,6 +159,10 @@ class GeoMapKey {
     public static fromStopBoundaryPoint(boundary: GeoLocation): GeoMapKey {
         return new GeoMapKey(boundary.latitude, boundary.longitude);
     }
+}
+
+export function isRouteRef(ref: POIReference): ref is RouteReference {
+    return isRoute(ref.poi);
 }
 
 export function isRoute(poi: TransitPOI): poi is Route {

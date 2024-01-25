@@ -1,5 +1,5 @@
 import { getDistance } from "geolib";
-import { DistanceCalculator } from "./distanceCalculator.js";
+import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistance } from "./distanceCalculator.js";
 import { TransitPOI, isRoute } from "./routeMap.js";
 
 export class LocationAnalyzer {
@@ -37,7 +37,8 @@ export class LocationAnalyzer {
         if (location === undefined) { return { guesses: [], nearbyPlatforms: [] }; }
 
         const poisWithDistance = this.distanceCalculator.getPOIsAt(location);
-        const rightDirectionPois = this.filterWrongDirectionPois(poisWithDistance);
+        const closestOfEachPoi = this.keepClosestOfEachPoi(poisWithDistance);
+        const rightDirectionPois = this.filterWrongDirectionPois(closestOfEachPoi);
         const nearbyPlatforms = rightDirectionPois.filter(isStopDistance).sort((a, b) => a.distance.value - b.distance.value);
         const closePoints = rightDirectionPois.filter(poi => poi.distance.value < location.accuracy);
 
@@ -66,7 +67,7 @@ export class LocationAnalyzer {
         }
         let lastPoisWithDistance: POIWithDistance[] = [];
         lastPoisWithDistance = this.distanceCalculator.getPOIsAt(lastLocation);
-
+        lastPoisWithDistance = this.keepClosestOfEachPoi(lastPoisWithDistance);
         return pois.filter(isStopOrRightDirection);
 
         function isStopOrRightDirection(poi: POIWithDistance): boolean {
@@ -89,6 +90,21 @@ export class LocationAnalyzer {
 
             return poi.distance.section > lastPoi.distance.section;
         }
+    }
+
+    protected keepClosestOfEachPoi(pois: POIWithDistance[]): POIWithDistance[] {
+        const closestOfEachPoi = new Map<string, POIWithDistance>();
+        pois.forEach(poi => {
+            const currentClosest = closestOfEachPoi.get(poi.poi.id);
+            if (currentClosest === undefined) {
+                closestOfEachPoi.set(poi.poi.id, poi);
+                return;
+            }
+            if (poi.distance.value < currentClosest.distance.value) {
+                closestOfEachPoi.set(poi.poi.id, poi);
+            }
+        });
+        return Array.from(closestOfEachPoi.values());
     }
 
     protected updateStatusHistory(status: Status): void {
@@ -122,32 +138,6 @@ export interface ResultStatus {
     nearbyPlatforms: StopWithDistance[];
 }
 
-interface SectionDistance {
-    poiId: string;
-    consecutiveSection: number;
-    section: number;
-    value: number;
-}
-
-interface StopDistance {
-    poiId: string;
-    value: number;
-}
-
-export type DistanceTypeOf<T extends TransitPOI> = T extends Route ? SectionDistance : StopDistance;
-
-export type POIWithDistance = StopWithDistance | RouteWithDistance;
-
-export interface StopWithDistance {
-    poi: Stop;
-    distance: StopDistance;
-}
-
-export interface RouteWithDistance {
-    poi: Route;
-    distance: SectionDistance;
-}
-
 export interface Stop {
     id: string;
     name: string;
@@ -174,6 +164,7 @@ export interface Route {
 
 export interface Section {
     routeId: string;
+    consecutiveSection: number;
     sequence: number;
     lat: number;
     lon: number;

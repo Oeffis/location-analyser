@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { StopWithDistance } from "../../../src/locationAnalyzer.js";
+import { StopWithDistance } from "../../../src/distanceCalculator.js";
 import { LocationAnalyzerWorld } from "../../world.js";
 
 export function getNearestPlatform(world: LocationAnalyzerWorld): StopWithDistance {

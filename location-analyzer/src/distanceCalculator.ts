@@ -1,6 +1,7 @@
-import { getDistanceFromLine, isPointInPolygon } from "geolib";
+import { getDistance, isPointInPolygon, isPointNearLine } from "geolib";
+import { getDistanceFromLine } from "./getDistanceFromLine.js";
 import { GeoPosition, Route, Stop } from "./locationAnalyzer.js";
-import { RouteMap, TransitPOI, isRoute } from "./routeMap.js";
+import { POIReference, RouteMap, RouteReference, StopReference, TransitPOI, isRouteRef } from "./routeMap.js";
 
 export class DistanceCalculator {
     protected routeMap = new RouteMap();
@@ -10,88 +11,63 @@ export class DistanceCalculator {
         return nearbyPOIs.map(poi => this.withDistance(currentLocation, poi));
     }
 
-    protected withDistance<T extends Stop | Route>(base: GeoPosition, poi: T): StopWithDistance | RouteWithDistance {
-        if (isRoute(poi)) {
+    protected withDistance(base: GeoPosition, reference: POIReference): POIWithDistance {
+        if (isRouteRef(reference)) {
             return {
-                poi,
-                distance: this.routeDistance(poi, base)
-            };
-        }
-        return {
-            poi,
-            distance: this.stopDistance(poi, base)
-        };
-    }
-
-    private routeDistance(poi: Route, base: GeoPosition): SectionDistance {
-        const distance = poi.sections.reduce((min, consecutiveSection, consecutiveSectionIndex) =>
-            consecutiveSection.reduce((min, section, index, sections) => {
-                const previous = sections[index - 1];
-                if (previous === undefined) {
-                    return min;
-                }
-                const value = getDistanceFromLine(base, {
-                    lat: section.lat,
-                    lon: section.lon
-                }, {
-                    lat: previous.lat,
-                    lon: previous.lon
-                }, 0.1);
-
-                if (value < min.value) {
-                    return {
-                        consecutiveSection: consecutiveSectionIndex,
-                        section: index,
-                        value
-                    };
-                }
-                return min;
-            }, min), {
-            consecutiveSection: -1,
-            section: -1,
-            value: Number.MAX_SAFE_INTEGER
-        });
-
-        return {
-            poiId: poi.id,
-            section: distance.section,
-            consecutiveSection: distance.consecutiveSection,
-            value: distance.value
-        };
-    }
-
-    private stopDistance(poi: Stop, base: GeoPosition): StopDistance {
-        if (isPointInPolygon(base, poi.boundaries.map(boundary => ({ latitude: boundary.latitude, longitude: boundary.longitude })))) {
-            return {
-                poiId: poi.id,
-                value: 0
+                poi: reference.poi,
+                distance: this.routeDistance(reference, base)
             };
         }
 
-        return poi.boundaries.reduce((min, location, index, locations) => {
-            const next = locations[index + 1];
-            if (next === undefined) {
-                return min;
-            }
+        return {
+            poi: reference.poi,
+            distance: this.stopDistance(reference, base)
+        };
+    }
 
-            const value = getDistanceFromLine(base, {
-                lat: location.latitude,
-                lon: location.longitude
-            }, {
-                lat: next.latitude,
-                lon: next.longitude
-            }, 0.1);
-            if (value < min.value) {
-                return {
-                    poiId: poi.id,
-                    value
-                };
-            }
-            return min;
+    private routeDistance(reference: RouteReference, base: GeoPosition): SectionDistance {
+        const start = reference.start;
+        const end = reference.end;
+        const distance = getDistanceFromLine(base, {
+            lat: start.latitude,
+            lon: start.longitude
         }, {
-            poiId: poi.id,
-            value: Number.MAX_SAFE_INTEGER
-        });
+            lat: end.latitude,
+            lon: end.longitude
+        }, 0.1);
+
+        return {
+            poiId: reference.poi.id,
+            consecutiveSection: reference.consecutiveSection,
+            section: reference.section,
+            value: distance
+        };
+    }
+
+    private stopDistance(stopReference: StopReference, base: GeoPosition): StopDistance {
+        let distance: number;
+        if (isPointInPolygon(base, stopReference.poi.boundaries)) {
+            distance = 0;
+        } else if (stopReference.end === undefined) {
+            distance = getDistance(base, stopReference.start, 0.1);
+        } else {
+            distance = getDistanceFromLine(base, {
+                lat: stopReference.start.latitude,
+                lon: stopReference.start.longitude
+            }, {
+                lat: stopReference.end.latitude,
+                lon: stopReference.end.longitude
+            }, 0.1);
+        }
+
+        if (isNaN(distance)) {
+            throw new Error("distance is NaN");
+        }
+
+        return {
+            poiId: stopReference.poi.id,
+            value: distance
+        };
     }
 
     public updatePOIs(pois: TransitPOI[]): void {

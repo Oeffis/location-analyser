@@ -12,8 +12,8 @@ Feature: Nearby Platforms Detection
         And the distance to the nearest platform is 0.0m
 
     Scenario: Detects that I am on the platform when I am on the platform
-        Given I am at 'Gelsenkirchen Hbf'
-        Then the id of the nearest platform is '230302908'
+        Given I am at 'Platform 7 of Gelsenkirchen Hbf'
+        Then the id of the nearest platform is '4250657'
         And the distance to the nearest platform is 0.0m
 
     Scenario: Detects the platform when I am near the platform
@@ -26,27 +26,27 @@ Feature: Nearby Platforms Detection
         Then no nearby platforms are detected
 
     Scenario: Detects multiple nearby platforms
-        Given I am at "Gelsenkirchen Hbf"
+        Given I am at "Platform 7 of Gelsenkirchen Hbf"
         Then the ids of the nearest platforms are:
-            | 230302908  |
-            | 4250656    |
             | 4250657    |
             | 4250655    |
-            | 293112656  |
-            | 293112785  |
-            | 293112790  |
+            | 4250656    |
+            | 230302908  |
+            | 3826948947 |
+            | 3826948945 |
             | 293112817  |
             | 293112824  |
+            | 3119213571 |
+            | 454116273  |
+            | 454116278  |
+            | 454116276  |
+            | 3835813460 |
+            | 3835813457 |
+            | 293112785  |
+            | 293112790  |
             | 448942759  |
             | 448942760  |
-            | 454116273  |
-            | 454116276  |
-            | 454116278  |
-            | 3119213571 |
-            | 3826948945 |
-            | 3826948947 |
-            | 3835813457 |
-            | 3835813460 |
+            | 293112656  |
 
     Scenario: No stops added
         Given I do not configure any stops initially

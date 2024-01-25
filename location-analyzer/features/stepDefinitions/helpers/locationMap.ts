@@ -9,13 +9,6 @@ export const locationMap: Record<string, { location: GeoPosition; id?: string; }
             accuracy: 4
         }
     },
-    "Gelsenkirchen Hbf": {
-        location: {
-            latitude: 51.5049259,
-            longitude: 7.1022064,
-            accuracy: 4
-        }
-    },
     "Platform 7 of Gelsenkirchen Hbf": {
         id: "4250657",
         location: {
