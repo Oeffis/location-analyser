@@ -42,7 +42,7 @@ export class LocationAnalyzer {
         const closePoints = rightDirectionPois.filter(poi => poi.distance.value < location.accuracy);
 
         const last = this.statusHistory[this.statusHistory.length - 1];
-        const reSeenPoints = rightDirectionPois.filter(poi => last?.guesses.find(lastPoi => lastPoi.poi.id === poi.poi.id));
+        const reSeenPoints = rightDirectionPois.filter(poi => last?.guesses.find(lastGuess => lastGuess.poi.id === poi.poi.id));
 
         let guesses = closePoints;
         if (reSeenPoints.length > 0) {
