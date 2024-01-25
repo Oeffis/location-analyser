@@ -7,8 +7,7 @@ export class DistanceCalculator {
 
     public getPOIsAt(currentLocation: GeoPosition): POIWithDistance[] {
         const nearbyPOIs = this.routeMap.getPOIsAtLocation(currentLocation);
-        return nearbyPOIs
-            .map(poi => this.withDistance(currentLocation, poi));
+        return nearbyPOIs.map(poi => this.withDistance(currentLocation, poi));
     }
 
     protected withDistance<T extends Stop | Route>(base: GeoPosition, poi: T): StopWithDistance | RouteWithDistance {
