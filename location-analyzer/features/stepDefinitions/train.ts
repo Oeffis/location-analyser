@@ -44,12 +44,13 @@ Given<LocationAnalyzerWorld>("I traveled from the Westfälische Hochschule to th
     ];
 
     for (const point of points) {
-        this.locationAnalyzer.updateLocation({
+        this.locationAnalyzer.updatePosition({
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             latitude: point[0]!,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             longitude: point[1]!,
-            accuracy: point[2]
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            accuracy: point[2]!
         });
         this.locationAnalyzer.getStatus();
     }
@@ -61,54 +62,61 @@ Given<LocationAnalyzerWorld>("the RE2 stops at platform 7 of Gelsenkirchen Hbf",
 });
 
 When<LocationAnalyzerWorld>("I am on the 302 to Buer Rathaus North of Veltins Arena", function () {
-    this.locationAnalyzer.updateLocation({
+    this.locationAnalyzer.updatePosition({
         latitude: 51.55826,
-        longitude: 7.06077
+        longitude: 7.06077,
+        accuracy: 4.0
     });
 });
 
 When<LocationAnalyzerWorld>("I am on the RB43 between Buer Süd and Zoo", function () {
-    this.locationAnalyzer.updateLocation({
+    this.locationAnalyzer.updatePosition({
         latitude: 51.5393,
-        longitude: 7.07059
+        longitude: 7.07059,
+        accuracy: 4.0
     });
 });
 
 When<LocationAnalyzerWorld>("I am traveling in the direction of Zoo", function () {
-    this.locationAnalyzer.updateLocation({
+    this.locationAnalyzer.updatePosition({
         latitude: 51.53879,
-        longitude: 7.07231
+        longitude: 7.07231,
+        accuracy: 4.0
     });
 });
 
 When<LocationAnalyzerWorld>("I move along the area edge between Gladback and Essen", function () {
-    this.locationAnalyzer.updateLocation({
+    this.locationAnalyzer.updatePosition({
         latitude: 51.5857704,
-        longitude: 7.000457
+        longitude: 7.000457,
+        accuracy: 4.0
     });
 
-    this.locationAnalyzer.updateLocation({
+    this.locationAnalyzer.updatePosition({
         latitude: 51.4500238,
-        longitude: 7.0000507
+        longitude: 7.0000507,
+        accuracy: 4.0
     });
 });
 
 When<LocationAnalyzerWorld>("I am on the S9 to Wuppertal between Essen and Wuppertal", function () {
-    this.locationAnalyzer.updateLocation({
+    this.locationAnalyzer.updatePosition({
         latitude: 51.34504,
-        longitude: 7.10074
+        longitude: 7.10074,
+        accuracy: 4.0
     });
 });
 
 When<LocationAnalyzerWorld>("I am on the RE2 at platform 7 of Gelsenkirchen Hbf", function () {
-    this.locationAnalyzer.updateLocation({
+    this.locationAnalyzer.updatePosition({
         latitude: 51.5048071,
-        longitude: 7.1028557
+        longitude: 7.1028557,
+        accuracy: 4.0
     });
 });
 
 When<LocationAnalyzerWorld>("I travel further along the route of the 399", function () {
-    this.locationAnalyzer.updateLocation({
+    this.locationAnalyzer.updatePosition({
         latitude: 51.57285,
         longitude: 7.03356,
         accuracy: 4.0
@@ -116,7 +124,7 @@ When<LocationAnalyzerWorld>("I travel further along the route of the 399", funct
 
     this.locationAnalyzer.getStatus();
 
-    this.locationAnalyzer.updateLocation({
+    this.locationAnalyzer.updatePosition({
         latitude: 51.57287,
         longitude: 7.03364,
         accuracy: 4.0
@@ -149,12 +157,13 @@ When<LocationAnalyzerWorld>("I travel more than ten seconds further along the ro
     ];
 
     for (const point of points) {
-        this.locationAnalyzer.updateLocation({
+        this.locationAnalyzer.updatePosition({
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             latitude: point[0]!,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             longitude: point[1]!,
-            accuracy: point[2]
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            accuracy: point[2]!
         });
         this.locationAnalyzer.getStatus();
     }
@@ -167,13 +176,13 @@ Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", fu
 });
 
 Then<LocationAnalyzerWorld>("one of the detected trains is the {string} to {string}", function (line: string, destination: string) {
-    const exists = this.locationAnalyzer.getStatus().pois.some((poi) => {
+    const exists = this.locationAnalyzer.getStatus().guesses.some((poi) => {
         if (isRouteDistance(poi)) {
             return poi.poi.ref === line && poi.poi.to === destination;
         }
         return false;
     });
-    assert.isTrue(exists, `The train ${line} to ${destination} is not detected, but should be. Options were ` + this.locationAnalyzer.getStatus().pois.map((poi) => {
+    assert.isTrue(exists, `The train ${line} to ${destination} is not detected, but should be. Options were ` + this.locationAnalyzer.getStatus().guesses.map((poi) => {
         if (isRouteDistance(poi)) {
             return `${poi.poi.ref} to ${poi.poi.to}`;
         }
@@ -196,7 +205,7 @@ async function loadAllRoutesTo(locationAnalyzer: LocationAnalyzer): Promise<void
 
 function getFirstRoute(world: LocationAnalyzerWorld): Route {
     const status = world.locationAnalyzer.getStatus();
-    const route = status.pois[0] as RouteWithDistance;
+    const route = status.guesses[0] as RouteWithDistance;
     assert.exists(route, "There is no route to check against.");
     return route.poi;
 }

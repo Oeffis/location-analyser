@@ -2,9 +2,10 @@ import { assert } from "chai";
 import { StopWithDistance } from "../../../src/locationAnalyzer.js";
 import { LocationAnalyzerWorld } from "../../world.js";
 
-export function getFirstStop(world: LocationAnalyzerWorld): StopWithDistance {
+export function getNearestPlatform(world: LocationAnalyzerWorld): StopWithDistance {
     const status = world.locationAnalyzer.getStatus();
-    const stop = status.pois[0] as StopWithDistance;
+    const stop = status.nearbyPlatforms[0];
     assert.isDefined(stop, "No stop found");
-    return stop;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return stop!;
 }

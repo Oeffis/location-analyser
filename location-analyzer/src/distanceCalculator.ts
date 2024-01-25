@@ -1,17 +1,17 @@
 import { getDistanceFromLine, isPointInPolygon } from "geolib";
-import { GeoLocation, Route, Stop } from "./locationAnalyzer.js";
+import { GeoPosition, Route, Stop } from "./locationAnalyzer.js";
 import { RouteMap, TransitPOI, isRoute } from "./routeMap.js";
 
 export class DistanceCalculator {
     protected routeMap = new RouteMap();
 
-    public getPOIsAt(currentLocation: GeoLocation): POIWithDistance[] {
+    public getPOIsAt(currentLocation: GeoPosition): POIWithDistance[] {
         const nearbyPOIs = this.routeMap.getPOIsAtLocation(currentLocation);
         return nearbyPOIs
             .map(poi => this.withDistance(currentLocation, poi));
     }
 
-    protected withDistance<T extends Stop | Route>(base: GeoLocation, poi: T): StopWithDistance | RouteWithDistance {
+    protected withDistance<T extends Stop | Route>(base: GeoPosition, poi: T): StopWithDistance | RouteWithDistance {
         if (isRoute(poi)) {
             return {
                 poi,
@@ -24,7 +24,7 @@ export class DistanceCalculator {
         };
     }
 
-    private routeDistance(poi: Route, base: GeoLocation): SectionDistance {
+    private routeDistance(poi: Route, base: GeoPosition): SectionDistance {
         const distance = poi.sections.reduce((min, consecutiveSection, consecutiveSectionIndex) =>
             consecutiveSection.reduce((min, section, index, sections) => {
                 const previous = sections[index - 1];
@@ -61,7 +61,7 @@ export class DistanceCalculator {
         };
     }
 
-    private stopDistance(poi: Stop, base: GeoLocation): StopDistance {
+    private stopDistance(poi: Stop, base: GeoPosition): StopDistance {
         if (isPointInPolygon(base, poi.boundaries.map(boundary => ({ latitude: boundary.latitude, longitude: boundary.longitude })))) {
             return {
                 poiId: poi.id,

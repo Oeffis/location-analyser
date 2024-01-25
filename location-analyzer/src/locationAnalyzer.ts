@@ -6,7 +6,7 @@ export class LocationAnalyzer {
     protected status?: Status;
     protected readonly bufferLimit = 10;
     protected statusHistory: Status[] = [];
-    protected locationHistory: GeoLocation[] = [];
+    protected locationHistory: GeoPosition[] = [];
     protected readonly distanceCalculator = new DistanceCalculator();
 
     public constructor(
@@ -15,7 +15,7 @@ export class LocationAnalyzer {
         this.updatePOIs(pois);
     }
 
-    public updateLocation(location: GeoLocation): void {
+    public updatePosition(location: GeoPosition): void {
         this.locationHistory.push(location);
         if (this.locationHistory.length > this.bufferLimit) {
             this.locationHistory.shift();
@@ -33,36 +33,29 @@ export class LocationAnalyzer {
     }
 
     protected calculateStatus(): Status {
-        const currentLocation = this.locationHistory[this.locationHistory.length - 1];
-        if (currentLocation === undefined) { return { pois: [] }; }
+        const location = this.locationHistory[this.locationHistory.length - 1];
+        if (location === undefined) { return { guesses: [], nearbyPlatforms: [] }; }
 
-        const poisWithDistance = this.distanceCalculator.getPOIsAt(currentLocation)
-            .filter(poi => !currentLocation.accuracy || poi.distance.value < currentLocation.accuracy * 2);
-
+        const poisWithDistance = this.distanceCalculator.getPOIsAt(location);
         const rightDirectionPois = this.filterWrongDirectionPois(poisWithDistance);
-        const sortedPOIs = rightDirectionPois
-            .map(poi => this.withAge(poi))
-            .sort((a, b) => {
-                const diff = b.age - a.age;
-                if (diff !== 0) return diff;
-                return a.distance.value - b.distance.value;
-            });
+        const nearbyPlatforms = rightDirectionPois.filter(isStopDistance).sort((a, b) => a.distance.value - b.distance.value);
+        const closePoints = rightDirectionPois.filter(poi => poi.distance.value < location.accuracy);
+
+        const last = this.statusHistory[this.statusHistory.length - 1];
+        const reSeenPoints = rightDirectionPois.filter(poi => last?.guesses.find(lastPoi => lastPoi.poi.id === poi.poi.id));
+
+        let guesses = closePoints;
+        if (reSeenPoints.length > 0) {
+            guesses = reSeenPoints;
+        }
 
         const status = {
-            location: currentLocation,
-            pois: sortedPOIs
+            location,
+            guesses,
+            nearbyPlatforms
         };
         this.updateStatusHistory(status);
         return status;
-    }
-
-    private withAge(poi: POIWithDistance): POIWithDistanceAndAge {
-        const lastOccurrence = this.statusHistory[this.statusHistory.length - 1]?.pois.find(lastPoi => lastPoi.poi.id === poi.poi.id);
-        const age = lastOccurrence ? lastOccurrence.age + 1 : 1;
-        return {
-            ...poi,
-            age
-        };
     }
 
     protected filterWrongDirectionPois(pois: POIWithDistance[]): POIWithDistance[] {
@@ -121,13 +114,12 @@ export function isStopDistance(poi: POIWithDistance): poi is StopWithDistance {
 
 export type Status = NoResultStatus | ResultStatus;
 
-export interface NoResultStatus {
-    pois: [];
-}
+export type NoResultStatus = Omit<ResultStatus, "location">;
 
 export interface ResultStatus {
-    location: GeoLocation;
-    pois: POIWithDistanceAndAge[]
+    location: GeoPosition;
+    guesses: POIWithDistance[];
+    nearbyPlatforms: StopWithDistance[];
 }
 
 interface SectionDistance {
@@ -145,7 +137,6 @@ interface StopDistance {
 export type DistanceTypeOf<T extends TransitPOI> = T extends Route ? SectionDistance : StopDistance;
 
 export type POIWithDistance = StopWithDistance | RouteWithDistance;
-export type POIWithDistanceAndAge = POIWithDistance & { age: number };
 
 export interface StopWithDistance {
     poi: Stop;
@@ -160,13 +151,16 @@ export interface RouteWithDistance {
 export interface Stop {
     id: string;
     name: string;
-    boundaries: Omit<GeoLocation, "altitude">[];
+    boundaries: GeoLocation[];
+}
+
+export interface GeoPosition extends GeoLocation {
+    accuracy: number;
 }
 
 export interface GeoLocation {
     latitude: number;
     longitude: number;
-    accuracy?: number;
     altitude?: number;
 }
 

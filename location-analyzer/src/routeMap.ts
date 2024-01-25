@@ -1,4 +1,4 @@
-import { GeoLocation, Route, Section, Stop } from "./locationAnalyzer";
+import { GeoLocation, GeoPosition, Route, Section, Stop } from "./locationAnalyzer";
 
 export type TransitPOI = Route | Stop;
 
@@ -111,7 +111,7 @@ class GeoMapKey {
         return new GeoMapKey(section.lat, section.lon);
     }
 
-    public static fromStopBoundaryPoint(boundary: Omit<GeoLocation, "altitude">): GeoMapKey {
+    public static fromStopBoundaryPoint(boundary: Omit<GeoPosition, "altitude">): GeoMapKey {
         return new GeoMapKey(boundary.latitude, boundary.longitude);
     }
 }

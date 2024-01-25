@@ -3,16 +3,16 @@ import { assert } from "chai";
 import { parse, stringify } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
-import { GeoLocation, Status, isStopDistance } from "../../src/locationAnalyzer.js";
+import { GeoPosition, Status, isStopDistance } from "../../src/locationAnalyzer.js";
 import { LocationAnalyzerWorld } from "../world.js";
-import { getFirstStop } from "./helpers/getFirstStop.js";
+import { getNearestPlatform } from "./helpers/getNearestPlatform.js";
 import { locationMap } from "./helpers/locationMap.js";
 
 Given<LocationAnalyzerWorld>("I am at {string}", function (location: string) {
     const locationCoords = locationMap[location]?.location;
     assert.ok(locationCoords, `Location ${location} not found`);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.locationAnalyzer.updateLocation(locationCoords!);
+    this.locationAnalyzer.updatePosition(locationCoords!);
 });
 
 Given<LocationAnalyzerWorld>("I am {double} m {word} of {string}", function (distance: number, direction: Direction, location: string) {
@@ -21,7 +21,7 @@ Given<LocationAnalyzerWorld>("I am {double} m {word} of {string}", function (dis
     const bearing = directionToBearing(direction);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const newCoords = computeDestinationPoint(locationCoords!, distance, bearing);
-    this.locationAnalyzer.updateLocation(newCoords);
+    this.locationAnalyzer.updatePosition({ ...newCoords, accuracy: 4 });
 });
 
 Given<LocationAnalyzerWorld>("No location was set", function () {
@@ -33,13 +33,13 @@ When<LocationAnalyzerWorld>("I am on {string}", function (route: string) {
     const routeCoords = locationMap[route]?.location;
     assert.ok(routeCoords, `Route ${route} not found`);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.locationAnalyzer.updateLocation(routeCoords!);
+    this.locationAnalyzer.updatePosition(routeCoords!);
 });
 
 When<LocationAnalyzerWorld>("I am at the stop {string} with an accuracy of {int} meters", function (stopName: string, accuracy: number) {
     const coords = locationMap[stopName]?.location;
     assert.ok(coords, `Stop ${stopName} not found`);
-    this.locationAnalyzer.updateLocation({
+    this.locationAnalyzer.updatePosition({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...coords!,
         accuracy
@@ -47,7 +47,7 @@ When<LocationAnalyzerWorld>("I am at the stop {string} with an accuracy of {int}
 });
 
 Then<LocationAnalyzerWorld>("the detected platform is {string}", function (platform: string) {
-    const stop = getFirstStop(this);
+    const stop = getNearestPlatform(this);
     const locationId = locationMap[platform]?.id;
     assert.equal(stop.poi.id, locationId);
 });
@@ -56,14 +56,15 @@ Then<LocationAnalyzerWorld>("the data output over time is correct", function () 
     assert.equal(this.statusList.length, this.track.length);
 
     function makeOutput(status: Status): string {
-        const stop = status.pois[0];
-        if (!stop) return "none";
+        if (status.guesses.length === 0) return "none";
 
-        if (isStopDistance(stop)) {
-            return `stop ${stop.poi.name || "without name"}`;
-        }
+        return status.guesses.map(poi => {
+            if (isStopDistance(poi)) {
+                return `stop ${poi.poi.name || "without name"}`;
+            }
 
-        return `route ${stop.poi.ref} from ${stop.poi.from} to ${stop.poi.to}`;
+            return `route ${poi.poi.ref} from ${poi.poi.from} to ${poi.poi.to}`;
+        }).join(", ");
     }
 
     const results = this.statusList.map((status, index) => ({
@@ -79,7 +80,7 @@ Then<LocationAnalyzerWorld>("the data output over time is correct", function () 
 
 Then<LocationAnalyzerWorld>("there are {int} pois left", function (amount: number) {
     const status = this.locationAnalyzer.getStatus();
-    assert.equal(status.pois.length, amount, `Expected ${amount} pois, but got ${status.pois.length}`);
+    assert.equal(status.guesses.length, amount, `Expected ${amount} pois, but got ${status.guesses.length}`);
 });
 
 type Direction = "north" | "east" | "south" | "west";
