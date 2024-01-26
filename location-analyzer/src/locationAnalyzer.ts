@@ -36,15 +36,14 @@ export class LocationAnalyzer {
         const location = this.locationHistory[this.locationHistory.length - 1];
         if (location === undefined) { return { guesses: [], nearbyPlatforms: [] }; }
 
-        const poisWithDistance = this.distanceCalculator.getPOIsAt(location);
-        const closestOfEachPoi = this.keepClosestOfEachPoi(poisWithDistance);
-        const rightDirectionPois = this.filterWrongDirectionPois(closestOfEachPoi);
+        const poisWithDistance = this.distanceCalculator.getUniquePOIsNear(location);
+        const rightDirectionPois = this.filterWrongDirectionPois(poisWithDistance);
         const nearbyPlatforms = rightDirectionPois
             .filter(isStopDistance)
-            .sort((a, b) => a.distance.value - b.distance.value);
+            .sort(byProximity);
         const closePoints = rightDirectionPois
-            .filter(poi => poi.distance.value < location.accuracy)
-            .sort((a, b) => a.distance.value - b.distance.value);
+            .filter(isCloserThan(location.accuracy))
+            .sort(byProximity);
 
         const last = this.statusHistory[this.statusHistory.length - 1];
         const reSeenPoints = rightDirectionPois.filter(poi => last?.guesses.find(lastGuess => lastGuess.poi.id === poi.poi.id));
@@ -68,10 +67,10 @@ export class LocationAnalyzer {
         if (lastLocation === undefined) {
             return pois;
         }
-        let lastPoisWithDistance: POIWithDistance[] = [];
-        lastPoisWithDistance = this.distanceCalculator.getPOIsAt(lastLocation);
-        lastPoisWithDistance = this.keepClosestOfEachPoi(lastPoisWithDistance);
-        const filter = new MatchingDirectionFilter(this.locationHistory, lastPoisWithDistance);
+        const filter = new MatchingDirectionFilter(
+            this.locationHistory,
+            this.distanceCalculator.getUniquePOIsNear(lastLocation)
+        );
         return pois.filter(filter.asFunction());
     }
 
@@ -139,6 +138,14 @@ class MatchingDirectionFilter {
 
         return poi.distance.section > lastPoi.distance.section;
     }
+}
+
+function byProximity(a: POIWithDistance, b: POIWithDistance): number {
+    return a.distance.value - b.distance.value;
+}
+
+function isCloserThan(maxDistance: number): (poi: POIWithDistance) => boolean {
+    return poi => poi.distance.value <= maxDistance;
 }
 
 export function isRouteDistance(poi: POIWithDistance): poi is RouteWithDistance {

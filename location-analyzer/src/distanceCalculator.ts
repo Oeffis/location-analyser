@@ -6,9 +6,28 @@ import { POIReference, RouteMap, RouteReference, StopReference, TransitPOI, isRo
 export class DistanceCalculator {
     protected routeMap = new RouteMap();
 
-    public getPOIsAt(currentLocation: GeoPosition): POIWithDistance[] {
+    public getUniquePOIsNear(currentLocation: GeoPosition): POIWithDistance[] {
+        return this.keepClosestOfEachPoi(this.getPOIsNear(currentLocation));
+    }
+
+    public getPOIsNear(currentLocation: GeoPosition): POIWithDistance[] {
         const nearbyPOIs = this.routeMap.getPOIsAtLocation(currentLocation);
         return nearbyPOIs.map(poi => this.withDistance(currentLocation, poi));
+    }
+
+    protected keepClosestOfEachPoi(pois: POIWithDistance[]): POIWithDistance[] {
+        const closestOfEachPoi = new Map<string, POIWithDistance>();
+        pois.forEach(poi => {
+            const currentClosest = closestOfEachPoi.get(poi.poi.id);
+            if (currentClosest === undefined) {
+                closestOfEachPoi.set(poi.poi.id, poi);
+                return;
+            }
+            if (poi.distance.value < currentClosest.distance.value) {
+                closestOfEachPoi.set(poi.poi.id, poi);
+            }
+        });
+        return Array.from(closestOfEachPoi.values());
     }
 
     protected withDistance(base: GeoPosition, reference: POIReference): POIWithDistance {
