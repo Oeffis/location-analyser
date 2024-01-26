@@ -1,12 +1,13 @@
 import { getDistance } from "geolib";
+import { Buffer } from "./buffer.js";
 import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistance } from "./distanceCalculator.js";
 import { TransitPOI, isRoute } from "./routeMap.js";
 
 export class LocationAnalyzer {
     protected status?: Status;
     protected readonly bufferLimit = 10;
-    protected statusHistory: Status[] = [];
-    protected locationHistory: GeoPosition[] = [];
+    protected readonly statusHistory = new Buffer<Status>(this.bufferLimit);
+    protected readonly locationHistory = new Buffer<GeoPosition>(this.bufferLimit);
     protected readonly distanceCalculator = new DistanceCalculator();
 
     public constructor(
@@ -17,9 +18,6 @@ export class LocationAnalyzer {
 
     public updatePosition(location: GeoPosition): void {
         this.locationHistory.push(location);
-        if (this.locationHistory.length > this.bufferLimit) {
-            this.locationHistory.shift();
-        }
         this.invalidateStatus();
     }
 
@@ -91,9 +89,6 @@ export class LocationAnalyzer {
 
     protected updateStatusHistory(status: Status): void {
         this.statusHistory.push(status);
-        if (this.statusHistory.length > this.bufferLimit) {
-            this.statusHistory.shift();
-        }
     }
 
     public updatePOIs(pois: TransitPOI[]): void {
