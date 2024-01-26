@@ -37,8 +37,8 @@ export class LocationAnalyzer {
             .filter(isCloserThan(location.accuracy))
             .sort(byProximity);
 
-        const last = this.history[this.history.length - 1];
-        const reSeenPoints = rightDirectionPois.filter(poi => last?.guesses.find(lastGuess => lastGuess.poi.id === poi.poi.id));
+        const last = this.history.last();
+        const reSeenPoints = rightDirectionPois.filter(guess => last?.guesses.find(isGuessFor(guess.poi)));
 
         let guesses = closePoints;
         if (reSeenPoints.length > 0) {
@@ -134,6 +134,10 @@ function byProximity(a: POIWithDistance, b: POIWithDistance): number {
 
 function isCloserThan(maxDistance: number): (poi: POIWithDistance) => boolean {
     return poi => poi.distance.value <= maxDistance;
+}
+
+function isGuessFor(poi: TransitPOI): (guess: POIWithDistance) => boolean {
+    return guess => guess.poi.id === poi.id;
 }
 
 export function isRouteDistance(poi: POIWithDistance): poi is RouteWithDistance {
