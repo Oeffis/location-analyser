@@ -82,10 +82,10 @@ export class LocationAnalyzer {
             const atSameSection = poi.distance.section === lastPoi.distance.section;
             if (atSameSection) {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                const sectionEnd = poi.poi.sections[poi.distance.consecutiveSection]![poi.distance.section]!;
+                const sectionEnd = poi.poi.sections[poi.distance.consecutiveSection]![poi.distance.section + 1]!;
                 const lastDistanceToSectionEnd = getDistance(lastLocation, sectionEnd);
                 const currentDistanceToSectionEnd = getDistance(currentLocation, sectionEnd);
-                return currentDistanceToSectionEnd < lastDistanceToSectionEnd;
+                return currentDistanceToSectionEnd <= lastDistanceToSectionEnd;
             }
 
             return poi.distance.section > lastPoi.distance.section;

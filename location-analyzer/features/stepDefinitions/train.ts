@@ -118,8 +118,8 @@ When<LocationAnalyzerWorld>("I am on the RE2 at platform 7 of Gelsenkirchen Hbf"
 
 When<LocationAnalyzerWorld>("I travel further along the route of the 399", function () {
     this.locationAnalyzer.updatePosition({
-        latitude: 51.57285,
-        longitude: 7.03356,
+        latitude: 51.57275,
+        longitude: 7.0334,
         accuracy: 4.0
     });
 

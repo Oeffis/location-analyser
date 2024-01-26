@@ -1,4 +1,4 @@
-import { getDistance, isPointInPolygon, isPointNearLine } from "geolib";
+import { getDistance, isPointInPolygon } from "geolib";
 import { getDistanceFromLine } from "./getDistanceFromLine.js";
 import { GeoPosition, Route, Stop } from "./locationAnalyzer.js";
 import { POIReference, RouteMap, RouteReference, StopReference, TransitPOI, isRouteRef } from "./routeMap.js";
