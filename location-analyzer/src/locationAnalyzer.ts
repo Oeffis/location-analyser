@@ -31,12 +31,8 @@ export class LocationAnalyzer {
     }
 
     private getNextStatus(location: GeoPosition): ResultStatus {
-        const rightDirectionPois = this.distanceCalculator
-            .getUniquePOIsNear(location)
-            .filter(this.directionFilter(location));
-        const nearbyPlatforms = rightDirectionPois
-            .filter(isStopDistance)
-            .sort(byProximity);
+        const rightDirectionPois = this.getRightDirectionPois(location);
+        const nearbyPlatforms = this.getNearbyPlatformsIn(rightDirectionPois);
         const closePoints = rightDirectionPois
             .filter(isCloserThan(location.accuracy))
             .sort(byProximity);
@@ -57,13 +53,29 @@ export class LocationAnalyzer {
         return status;
     }
 
+    protected getRightDirectionPois(currentLocation: GeoPosition): POIWithDistance[] {
+        return this.distanceCalculator
+            .getUniquePOIsNear(currentLocation)
+            .filter(this.directionFilter(currentLocation));
+    }
+
     protected directionFilter(currentLocation: GeoPosition): (poi: POIWithDistance) => boolean {
         const status = this.getStatus();
         if (!isResultStatus(status)) return () => true;
+
+        const previousLocations = this.history.map(status => status.location);
+        const locationHistory = [...previousLocations, currentLocation];
+
         return new MatchingDirectionFilter(
-            [...this.history.map(status => status.location), currentLocation],
+            locationHistory,
             this.distanceCalculator.getUniquePOIsNear(status.location)
         ).asFunction();
+    }
+
+    protected getNearbyPlatformsIn(pois: POIWithDistance[]): StopWithDistance[] {
+        return pois
+            .filter(isStopDistance)
+            .sort(byProximity);
     }
 
     protected keepClosestOfEachPoi(pois: POIWithDistance[]): POIWithDistance[] {
