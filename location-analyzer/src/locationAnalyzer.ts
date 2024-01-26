@@ -12,6 +12,13 @@ export class LocationAnalyzer {
         this.updatePOIs(pois);
     }
 
+    public updatePOIs(pois: TransitPOI[]): void {
+        this.distanceCalculator.updatePOIs(pois);
+
+        const status = this.getStatus();
+        isResultStatus(status) && this.updatePosition(status.location);
+    }
+
     public getStatus(): Status {
         return this.history.last() ?? {
             guesses: [],
@@ -69,13 +76,6 @@ export class LocationAnalyzer {
             }
         });
         return Array.from(closestOfEachPoi.values());
-    }
-
-    public updatePOIs(pois: TransitPOI[]): void {
-        this.distanceCalculator.updatePOIs(pois);
-
-        const status = this.getStatus();
-        isResultStatus(status) && this.updatePosition(status.location);
     }
 }
 
