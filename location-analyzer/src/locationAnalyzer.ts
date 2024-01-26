@@ -82,10 +82,9 @@ export class LocationAnalyzer {
         const closestOfEachPoi = new Map<string, POIWithDistance>();
         pois.forEach(poi => {
             const currentClosest = closestOfEachPoi.get(poi.poi.id);
-            if (currentClosest === undefined
-                || poi.distance.value < currentClosest.distance.value) {
-                closestOfEachPoi.set(poi.poi.id, poi);
-            }
+            const isCloser = !currentClosest || poi.distance.value < currentClosest.distance.value;
+            if (isCloser) closestOfEachPoi.set(poi.poi.id, poi);
+
         });
         return Array.from(closestOfEachPoi.values());
     }
