@@ -19,7 +19,7 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { LocationAnalyzer, Route, Section, Stop, isRouteDistance } from "@oeffis/location-analyzer";
+import { LocationAnalyzer, Route, Section, Status, Stop, isRouteDistance } from "@oeffis/location-analyzer";
 import { POIWithDistance } from "@oeffis/location-analyzer/dist/distanceCalculator";
 import { parse } from "csv-parse/browser/esm/sync";
 import { inflate } from "pako";
@@ -31,7 +31,7 @@ setupIonicReact();
 const App: React.FC = () => {
   const position = usePosition();
   const pois = usePois();
-  const [nearestPOI, setNearestPOI] = useState<POIWithDistance | null>(null);
+  const [status, setStatus] = useState<Status>();
   const analyzer = new LocationAnalyzer(pois);
 
   function getName(poi: POIWithDistance): string {
@@ -43,7 +43,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (position.isError) {
-      setNearestPOI(null);
+      setStatus({ guesses: [], nearbyPlatforms: [] });
       return;
     }
 
@@ -53,12 +53,7 @@ const App: React.FC = () => {
       accuracy: position.position.coords.accuracy
     });
     const status = analyzer.getStatus();
-    const statusStop = status.guesses[0];
-    if (!statusStop) {
-      setNearestPOI(null);
-      return;
-    }
-    setNearestPOI(statusStop);
+    setStatus(status);
   }, [position, analyzer]);
 
   return (<IonApp>
@@ -77,12 +72,21 @@ const App: React.FC = () => {
           Accuracy: {position.position.coords.accuracy}m<br />
           Time: {new Date(position.position.timestamp).toTimeString()}<br />
         </p>)}
-        <h1>Nearest POI</h1>
-        {nearestPOI && (<p>
-          ID: {nearestPOI.poi.id}<br />
-          Name: {getName(nearestPOI)}<br />
-          Distance: {nearestPOI.distance.value}m<br />
-        </p>)}
+        <h1>Guesses</h1>
+        {status?.guesses.map(guess => (<p key={guess.poi.id}>
+          {isRouteDistance(guess) ? "Route" : "Stop"}
+          ID: {guess.poi.id}<br />
+          Name: {getName(guess)}<br />
+          Distance: {guess.distance.value}m<br />
+        </p>))}
+        {(status?.guesses ?? []).length === 0 && <p>No Guesses</p>}
+        <h1>Nearby Platforms</h1>
+        {status?.nearbyPlatforms.map(platform => (<p key={platform.poi.id}>
+          ID: {platform.poi.id}<br />
+          Name: {platform.poi.name}<br />
+          Distance: {platform.distance.value}m<br />
+        </p>))}
+        {(status?.nearbyPlatforms ?? []).length === 0 && <p>No Nearby Platforms</p>}
       </IonContent>
     </IonPage>
   </IonApp>
