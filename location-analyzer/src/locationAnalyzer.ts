@@ -4,26 +4,26 @@ import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistanc
 import { TransitPOI, isRoute } from "./routeMap.js";
 
 export class LocationAnalyzer {
-    protected status: Status = { guesses: [], nearbyPlatforms: [] };
     protected readonly bufferLimit = 10;
     protected readonly history = new Buffer<ResultStatus>(this.bufferLimit);
     protected readonly distanceCalculator = new DistanceCalculator();
 
-    public constructor(
-        pois: TransitPOI[] = [],
-    ) {
+    public constructor(pois: TransitPOI[] = []) {
         this.updatePOIs(pois);
     }
 
-    public updatePosition(location: GeoPosition): void {
-        this.status = this.calculateStatus(location);
-    }
-
     public getStatus(): Status {
-        return this.status;
+        return this.history.last() ?? {
+            guesses: [],
+            nearbyPlatforms: []
+        };
     }
 
-    protected calculateStatus(location: GeoPosition): Status {
+    public updatePosition(location: GeoPosition): ResultStatus {
+        return this.history.append(this.getNextStatus(location));
+    }
+
+    private getNextStatus(location: GeoPosition): ResultStatus {
         const rightDirectionPois = this.distanceCalculator
             .getUniquePOIsNear(location)
             .filter(this.directionFilter(location));
@@ -47,15 +47,15 @@ export class LocationAnalyzer {
             guesses,
             nearbyPlatforms
         };
-        this.updateStatusHistory(status);
         return status;
     }
 
     protected directionFilter(currentLocation: GeoPosition): (poi: POIWithDistance) => boolean {
-        if (!isResultStatus(this.status)) return () => true;
+        const status = this.getStatus();
+        if (!isResultStatus(status)) return () => true;
         return new MatchingDirectionFilter(
             [...this.history.map(status => status.location), currentLocation],
-            this.distanceCalculator.getUniquePOIsNear(this.status.location)
+            this.distanceCalculator.getUniquePOIsNear(status.location)
         ).asFunction();
     }
 
@@ -71,14 +71,11 @@ export class LocationAnalyzer {
         return Array.from(closestOfEachPoi.values());
     }
 
-    protected updateStatusHistory(status: ResultStatus): void {
-        this.history.push(status);
-    }
-
     public updatePOIs(pois: TransitPOI[]): void {
         this.distanceCalculator.updatePOIs(pois);
-        if (!isResultStatus(this.status)) return;
-        this.status = this.calculateStatus(this.status.location);
+
+        const status = this.getStatus();
+        isResultStatus(status) && this.updatePosition(status.location);
     }
 }
 

@@ -3,6 +3,11 @@ export class Buffer<C> extends Array<C> {
         super();
     }
 
+    public append(item: C): C {
+        this.push(item);
+        return item;
+    }
+
     public push(...items: C[]): number {
         const newLength = super.push(...items);
         if (newLength > this.capacity) {
@@ -10,5 +15,9 @@ export class Buffer<C> extends Array<C> {
         }
 
         return newLength;
+    }
+
+    public last(): C | undefined {
+        return this[this.length - 1];
     }
 }
