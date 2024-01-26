@@ -4,8 +4,8 @@ import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistanc
 import { TransitPOI, isRoute } from "./routeMap.js";
 
 export class LocationAnalyzer {
-    protected readonly bufferLimit = 10;
-    protected readonly history = new Buffer<ResultStatus>(this.bufferLimit);
+    protected readonly historyLimit = 10;
+    protected readonly history = new Buffer<ResultStatus>(this.historyLimit);
     protected readonly distanceCalculator = new DistanceCalculator();
 
     public constructor(pois: TransitPOI[] = []) {
