@@ -64,7 +64,6 @@ export class LocationAnalyzer {
     }
 
     protected filterWrongDirectionPois(pois: POIWithDistance[]): POIWithDistance[] {
-        const currentLocation = this.locationHistory[this.locationHistory.length - 1];
         const lastLocation = this.locationHistory[this.locationHistory.length - 2];
         if (lastLocation === undefined) {
             return pois;
@@ -72,28 +71,8 @@ export class LocationAnalyzer {
         let lastPoisWithDistance: POIWithDistance[] = [];
         lastPoisWithDistance = this.distanceCalculator.getPOIsAt(lastLocation);
         lastPoisWithDistance = this.keepClosestOfEachPoi(lastPoisWithDistance);
-        return pois.filter(isStopOrRightDirection);
-
-        function isStopOrRightDirection(poi: POIWithDistance): boolean {
-            if (isStopDistance(poi)) return true;
-            if (currentLocation === undefined) return true;
-            if (lastLocation === undefined) return true;
-
-            const lastPoi = lastPoisWithDistance
-                .find(lastPoi => lastPoi.poi.id === poi.poi.id) as RouteWithDistance | undefined;
-            if (lastPoi === undefined) return true;
-
-            const atSameSection = poi.distance.section === lastPoi.distance.section;
-            if (atSameSection) {
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                const sectionEnd = poi.poi.sections[poi.distance.consecutiveSection]![poi.distance.section + 1]!;
-                const lastDistanceToSectionEnd = getDistance(lastLocation, sectionEnd);
-                const currentDistanceToSectionEnd = getDistance(currentLocation, sectionEnd);
-                return currentDistanceToSectionEnd <= lastDistanceToSectionEnd;
-            }
-
-            return poi.distance.section > lastPoi.distance.section;
-        }
+        const filter = new MatchingDirectionFilter(this.locationHistory, lastPoisWithDistance);
+        return pois.filter(filter.asFunction());
     }
 
     protected keepClosestOfEachPoi(pois: POIWithDistance[]): POIWithDistance[] {
@@ -121,6 +100,44 @@ export class LocationAnalyzer {
     public updatePOIs(pois: TransitPOI[]): void {
         this.distanceCalculator.updatePOIs(pois);
         this.invalidateStatus();
+    }
+}
+
+class MatchingDirectionFilter {
+    protected readonly currentLocation: GeoPosition | undefined;
+    protected readonly lastLocation: GeoPosition | undefined;
+
+    public constructor(
+        protected readonly locationHistory: GeoPosition[],
+        protected readonly lastPoisWithDistance: POIWithDistance[]
+    ) {
+        this.currentLocation = locationHistory[locationHistory.length - 1];
+        this.lastLocation = locationHistory[locationHistory.length - 2];
+    }
+
+    public asFunction(): (poi: POIWithDistance) => boolean {
+        return this.apply.bind(this);
+    }
+
+    protected apply(poi: POIWithDistance): boolean {
+        if (isStopDistance(poi)) return true;
+        if (this.currentLocation === undefined) return true;
+        if (this.lastLocation === undefined) return true;
+
+        const lastPoi = this.lastPoisWithDistance
+            .find(lastPoi => lastPoi.poi.id === poi.poi.id) as RouteWithDistance | undefined;
+        if (lastPoi === undefined) return true;
+
+        const atSameSection = poi.distance.section === lastPoi.distance.section;
+        if (atSameSection) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const sectionEnd = poi.poi.sections[poi.distance.consecutiveSection]![poi.distance.section + 1]!;
+            const lastDistanceToSectionEnd = getDistance(this.lastLocation, sectionEnd);
+            const currentDistanceToSectionEnd = getDistance(this.currentLocation, sectionEnd);
+            return currentDistanceToSectionEnd <= lastDistanceToSectionEnd;
+        }
+
+        return poi.distance.section > lastPoi.distance.section;
     }
 }
 
