@@ -4,7 +4,7 @@ import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistanc
 import { TransitPOI, isRoute } from "./routeMap.js";
 
 export class LocationAnalyzer {
-    protected status?: Status;
+    protected status: Status = { guesses: [], nearbyPlatforms: [] };
     protected readonly bufferLimit = 10;
     protected readonly statusHistory = new Buffer<Status>(this.bufferLimit);
     protected readonly locationHistory = new Buffer<GeoPosition>(this.bufferLimit);
@@ -18,22 +18,14 @@ export class LocationAnalyzer {
 
     public updatePosition(location: GeoPosition): void {
         this.locationHistory.push(location);
-        this.invalidateStatus();
-    }
-
-    protected invalidateStatus(): void {
-        this.status = undefined;
+        this.status = this.calculateStatus(location);
     }
 
     public getStatus(): Status {
-        this.status = this.status ?? this.calculateStatus();
         return this.status;
     }
 
-    protected calculateStatus(): Status {
-        const location = this.locationHistory[this.locationHistory.length - 1];
-        if (location === undefined) { return { guesses: [], nearbyPlatforms: [] }; }
-
+    protected calculateStatus(location: GeoPosition): Status {
         const poisWithDistance = this.distanceCalculator.getUniquePOIsNear(location);
         const rightDirectionPois = this.filterWrongDirectionPois(poisWithDistance);
         const nearbyPlatforms = rightDirectionPois
@@ -93,7 +85,9 @@ export class LocationAnalyzer {
 
     public updatePOIs(pois: TransitPOI[]): void {
         this.distanceCalculator.updatePOIs(pois);
-        this.invalidateStatus();
+        const lastLocation = this.locationHistory[this.locationHistory.length - 1];
+        if (lastLocation === undefined) return;
+        this.status = this.calculateStatus(lastLocation);
     }
 }
 
