@@ -24,8 +24,9 @@ export class LocationAnalyzer {
     }
 
     protected calculateStatus(location: GeoPosition): Status {
-        const poisWithDistance = this.distanceCalculator.getUniquePOIsNear(location);
-        const rightDirectionPois = this.filterWrongDirectionPois(location, poisWithDistance);
+        const rightDirectionPois = this.distanceCalculator
+            .getUniquePOIsNear(location)
+            .filter(this.directionFilter(location));
         const nearbyPlatforms = rightDirectionPois
             .filter(isStopDistance)
             .sort(byProximity);
@@ -50,13 +51,12 @@ export class LocationAnalyzer {
         return status;
     }
 
-    protected filterWrongDirectionPois(currentLocation: GeoPosition, pois: POIWithDistance[]): POIWithDistance[] {
-        if (!isResultStatus(this.status)) return pois;
-        const filter = new MatchingDirectionFilter(
+    protected directionFilter(currentLocation: GeoPosition): (poi: POIWithDistance) => boolean {
+        if (!isResultStatus(this.status)) return () => true;
+        return new MatchingDirectionFilter(
             [...this.history.map(status => status.location), currentLocation],
             this.distanceCalculator.getUniquePOIsNear(this.status.location)
-        );
-        return pois.filter(filter.asFunction());
+        ).asFunction();
     }
 
     protected keepClosestOfEachPoi(pois: POIWithDistance[]): POIWithDistance[] {
