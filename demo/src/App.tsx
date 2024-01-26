@@ -19,7 +19,8 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { LocationAnalyzer, POIWithDistance, Route, Section, Stop, isRoute } from "@oeffis/location-analyzer";
+import { LocationAnalyzer, Route, Section, Stop, isRouteDistance } from "@oeffis/location-analyzer";
+import { POIWithDistance } from "@oeffis/location-analyzer/dist/distanceCalculator";
 import { parse } from "csv-parse/browser/esm/sync";
 import { inflate } from "pako";
 import { useEffect, useState } from "react";
@@ -34,10 +35,10 @@ const App: React.FC = () => {
   const analyzer = new LocationAnalyzer(pois);
 
   function getName(poi: POIWithDistance): string {
-    if (isRoute(poi)) {
-      return (poi as Route).from + " - " + (poi as Route).to;
+    if (isRouteDistance(poi)) {
+      return poi.poi.from + " - " + poi.poi.to;
     }
-    return poi.name;
+    return poi.poi.name;
   }
 
   useEffect(() => {
@@ -46,14 +47,13 @@ const App: React.FC = () => {
       return;
     }
 
-    analyzer.updateLocation({
+    analyzer.updatePosition({
       latitude: position.position.coords.latitude,
       longitude: position.position.coords.longitude,
-      altitude: position.position.coords.altitude ?? undefined
+      accuracy: position.position.coords.accuracy
     });
     const status = analyzer.getStatus();
-    const statusStop = status.pois[0];
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const statusStop = status.guesses[0];
     if (!statusStop) {
       setNearestPOI(null);
       return;
@@ -79,7 +79,7 @@ const App: React.FC = () => {
         </p>)}
         <h1>Nearest POI</h1>
         {nearestPOI && (<p>
-          ID: {nearestPOI.id}<br />
+          ID: {nearestPOI.poi.id}<br />
           Name: {getName(nearestPOI)}<br />
           Distance: {nearestPOI.distance.value}m<br />
         </p>)}
