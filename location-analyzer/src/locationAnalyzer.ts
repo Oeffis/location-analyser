@@ -39,8 +39,12 @@ export class LocationAnalyzer {
         const poisWithDistance = this.distanceCalculator.getPOIsAt(location);
         const closestOfEachPoi = this.keepClosestOfEachPoi(poisWithDistance);
         const rightDirectionPois = this.filterWrongDirectionPois(closestOfEachPoi);
-        const nearbyPlatforms = rightDirectionPois.filter(isStopDistance).sort((a, b) => a.distance.value - b.distance.value);
-        const closePoints = rightDirectionPois.filter(poi => poi.distance.value < location.accuracy);
+        const nearbyPlatforms = rightDirectionPois
+            .filter(isStopDistance)
+            .sort((a, b) => a.distance.value - b.distance.value);
+        const closePoints = rightDirectionPois
+            .filter(poi => poi.distance.value < location.accuracy)
+            .sort((a, b) => a.distance.value - b.distance.value);
 
         const last = this.statusHistory[this.statusHistory.length - 1];
         const reSeenPoints = rightDirectionPois.filter(poi => last?.guesses.find(lastGuess => lastGuess.poi.id === poi.poi.id));
