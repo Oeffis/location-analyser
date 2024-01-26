@@ -53,7 +53,6 @@ Given<LocationAnalyzerWorld>("I traveled from the Westfälische Hochschule to th
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             accuracy: point[2]!
         });
-        this.locationAnalyzer.getStatus();
     }
 });
 
@@ -123,8 +122,6 @@ When<LocationAnalyzerWorld>("I travel further along the route of the 399", funct
         accuracy: 4.0
     });
 
-    this.locationAnalyzer.getStatus();
-
     this.locationAnalyzer.updatePosition({
         latitude: 51.57287,
         longitude: 7.03364,
@@ -166,7 +163,6 @@ When<LocationAnalyzerWorld>("I travel more than ten seconds further along the ro
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             accuracy: point[2]!
         });
-        this.locationAnalyzer.getStatus();
     }
 });
 
