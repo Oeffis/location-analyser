@@ -6,8 +6,7 @@ import { TransitPOI, isRoute } from "./routeMap.js";
 export class LocationAnalyzer {
     protected status: Status = { guesses: [], nearbyPlatforms: [] };
     protected readonly bufferLimit = 10;
-    protected readonly statusHistory = new Buffer<Status>(this.bufferLimit);
-    protected readonly locationHistory = new Buffer<GeoPosition>(this.bufferLimit);
+    protected readonly history = new Buffer<ResultStatus>(this.bufferLimit);
     protected readonly distanceCalculator = new DistanceCalculator();
 
     public constructor(
@@ -17,7 +16,6 @@ export class LocationAnalyzer {
     }
 
     public updatePosition(location: GeoPosition): void {
-        this.locationHistory.push(location);
         this.status = this.calculateStatus(location);
     }
 
@@ -27,7 +25,7 @@ export class LocationAnalyzer {
 
     protected calculateStatus(location: GeoPosition): Status {
         const poisWithDistance = this.distanceCalculator.getUniquePOIsNear(location);
-        const rightDirectionPois = this.filterWrongDirectionPois(poisWithDistance);
+        const rightDirectionPois = this.filterWrongDirectionPois(location, poisWithDistance);
         const nearbyPlatforms = rightDirectionPois
             .filter(isStopDistance)
             .sort(byProximity);
@@ -35,7 +33,7 @@ export class LocationAnalyzer {
             .filter(isCloserThan(location.accuracy))
             .sort(byProximity);
 
-        const last = this.statusHistory[this.statusHistory.length - 1];
+        const last = this.history[this.history.length - 1];
         const reSeenPoints = rightDirectionPois.filter(poi => last?.guesses.find(lastGuess => lastGuess.poi.id === poi.poi.id));
 
         let guesses = closePoints;
@@ -52,14 +50,11 @@ export class LocationAnalyzer {
         return status;
     }
 
-    protected filterWrongDirectionPois(pois: POIWithDistance[]): POIWithDistance[] {
-        const lastLocation = this.locationHistory[this.locationHistory.length - 2];
-        if (lastLocation === undefined) {
-            return pois;
-        }
+    protected filterWrongDirectionPois(currentLocation: GeoPosition, pois: POIWithDistance[]): POIWithDistance[] {
+        if (!isResultStatus(this.status)) return pois;
         const filter = new MatchingDirectionFilter(
-            this.locationHistory,
-            this.distanceCalculator.getUniquePOIsNear(lastLocation)
+            [...this.history.map(status => status.location), currentLocation],
+            this.distanceCalculator.getUniquePOIsNear(this.status.location)
         );
         return pois.filter(filter.asFunction());
     }
@@ -79,15 +74,14 @@ export class LocationAnalyzer {
         return Array.from(closestOfEachPoi.values());
     }
 
-    protected updateStatusHistory(status: Status): void {
-        this.statusHistory.push(status);
+    protected updateStatusHistory(status: ResultStatus): void {
+        this.history.push(status);
     }
 
     public updatePOIs(pois: TransitPOI[]): void {
         this.distanceCalculator.updatePOIs(pois);
-        const lastLocation = this.locationHistory[this.locationHistory.length - 1];
-        if (lastLocation === undefined) return;
-        this.status = this.calculateStatus(lastLocation);
+        if (!isResultStatus(this.status)) return;
+        this.status = this.calculateStatus(this.status.location);
     }
 }
 
@@ -143,6 +137,10 @@ export function isRouteDistance(poi: POIWithDistance): poi is RouteWithDistance 
 
 export function isStopDistance(poi: POIWithDistance): poi is StopWithDistance {
     return !isRoute(poi.poi);
+}
+
+export function isResultStatus(status: Status): status is ResultStatus {
+    return Object.hasOwn(status, "location");
 }
 
 export type Status = NoResultStatus | ResultStatus;
