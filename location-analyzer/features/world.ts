@@ -1,5 +1,8 @@
 import { setWorldConstructor } from "@cucumber/cucumber";
 import { GeoLocation, GeoPosition, LocationAnalyzer, Route, Status } from "../src/locationAnalyzer.js";
+import { TransitPOI } from "../src/routeMap.js";
+import { getVrrRoutes } from "./getVrrRoutes.js";
+import { getVrrStops } from "./getVrrStops.js";
 
 type Coords = CoordPair | CoordPairWithAccuracy | GeoPosition | GeoLocation;
 type CoordPair = [number, number];
@@ -37,6 +40,26 @@ export class LocationAnalyzerWorld {
             coords.push(position.accuracy);
         }
         this.updatePositionFromArray(coords);
+    }
+
+    public updatePOIs(routes: TransitPOI[]): void {
+        this.locationAnalyzer.updatePOIs(routes);
+    }
+
+    public async loadVrrRoutes(): Promise<void> {
+        this.updatePOIs(await getVrrRoutes());
+    }
+
+    public async loadVrrStops(): Promise<void> {
+        this.updatePOIs(await getVrrStops());
+    }
+
+    public async loadAllVrrData(): Promise<void> {
+        const both = await Promise.all([
+            getVrrRoutes(),
+            getVrrStops()
+        ]);
+        this.updatePOIs(both.flat());
     }
 }
 

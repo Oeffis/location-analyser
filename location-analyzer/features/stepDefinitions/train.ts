@@ -3,7 +3,7 @@ import { LocationAnalyzerWorld } from "../world";
 
 import { assert } from "chai";
 import { RouteWithDistance } from "../../src/distanceCalculator";
-import { LocationAnalyzer, Route, Stop, isRouteDistance } from "../../src/locationAnalyzer.js";
+import { Route, Stop, isRouteDistance } from "../../src/locationAnalyzer.js";
 import { Route as VrrRoute, getVrrRoutes } from "../getVrrRoutes.js";
 import { getVrrStops } from "../getVrrStops.js";
 
@@ -21,19 +21,19 @@ Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direct
         ...await getVrrStops(),
         ...(await getVrrRoutes()).filter(hasNoDuplicateAtThisLocation)
     ];
-    this.locationAnalyzer.updatePOIs(routes);
+    this.updatePOIs(routes);
 });
 
-Given<LocationAnalyzerWorld>("the RB43 travels on a single track between Buer Süd and Zoo", async function () {
-    await loadAllRoutesTo(this.locationAnalyzer);
+Given<LocationAnalyzerWorld>("the RB43 travels on a single track between Buer Süd and Zoo", function () {
+    return this.loadAllVrrData();
 });
 
 Given<LocationAnalyzerWorld>("the S9 to Wuppertal leaves the area between Gladback and Essen", async function () {
-    await loadAllRoutesTo(this.locationAnalyzer);
+    return this.loadAllVrrData();
 });
 
 Given<LocationAnalyzerWorld>("the Lines 399 and 342 split at the start of the Neidenburger Straße", async function () {
-    await loadAllRoutesTo(this.locationAnalyzer);
+    return this.loadAllVrrData();
 });
 
 Given<LocationAnalyzerWorld>("I traveled from the Westfälische Hochschule to the Neidenburger Straße", function () {
@@ -46,8 +46,7 @@ Given<LocationAnalyzerWorld>("I traveled from the Westfälische Hochschule to th
 });
 
 Given<LocationAnalyzerWorld>("the RE2 stops at platform 7 of Gelsenkirchen Hbf", async function () {
-    const data = await Promise.all([getVrrStops(), getVrrRoutes()]);
-    this.locationAnalyzer.updatePOIs(data.flat());
+    return this.loadAllVrrData();
 });
 
 When<LocationAnalyzerWorld>("I am on the 302 to Buer Rathaus North of Veltins Arena", function () {
@@ -135,11 +134,6 @@ Then<LocationAnalyzerWorld>("the train {string} to {string} is not detected", fu
     const sameDestination = route.to === destination;
     assert.isFalse(sameLine && sameDestination, `The train ${line} to ${destination} is detected, but should not be.`);
 });
-
-async function loadAllRoutesTo(locationAnalyzer: LocationAnalyzer): Promise<void> {
-    const allRoutes = await getVrrRoutes();
-    locationAnalyzer.updatePOIs(allRoutes);
-}
 
 function getFirstRoute(world: LocationAnalyzerWorld): Route {
     const status = world.locationAnalyzer.getStatus();
