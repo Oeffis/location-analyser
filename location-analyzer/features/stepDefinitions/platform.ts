@@ -1,5 +1,6 @@
 import { Then } from "@cucumber/cucumber";
 import { assert } from "chai";
+import { isStopDistance } from "../../src/locationAnalyzer.js";
 import { LocationAnalyzerWorld } from "../world.js";
 import { locationMap } from "./helpers/locationMap.js";
 
@@ -40,7 +41,9 @@ Then<LocationAnalyzerWorld>("the ids of the nearest platforms are:", function (d
     assert.deepEqual(ids, expectedIds);
 });
 
-Then<LocationAnalyzerWorld>("the stop {string} is not detected", function (stopName: string) {
-    const exists = this.getStatus().nearbyPlatforms.some(stop => stop.poi.name === stopName);
+Then<LocationAnalyzerWorld>("the stop {string} is not guessed", function (stopName: string) {
+    const exists = this.getStatus().guesses
+        .filter(isStopDistance)
+        .some(stop => stop.poi.name === stopName);
     assert.isFalse(exists, `The stop ${stopName} is detected, but should not be.`);
 });

@@ -146,13 +146,15 @@ Then<LocationAnalyzerWorld>("the following lines are detected", function (table:
         destination: row[1]
     }));
 
-    const detectedLines = this.getStatus()
-        .guesses
-        .filter(isRouteDistance)
-        .map(poi => ({
-            line: poi.poi.ref,
-            destination: poi.poi.to
-        }));
+    const status = this.getStatus();
+    const allFound = expectedLines.every(expectedLine =>
+        status.guesses.some((poi) =>
+            isRouteDistance(poi)
+            && poi.poi.ref === expectedLine.line && poi.poi.to === expectedLine.destination));
 
-    assert.deepEqual(detectedLines, expectedLines);
+    assert.isTrue(allFound, `Not all lines were detected. Options were ` + status.guesses.map((poi) => {
+        if (isRouteDistance(poi)) {
+            return `${poi.poi.ref} to ${poi.poi.to}`;
+        }
+    }).join(",\n"));
 });

@@ -47,7 +47,7 @@ Feature: Onboard Train Detection
         When I travel more than ten seconds further along the route of the 399
         Then the detected train is the "399" to "Gelsenkirchen Buer Rathaus"
 
-    Scenario: Detects I am on a train when location glitched
+    Scenario: Detects I am on a train when location glitches a little
         Given the 302 travels along the Musiktheater im Revier, where a Bus Stop is North of the track
         And I travel on the 302 from Kennedyplatz to Musiktheater station
         When the GPS glitches so my next position is at the bus stop
@@ -55,7 +55,7 @@ Feature: Onboard Train Detection
         Then the following lines are detected
             | 302 | Bochum O-Werk      |
             | 302 | Bochum Langendreer |
-        And the stop "Musiktheater" is not detected
+        And the stop "Musiktheater" is not guessed
 
     @ignore
     Scenario: Detects no train when I am not on a train

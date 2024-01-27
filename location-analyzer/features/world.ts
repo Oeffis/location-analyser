@@ -1,7 +1,7 @@
 import { setWorldConstructor } from "@cucumber/cucumber";
 import { assert } from "chai";
 import { RouteWithDistance, StopWithDistance } from "../src/distanceCalculator.js";
-import { GeoLocation, GeoPosition, LocationAnalyzer, Route, Status } from "../src/locationAnalyzer.js";
+import { GeoLocation, GeoPosition, LocationAnalyzer, ResultStatus, Route, Status } from "../src/locationAnalyzer.js";
 import { TransitPOI } from "../src/routeMap.js";
 import { getVrrRoutes } from "./getVrrRoutes.js";
 import { getVrrStops } from "./getVrrStops.js";
@@ -14,7 +14,7 @@ export class LocationAnalyzerWorld {
     protected locationAnalyzer: LocationAnalyzer = new LocationAnalyzer();
     public expectedRoutes: Partial<Route>[] = [];
     public routeOrderMatters = true;
-    public statusList: Status[] = [this.locationAnalyzer.getStatus()];
+    public statusList: ResultStatus[] = [];
     public track: GeoPosition[] = [];
 
     public updatePosition(...positions: Coords[]): void {
@@ -72,11 +72,7 @@ export class LocationAnalyzerWorld {
     }
 
     public getStatus(): Status {
-        const status = this.statusList[this.statusList.length - 1];
-        if (status === undefined) {
-            throw new Error("No status available");
-        }
-        return status;
+        return this.statusList[this.statusList.length - 1] ?? this.locationAnalyzer.getStatus();
     }
 
     public getNearestPlatform(): StopWithDistance {

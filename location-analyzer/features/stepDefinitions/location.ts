@@ -30,10 +30,20 @@ Given<LocationAnalyzerWorld>("No location was set", function () {
 
 Given<LocationAnalyzerWorld>("I travel on the 302 from Kennedyplatz to Musiktheater station", function () {
     this.updatePosition(
-        [51.513748, 7.093218],
-        [51.513711, 7.093010],
-        [51.513666, 7.092854],
-        [51.513619, 7.092694],
+        [51.514508, 7.094044, 4.812899933984365],
+        [51.514396, 7.094069, 4.957418141995718],
+        [51.514294, 7.094151, 4.907870088336124],
+        [51.514199, 7.094208, 4.920214836943836],
+        [51.514103, 7.094183, 4.952843315613497],
+        [51.514017, 7.094110, 5.070647214274187],
+        [51.513944, 7.093981, 5.234951602323192],
+        [51.513901, 7.093805, 5.316365399732025],
+        [51.513856, 7.093599, 5.364008192562383],
+        [51.513810, 7.093411, 5.376993644666365],
+        [51.513748, 7.093218, 5.316263817510434],
+        [51.513711, 7.093010, 5.524452298816627],
+        [51.513666, 7.092854, 5.74273035940015],
+        [51.513619, 7.092694, 5.912747952604428]
     );
 });
 
@@ -55,15 +65,15 @@ When<LocationAnalyzerWorld>("I am at the stop {string} with an accuracy of {int}
 });
 
 When<LocationAnalyzerWorld>("the GPS glitches so my next position is at the bus stop", function () {
-    this.updatePosition([51.513659, 7.092553]);
+    this.updatePosition([51.513659, 7.092553, 5.214622950041441]);
 });
 
 When<LocationAnalyzerWorld>("my next positions are back on the track", function () {
-    this.updatePosition([51.513563, 7.092461], [51.513493, 7.092314]);
+    this.updatePosition([51.513563, 7.092461, 4.921717638301804], [51.513493, 7.092314, 4.830296054452409]);
 });
 
 Then<LocationAnalyzerWorld>("the data output over time is correct", function () {
-    assert.equal(this.statusList.length, this.track.length + 1);
+    assert.equal(this.statusList.length, this.track.length);
 
     function makeOutput(status: Status): string {
         if (status.guesses.length === 0) return "none";

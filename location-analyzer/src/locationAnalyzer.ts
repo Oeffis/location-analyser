@@ -32,13 +32,14 @@ export class LocationAnalyzer {
 
     private getNextStatus(location: GeoPosition): ResultStatus {
         const rightDirectionPois = this.getRightDirectionPois(location);
-        const nearbyPlatforms = this.getNearbyPlatformsIn(rightDirectionPois);
-        const closePoints = rightDirectionPois
+        const uniqueRightDirectionPois = this.keepClosestOfEachPoi(rightDirectionPois);
+        const nearbyPlatforms = this.getNearbyPlatformsIn(uniqueRightDirectionPois);
+        const closePoints = uniqueRightDirectionPois
             .filter(isCloserThan(location.accuracy))
             .sort(byProximity);
 
         const last = this.history.last();
-        const reSeenPoints = rightDirectionPois.filter(guess => last?.guesses.find(isGuessFor(guess.poi)));
+        const reSeenPoints = uniqueRightDirectionPois.filter(guess => last?.guesses.find(isGuessFor(guess.poi)));
 
         let guesses = closePoints;
         if (reSeenPoints.length > 0) {
@@ -121,7 +122,9 @@ class MatchingDirectionFilter {
             const sectionEnd = poi.poi.sections[poi.distance.consecutiveSection]![poi.distance.section + 1]!;
             const lastDistanceToSectionEnd = getDistance(this.lastLocation, sectionEnd);
             const currentDistanceToSectionEnd = getDistance(this.currentLocation, sectionEnd);
-            return currentDistanceToSectionEnd <= lastDistanceToSectionEnd;
+            const wrongDirectionDistance = currentDistanceToSectionEnd - lastDistanceToSectionEnd;
+            const gracedWrongDirectionDistance = wrongDirectionDistance - this.currentLocation.accuracy - this.lastLocation.accuracy;
+            return gracedWrongDirectionDistance < 0;
         }
 
         return poi.distance.section > lastPoi.distance.section;
