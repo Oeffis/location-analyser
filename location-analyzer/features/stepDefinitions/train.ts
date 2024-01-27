@@ -2,8 +2,7 @@ import { Given, Then, When } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
 import { assert } from "chai";
-import { RouteWithDistance } from "../../src/distanceCalculator";
-import { Route, Stop, isRouteDistance } from "../../src/locationAnalyzer.js";
+import { Stop, isRouteDistance } from "../../src/locationAnalyzer.js";
 import { Route as VrrRoute, getVrrRoutes } from "../getVrrRoutes.js";
 import { getVrrStops } from "../getVrrStops.js";
 
@@ -107,19 +106,19 @@ When<LocationAnalyzerWorld>("I travel more than ten seconds further along the ro
 });
 
 Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", function (line: string, destination: string) {
-    const route = getFirstRoute(this);
+    const route = this.getFirstRoute();
     assert.strictEqual(route.ref, line);
     assert.strictEqual(route.to, destination);
 });
 
 Then<LocationAnalyzerWorld>("one of the detected trains is the {string} to {string}", function (line: string, destination: string) {
-    const exists = this.locationAnalyzer.getStatus().guesses.some((poi) => {
+    const exists = this.getStatus().guesses.some((poi) => {
         if (isRouteDistance(poi)) {
             return poi.poi.ref === line && poi.poi.to === destination;
         }
         return false;
     });
-    assert.isTrue(exists, `The train ${line} to ${destination} is not detected, but should be. Options were ` + this.locationAnalyzer.getStatus().guesses.map((poi) => {
+    assert.isTrue(exists, `The train ${line} to ${destination} is not detected, but should be. Options were ` + this.getStatus().guesses.map((poi) => {
         if (isRouteDistance(poi)) {
             return `${poi.poi.ref} to ${poi.poi.to}`;
         }
@@ -128,16 +127,9 @@ Then<LocationAnalyzerWorld>("one of the detected trains is the {string} to {stri
 });
 
 Then<LocationAnalyzerWorld>("the train {string} to {string} is not detected", function (line: string, destination: string) {
-    const route = getFirstRoute(this);
+    const route = this.getFirstRoute();
 
     const sameLine = route.ref === line;
     const sameDestination = route.to === destination;
     assert.isFalse(sameLine && sameDestination, `The train ${line} to ${destination} is detected, but should not be.`);
 });
-
-function getFirstRoute(world: LocationAnalyzerWorld): Route {
-    const status = world.locationAnalyzer.getStatus();
-    const route = status.guesses[0] as RouteWithDistance;
-    assert.exists(route, "There is no route to check against.");
-    return route.poi;
-}

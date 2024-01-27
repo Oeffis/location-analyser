@@ -5,7 +5,6 @@ import { readFileSync, writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
 import { GeoPosition, Status, isStopDistance } from "../../src/locationAnalyzer.js";
 import { LocationAnalyzerWorld } from "../world.js";
-import { getNearestPlatform } from "./helpers/getNearestPlatform.js";
 import { locationMap } from "./helpers/locationMap.js";
 
 Given<LocationAnalyzerWorld>("I am at {string}", function (location: string) {
@@ -46,14 +45,8 @@ When<LocationAnalyzerWorld>("I am at the stop {string} with an accuracy of {int}
     });
 });
 
-Then<LocationAnalyzerWorld>("the detected platform is {string}", function (platform: string) {
-    const stop = getNearestPlatform(this);
-    const locationId = locationMap[platform]?.id;
-    assert.equal(stop.poi.id, locationId);
-});
-
 Then<LocationAnalyzerWorld>("the data output over time is correct", function () {
-    assert.equal(this.statusList.length, this.track.length);
+    assert.equal(this.statusList.length, this.track.length + 1);
 
     function makeOutput(status: Status): string {
         if (status.guesses.length === 0) return "none";
@@ -79,7 +72,7 @@ Then<LocationAnalyzerWorld>("the data output over time is correct", function () 
 });
 
 Then<LocationAnalyzerWorld>("there are {int} pois left", function (amount: number) {
-    const status = this.locationAnalyzer.getStatus();
+    const status = this.getStatus();
     assert.equal(status.guesses.length, amount, `Expected ${amount} pois, but got ${status.guesses.length}`);
 });
 

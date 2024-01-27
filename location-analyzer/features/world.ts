@@ -1,4 +1,6 @@
 import { setWorldConstructor } from "@cucumber/cucumber";
+import { assert } from "chai";
+import { RouteWithDistance, StopWithDistance } from "../src/distanceCalculator.js";
 import { GeoLocation, GeoPosition, LocationAnalyzer, Route, Status } from "../src/locationAnalyzer.js";
 import { TransitPOI } from "../src/routeMap.js";
 import { getVrrRoutes } from "./getVrrRoutes.js";
@@ -9,10 +11,10 @@ type CoordPair = [number, number];
 type CoordPairWithAccuracy = [number, number, number];
 
 export class LocationAnalyzerWorld {
-    public locationAnalyzer: LocationAnalyzer = new LocationAnalyzer();
+    protected locationAnalyzer: LocationAnalyzer = new LocationAnalyzer();
     public expectedRoutes: Partial<Route>[] = [];
     public routeOrderMatters = true;
-    public statusList: Status[] = [];
+    public statusList: Status[] = [this.locationAnalyzer.getStatus()];
     public track: GeoPosition[] = [];
 
     public updatePosition(...positions: Coords[]): void {
@@ -60,6 +62,29 @@ export class LocationAnalyzerWorld {
             getVrrStops()
         ]);
         this.updatePOIs(both.flat());
+    }
+
+    public getFirstRoute(): Route {
+        const status = this.getStatus();
+        const route = status.guesses[0] as RouteWithDistance;
+        assert.exists(route, "There is no route to check against.");
+        return route.poi;
+    }
+
+    public getStatus(): Status {
+        const status = this.statusList[this.statusList.length - 1];
+        if (status === undefined) {
+            throw new Error("No status available");
+        }
+        return status;
+    }
+
+    public getNearestPlatform(): StopWithDistance {
+        const status = this.getStatus();
+        const stop = status.nearbyPlatforms[0];
+        assert.isDefined(stop, "No stop found");
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return stop!;
     }
 }
 
