@@ -39,3 +39,8 @@ Then<LocationAnalyzerWorld>("the ids of the nearest platforms are:", function (d
     const expectedIds = dataTable.rawTable.map(row => row[0]);
     assert.deepEqual(ids, expectedIds);
 });
+
+Then<LocationAnalyzerWorld>("the stop {string} is not detected", function (stopName: string) {
+    const exists = this.getStatus().nearbyPlatforms.some(stop => stop.poi.name === stopName);
+    assert.isFalse(exists, `The stop ${stopName} is detected, but should not be.`);
+});

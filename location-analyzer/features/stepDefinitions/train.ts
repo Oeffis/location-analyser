@@ -6,6 +6,8 @@ import { Stop, isRouteDistance } from "../../src/locationAnalyzer.js";
 import { Route as VrrRoute, getVrrRoutes } from "../getVrrRoutes.js";
 import { getVrrStops } from "../getVrrStops.js";
 
+interface RawDataTable { rawTable: string[][] }
+
 Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direction north of Veltins Arena", async function () {
     const TRAM_302_LANGENDREER_TO_BUER = "572234368";
     const TRAM_302_BUER_TO_LANGENDREER = "3720902989";
@@ -45,6 +47,10 @@ Given<LocationAnalyzerWorld>("I traveled from the Westfälische Hochschule to th
 });
 
 Given<LocationAnalyzerWorld>("the RE2 stops at platform 7 of Gelsenkirchen Hbf", async function () {
+    return this.loadAllVrrData();
+});
+
+Given<LocationAnalyzerWorld>("the 302 travels along the Musiktheater im Revier, where a Bus Stop is North of the track", async function () {
     return this.loadAllVrrData();
 });
 
@@ -132,4 +138,21 @@ Then<LocationAnalyzerWorld>("the train {string} to {string} is not detected", fu
     const sameLine = route.ref === line;
     const sameDestination = route.to === destination;
     assert.isFalse(sameLine && sameDestination, `The train ${line} to ${destination} is detected, but should not be.`);
+});
+
+Then<LocationAnalyzerWorld>("the following lines are detected", function (table: RawDataTable) {
+    const expectedLines = table.rawTable.map(row => ({
+        line: row[0],
+        destination: row[1]
+    }));
+
+    const detectedLines = this.getStatus()
+        .guesses
+        .filter(isRouteDistance)
+        .map(poi => ({
+            line: poi.poi.ref,
+            destination: poi.poi.to
+        }));
+
+    assert.deepEqual(detectedLines, expectedLines);
 });

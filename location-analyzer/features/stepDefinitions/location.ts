@@ -28,6 +28,15 @@ Given<LocationAnalyzerWorld>("No location was set", function () {
 });
 
 
+Given<LocationAnalyzerWorld>("I travel on the 302 from Kennedyplatz to Musiktheater station", function () {
+    this.updatePosition(
+        [51.513748, 7.093218],
+        [51.513711, 7.093010],
+        [51.513666, 7.092854],
+        [51.513619, 7.092694],
+    );
+});
+
 When<LocationAnalyzerWorld>("I am on {string}", function (route: string) {
     const routeCoords = locationMap[route]?.location;
     assert.ok(routeCoords, `Route ${route} not found`);
@@ -43,6 +52,14 @@ When<LocationAnalyzerWorld>("I am at the stop {string} with an accuracy of {int}
         ...coords!,
         accuracy
     });
+});
+
+When<LocationAnalyzerWorld>("the GPS glitches so my next position is at the bus stop", function () {
+    this.updatePosition([51.513659, 7.092553]);
+});
+
+When<LocationAnalyzerWorld>("my next positions are back on the track", function () {
+    this.updatePosition([51.513563, 7.092461], [51.513493, 7.092314]);
 });
 
 Then<LocationAnalyzerWorld>("the data output over time is correct", function () {

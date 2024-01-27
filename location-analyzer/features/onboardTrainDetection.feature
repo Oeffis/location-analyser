@@ -8,7 +8,6 @@ Feature: Onboard Train Detection
         When I am on the 302 to Buer Rathaus North of Veltins Arena
         Then the detected train is the "302" to "Gelsenkirchen Buer Rathaus"
 
-    @focus
     Scenario: Detect the train I am currently on both directions travel on the same track
         Given the RB43 travels on a single track between Buer Süd and Zoo
         When I am on the RB43 between Buer Süd and Zoo
@@ -48,11 +47,15 @@ Feature: Onboard Train Detection
         When I travel more than ten seconds further along the route of the 399
         Then the detected train is the "399" to "Gelsenkirchen Buer Rathaus"
 
-    @ignore
     Scenario: Detects I am on a train when location glitched
-        When my previous location was nowhere near
-        And I am on a train
-        Then the train I am on is detected
+        Given the 302 travels along the Musiktheater im Revier, where a Bus Stop is North of the track
+        And I travel on the 302 from Kennedyplatz to Musiktheater station
+        When the GPS glitches so my next position is at the bus stop
+        But my next positions are back on the track
+        Then the following lines are detected
+            | 302 | Bochum O-Werk      |
+            | 302 | Bochum Langendreer |
+        And the stop "Musiktheater" is not detected
 
     @ignore
     Scenario: Detects no train when I am not on a train
