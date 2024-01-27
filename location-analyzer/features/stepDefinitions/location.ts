@@ -12,7 +12,7 @@ Given<LocationAnalyzerWorld>("I am at {string}", function (location: string) {
     const locationCoords = locationMap[location]?.location;
     assert.ok(locationCoords, `Location ${location} not found`);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.locationAnalyzer.updatePosition(locationCoords!);
+    this.updatePosition(locationCoords!);
 });
 
 Given<LocationAnalyzerWorld>("I am {double} m {word} of {string}", function (distance: number, direction: Direction, location: string) {
@@ -21,7 +21,7 @@ Given<LocationAnalyzerWorld>("I am {double} m {word} of {string}", function (dis
     const bearing = directionToBearing(direction);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const newCoords = computeDestinationPoint(locationCoords!, distance, bearing);
-    this.locationAnalyzer.updatePosition({ ...newCoords, accuracy: 4 });
+    this.updatePosition(newCoords);
 });
 
 Given<LocationAnalyzerWorld>("No location was set", function () {
@@ -33,13 +33,13 @@ When<LocationAnalyzerWorld>("I am on {string}", function (route: string) {
     const routeCoords = locationMap[route]?.location;
     assert.ok(routeCoords, `Route ${route} not found`);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.locationAnalyzer.updatePosition(routeCoords!);
+    this.updatePosition(routeCoords!);
 });
 
 When<LocationAnalyzerWorld>("I am at the stop {string} with an accuracy of {int} meters", function (stopName: string, accuracy: number) {
     const coords = locationMap[stopName]?.location;
     assert.ok(coords, `Stop ${stopName} not found`);
-    this.locationAnalyzer.updatePosition({
+    this.updatePosition({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...coords!,
         accuracy
