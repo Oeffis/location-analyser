@@ -38,8 +38,33 @@ export class LocationAnalyzer {
             .filter(isCloserThan(location.accuracy))
             .sort(byProximity);
 
-        const last = this.history.last();
-        const reSeenPoints = uniqueRightDirectionPois.filter(guess => last?.guesses.find(isGuessFor(guess.poi)));
+        const reSeenPoints = uniqueRightDirectionPois
+            .map(guess => {
+                const currentDistance = guess.distance.value;
+                const previousDistance = this.history.last()?.guesses.find(isGuessFor(guess.poi))?.distance.value;
+                const prePreviousDistance = this.history[this.history.length - 2]?.guesses.find(isGuessFor(guess.poi))?.distance.value;
+                if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
+
+                const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
+                return {
+                    guess,
+                    cumulatedDistance
+                };
+            })
+            .filter((guess): guess is { guess: POIWithDistance, cumulatedDistance: number } => guess !== undefined)
+            .sort((a, b) => a.cumulatedDistance - b.cumulatedDistance)
+            .reduce((acc, guess) => {
+                if (acc.minDistance < guess.cumulatedDistance) return acc;
+                if (acc.minDistance === guess.cumulatedDistance) {
+                    acc.points.push(guess.guess);
+                    return acc;
+                }
+                return {
+                    minDistance: guess.cumulatedDistance,
+                    points: [guess.guess]
+                };
+            }, { minDistance: Infinity, points: [] as POIWithDistance[] })
+            .points;
 
         let guesses = closePoints;
         if (reSeenPoints.length > 0) {
