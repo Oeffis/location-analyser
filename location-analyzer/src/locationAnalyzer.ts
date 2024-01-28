@@ -38,21 +38,38 @@ export class LocationAnalyzer {
             .filter(isCloserThan(location.accuracy))
             .sort(byProximity);
 
-        const reSeenPoints = uniqueRightDirectionPois
+        const intermediate = uniqueRightDirectionPois
             .map(guess => {
                 const currentDistance = guess.distance.value;
-                const previousDistance = this.history.last()?.guesses.find(isGuessFor(guess.poi))?.distance.value;
-                const prePreviousDistance = this.history[this.history.length - 2]?.guesses.find(isGuessFor(guess.poi))?.distance.value;
+                if (isRouteDistance(guess)) {
+                    const previousDistance = this.history.last()?.guesses.find(isGuessFor(guess.poi))?.distance.value;
+                    const prePreviousDistance = this.history[this.history.length - 2]?.guesses.find(isGuessFor(guess.poi))?.distance.value;
+                    if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
+                    const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
+                    return {
+                        guess,
+                        cumulatedDistance
+                    };
+                }
+                if (location.speed > 2) return undefined;
+                const previousDistance = this.history.last()?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
+                const prePreviousDistance = this.history[this.history.length - 2]?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
                 if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
-
                 const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
                 return {
                     guess,
                     cumulatedDistance
-                };
+                } as { guess: POIWithDistance, cumulatedDistance: number };
             })
             .filter((guess): guess is { guess: POIWithDistance, cumulatedDistance: number } => guess !== undefined)
-            .sort((a, b) => a.cumulatedDistance - b.cumulatedDistance)
+            .sort((a, b) => a.cumulatedDistance - b.cumulatedDistance);
+
+        // @ts-ignore
+        // if (location.latitude == "51.564596") {
+        //     debugger;
+        // }
+
+        const reSeenPoints = intermediate
             .reduce((acc, guess) => {
                 if (acc.minDistance < guess.cumulatedDistance) return acc;
                 if (acc.minDistance === guess.cumulatedDistance) {
