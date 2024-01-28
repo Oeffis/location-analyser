@@ -64,11 +64,6 @@ export class LocationAnalyzer {
             .filter((guess): guess is { guess: POIWithDistance, cumulatedDistance: number } => guess !== undefined)
             .sort((a, b) => a.cumulatedDistance - b.cumulatedDistance);
 
-        // @ts-ignore
-        // if (location.latitude == "51.564596") {
-        //     debugger;
-        // }
-
         const reSeenPoints = intermediate
             .reduce((acc, guess) => {
                 if (acc.minDistance < guess.cumulatedDistance) return acc;

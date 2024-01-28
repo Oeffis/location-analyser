@@ -169,16 +169,16 @@ latitude,longitude,result
 51.578323,7.058358,route 222 from Marl Sinsen Wacholderstraße to Gelsenkirchen Buer Rathaus
 51.578301,7.058212,route 222 from Marl Sinsen Wacholderstraße to Gelsenkirchen Buer Rathaus
 51.578291,7.058057,"stop Buer Rathaus, route 381 from Gelsenkirchen Landschede to Gelsenkirchen Buer Rathaus, route NE11 from Gelsenkirchen Hauptbahnhof to Gelsenkirchen Buer Rathaus, route 398 from Gelsenkirchen Schäferstraße to Gelsenkirchen Buer Rathaus, route NE12 from Gelsenkirchen Südfriedhof to Gelsenkirchen Buer Rathaus, route 396 from Gelsenkirchen Lucasstraße to Gelsenkirchen Buer Rathaus, route NE14 from Gelsenkirchen Landschede to Gelsenkirchen Buer Rathaus, route ""Dorsten from ""Gelsenkirchen to  Buer Rathaus"", route 380 from Gelsenkirchen Hauptbahnhof/ZOB to Gelsenkirchen Buer Rathaus, route 381 from Gelsenkirchen Landschede to Gelsenkirchen Buer Rathaus, route 397 from Gelsenkirchen Im Eichkamp to Gelsenkirchen Buer Rathaus, route 399 from Gelsenkirchen Fachhochschule to Gelsenkirchen Buer Rathaus, route NE10 from Bochum Hauptbahnhof to Gelsenkirchen Buer Rathaus, route 396 from Gelsenkirchen Lucasstraße to Gelsenkirchen Buer Rathaus, route Herten Mitte from ""Gelsenkirchen to  Buer Rathaus"", route Herten Mitte from ""Gelsenkirchen to  Buer Rathaus"", route 222 from Gelsenkirchen Buer Rathaus to Marl Sinsen Wacholderstraße"
-51.578279,7.057903,"stop Buer Rathaus, route 381 from Gelsenkirchen Landschede to Gelsenkirchen Buer Rathaus, route NE11 from Gelsenkirchen Hauptbahnhof to Gelsenkirchen Buer Rathaus, route 398 from Gelsenkirchen Schäferstraße to Gelsenkirchen Buer Rathaus, route NE12 from Gelsenkirchen Südfriedhof to Gelsenkirchen Buer Rathaus, route 396 from Gelsenkirchen Lucasstraße to Gelsenkirchen Buer Rathaus, route 399 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Fachhochschule, route NE14 from Gelsenkirchen Landschede to Gelsenkirchen Buer Rathaus, route 396 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Lucasstraße, route ""Dorsten from ""Gelsenkirchen to  Buer Rathaus"", route 380 from Gelsenkirchen Hauptbahnhof/ZOB to Gelsenkirchen Buer Rathaus, route 381 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Landschede, route 381 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Landschede, route 381 from Gelsenkirchen Landschede to Gelsenkirchen Buer Rathaus, route 397 from Gelsenkirchen Im Eichkamp to Gelsenkirchen Buer Rathaus, route 398 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Schäferstraße, route 399 from Gelsenkirchen Fachhochschule to Gelsenkirchen Buer Rathaus, route NE14 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Landschede, route NE10 from Bochum Hauptbahnhof to Gelsenkirchen Buer Rathaus, route NE10 from Gelsenkirchen Buer Rathaus to Bochum Hauptbahnhof, route 396 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Lucasstraße, route 396 from Gelsenkirchen Lucasstraße to Gelsenkirchen Buer Rathaus, route Herten Mitte from ""Gelsenkirchen to  Buer Rathaus"", route Herten Mitte from ""Gelsenkirchen to  Buer Rathaus"", route 222 from Gelsenkirchen Buer Rathaus to Marl Sinsen Wacholderstraße"
-51.578185,7.057841,"route NE11 from Gelsenkirchen Hauptbahnhof to Gelsenkirchen Buer Rathaus, route NE12 from Gelsenkirchen Südfriedhof to Gelsenkirchen Buer Rathaus, route ""Dorsten from ""Gelsenkirchen to  Buer Rathaus"", route 380 from Gelsenkirchen Hauptbahnhof/ZOB to Gelsenkirchen Buer Rathaus, route 397 from Gelsenkirchen Im Eichkamp to Gelsenkirchen Buer Rathaus, route Herten Mitte from ""Gelsenkirchen to  Buer Rathaus"", route Herten Mitte from ""Gelsenkirchen to  Buer Rathaus"", route 222 from Gelsenkirchen Buer Rathaus to Marl Sinsen Wacholderstraße"
-51.578112,7.057727,"route NE11 from Gelsenkirchen Hauptbahnhof to Gelsenkirchen Buer Rathaus, route NE12 from Gelsenkirchen Südfriedhof to Gelsenkirchen Buer Rathaus, route ""Dorsten from ""Gelsenkirchen to  Buer Rathaus"", route 380 from Gelsenkirchen Hauptbahnhof/ZOB to Gelsenkirchen Buer Rathaus, route 397 from Gelsenkirchen Im Eichkamp to Gelsenkirchen Buer Rathaus, route Herten Mitte from ""Gelsenkirchen to  Buer Rathaus"", route Herten Mitte from ""Gelsenkirchen to  Buer Rathaus"", route 222 from Gelsenkirchen Buer Rathaus to Marl Sinsen Wacholderstraße"
+51.578279,7.057903,stop Buer Rathaus
+51.578185,7.057841,stop Buer Rathaus
+51.578112,7.057727,stop Buer Rathaus
 51.578043,7.057604,stop Buer Rathaus
 51.578024,7.057457,stop Buer Rathaus
 51.577969,7.057343,stop Buer Rathaus
-51.577933,7.057082,stop Buer Rathaus
-51.577893,7.056930,stop Buer Rathaus
+51.577933,7.057082,"stop Buer Rathaus, route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
+51.577893,7.056930,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.577866,7.056733,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
-51.577757,7.056622,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk, route 244 from  to "
+51.577757,7.056622,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.577667,7.056582,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.577541,7.056610,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.577451,7.056666,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
@@ -343,8 +343,8 @@ latitude,longitude,result
 51.555689,7.061853,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.555537,7.061937,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.555442,7.061985,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
-51.555359,7.062049,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
-51.555262,7.062098,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
+51.555359,7.062049,"stop VELTINS-Arena, Steig 2"
+51.555262,7.062098,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk, stop VELTINS-Arena, Steig 2"
 51.555152,7.062158,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.555006,7.062239,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.554828,7.062338,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
@@ -637,9 +637,9 @@ latitude,longitude,result
 51.521012,7.090177,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.520901,7.090248,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.520813,7.090297,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
-51.520689,7.090301,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
-51.520564,7.090349,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
-51.520447,7.090458,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
+51.520689,7.090301,stop Grillostraße
+51.520564,7.090349,"route 380 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Hauptbahnhof/ZOB, route 381 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Landschede, route 381 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Landschede, route 381 from Gelsenkirchen Kirschblütenweg to Gelsenkirchen Landschede, route 381 from Gelsenkirchen Kirschblütenweg to Gelsenkirchen Landschede, route NE11 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Hauptbahnhof, route NE10 from Gelsenkirchen Buer Rathaus to Bochum Hauptbahnhof"
+51.520447,7.090458,"route 384 from Gelsenkirchen Terneddenstraße to Herne Wanne-Eickel Hauptbahnhof, route 381 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Landschede, route 381 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Landschede, route 381 from Gelsenkirchen Kirschblütenweg to Gelsenkirchen Landschede, route 381 from Gelsenkirchen Kirschblütenweg to Gelsenkirchen Landschede, route NE11 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Hauptbahnhof, route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.520273,7.090550,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.520182,7.090590,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.520089,7.090653,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
@@ -728,3 +728,16 @@ latitude,longitude,result
 51.511724,7.092943,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.511641,7.093016,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
 51.511558,7.093090,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk"
+51.524851,7.107083,none
+51.501655,7.105780,"route 302 from Bochum Langendreer to Gelsenkirchen Buer Rathaus, route 302 from Bochum O-Werk to Gelsenkirchen Buer Rathaus, stop Rheinelbestraße, route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk, stop Rheinelbestraße, route 385 from Bochum Zillertal to Gelsenkirchen Hauptbahnhof/ZOB, route 389 from Bochum Zilleweg to Gelsenkirchen Hauptbahnhof/ZOB, route 385 from Bochum Keplerweg Wendeschleife to Gelsenkirchen Hauptbahnhof/ZOB, route 389 from Gelsenkirchen Hauptbahnhof/ZOB to Bochum Zilleweg, route 385 from Gelsenkirchen Hauptbahnhof/ZOB to Bochum Keplerweg Wendeschleife, route NE12 from Gelsenkirchen Buer Rathaus to Gelsenkirchen Südfriedhof, route 385 from Gelsenkirchen Hauptbahnhof/ZOB to Bochum Zillertal"
+51.501574,7.105861,"route 302 from Gelsenkirchen Buer Rathaus to Bochum Langendreer, route 302 from Gelsenkirchen Buer Rathaus to Bochum O-Werk, stop Rheinelbestraße, stop Rheinelbestraße"
+51.501481,7.105901,stop Rheinelbestraße
+51.501427,7.106028,stop Rheinelbestraße
+51.501392,7.105896,stop Rheinelbestraße
+51.501471,7.105816,stop Rheinelbestraße
+51.501554,7.105753,stop Rheinelbestraße
+51.501635,7.105639,stop Rheinelbestraße
+51.501708,7.105540,stop Rheinelbestraße
+51.501797,7.105476,stop Rheinelbestraße
+51.501878,7.105385,stop Rheinelbestraße
+51.501917,7.105322,stop Rheinelbestraße
