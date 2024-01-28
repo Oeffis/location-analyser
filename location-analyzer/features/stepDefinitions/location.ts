@@ -134,6 +134,13 @@ Then<LocationAnalyzerWorld>("the following vehicles and stops should be detected
     assert.isAtLeast(score, previousScores.base, `Score has declined, was ${previousScores.base}%, is now ${score}%`);
     assert.isAtLeast(scoreAllowingExtra, previousScores.allowingExtra, `Score allowing extra has declined, was ${previousScores.allowingExtra}%, is now ${scoreAllowingExtra}%`);
 
+    if (score > previousScores.base) {
+        this.postRunLog(`🚀 Score has improved, was ${previousScores.base}%, is now ${score}%`);
+    }
+    if (scoreAllowingExtra > previousScores.allowingExtra) {
+        this.postRunLog(`🚀 Score allowing extra has improved, was ${previousScores.allowingExtra}%, is now ${scoreAllowingExtra}%`);
+    }
+
     writeFileSync("features/data/testTrackScores.json", JSON.stringify({ base: score, allowingExtra: scoreAllowingExtra }));
 
     // console.log(`Score is ${score}% (${correct} correct, ${wrong} wrong)`);

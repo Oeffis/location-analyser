@@ -1,4 +1,4 @@
-import { setWorldConstructor } from "@cucumber/cucumber";
+import { AfterAll, setWorldConstructor } from "@cucumber/cucumber";
 import { assert } from "chai";
 import { RouteWithDistance, StopWithDistance } from "../src/distanceCalculator.js";
 import { GeoLocation, GeoPosition, LocationAnalyzer, ResultStatus, Route, Status } from "../src/locationAnalyzer.js";
@@ -9,6 +9,17 @@ import { getVrrStops } from "./getVrrStops.js";
 type Coords = CoordPair | CoordPairWithAccuracy | GeoPosition | GeoLocation;
 type CoordPair = [number, number];
 type CoordPairWithAccuracy = [number, number, number];
+
+const postRunMessages: string[] = [];
+AfterAll(function () {
+    if (postRunMessages.length === 0) return;
+
+    console.log("\n\n");
+    console.log("Post-run messages:");
+    for (const message of postRunMessages) {
+        console.log(message);
+    }
+});
 
 export class LocationAnalyzerWorld {
     protected locationAnalyzer: LocationAnalyzer = new LocationAnalyzer();
@@ -81,6 +92,10 @@ export class LocationAnalyzerWorld {
         assert.isDefined(stop, "No stop found");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return stop!;
+    }
+
+    public postRunLog(...messages: string[]): void {
+        postRunMessages.push(...messages);
     }
 }
 
