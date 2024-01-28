@@ -3,9 +3,11 @@ import { assert } from "chai";
 import { parse, stringify } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
-import { GeoPosition, Status, isStopDistance } from "../../src/locationAnalyzer.js";
+import { GeoPosition, ResultStatus, Status, isStopDistance } from "../../src/locationAnalyzer.js";
 import { LocationAnalyzerWorld } from "../world.js";
 import { locationMap } from "./helpers/locationMap.js";
+
+interface RawDataTable { rawTable: string[][] }
 
 Given<LocationAnalyzerWorld>("I am at {string}", function (location: string) {
     const locationCoords = locationMap[location]?.location;
@@ -72,9 +74,24 @@ When<LocationAnalyzerWorld>("my next positions are back on the track", function 
     this.updatePosition([51.513563, 7.092461, 4.921717638301804], [51.513493, 7.092314, 4.830296054452409]);
 });
 
-Then<LocationAnalyzerWorld>("the data output over time is correct", function () {
+Then<LocationAnalyzerWorld>("the following vehicles and stops should be detected", function (data: RawDataTable) {
     assert.equal(this.statusList.length, this.track.length);
+    printSimulationResults(this.statusList, this.track);
 
+    const expectedValues = data.rawTable.slice(1).map(row => {
+        const startTime = row[0];
+    });
+
+});
+
+Then<LocationAnalyzerWorld>("there are {int} pois left", function (amount: number) {
+    const status = this.getStatus();
+    assert.equal(status.guesses.length, amount, `Expected ${amount} pois, but got ${status.guesses.length}`);
+});
+
+type Direction = "north" | "east" | "south" | "west";
+
+function printSimulationResults(statusList: ResultStatus[], track: GeoPosition[]): void {
     function makeOutput(status: Status): string {
         if (status.guesses.length === 0) return "none";
 
@@ -87,23 +104,15 @@ Then<LocationAnalyzerWorld>("the data output over time is correct", function () 
         }).join(", ");
     }
 
-    const results = this.statusList.map((status, index) => ({
-        latitude: this.track[index]?.latitude,
-        longitude: this.track[index]?.longitude,
+    const results = statusList.map((status, index) => ({
+        latitude: track[index]?.latitude,
+        longitude: track[index]?.longitude,
         result: makeOutput(status)
     }));
 
     writeFileSync("features/data/testTrackResults.csv", stringify(results, { header: true }));
-    // const expectedResults = parse("features/data/testTrackResults.csv", { columns: true }) as { latitude: string, longitude: string, result: string }[];
-    // assert.deepEqual(results, expectedResults);
-});
+}
 
-Then<LocationAnalyzerWorld>("there are {int} pois left", function (amount: number) {
-    const status = this.getStatus();
-    assert.equal(status.guesses.length, amount, `Expected ${amount} pois, but got ${status.guesses.length}`);
-});
-
-type Direction = "north" | "east" | "south" | "west";
 function directionToBearing(direction: Direction): number {
     const directionToBearingMap = {
         north: 0,
