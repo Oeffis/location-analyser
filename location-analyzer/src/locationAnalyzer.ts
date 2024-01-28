@@ -198,6 +198,7 @@ export interface Stop {
 
 export interface GeoPosition extends GeoLocation {
     accuracy: number;
+    speed: number;
 }
 
 export interface GeoLocation {

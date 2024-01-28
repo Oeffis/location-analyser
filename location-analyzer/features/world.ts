@@ -6,9 +6,9 @@ import { TransitPOI } from "../src/routeMap.js";
 import { getVrrRoutes } from "./getVrrRoutes.js";
 import { getVrrStops } from "./getVrrStops.js";
 
-type Coords = CoordPair | CoordPairWithAccuracy | GeoPosition | GeoLocation;
+type Coords = CoordPair | CoordPairWithAccuracyAndSpeed | GeoPosition | GeoLocation;
 type CoordPair = [number, number];
-type CoordPairWithAccuracy = [number, number, number];
+type CoordPairWithAccuracyAndSpeed = [number, number, number, number];
 
 const postRunMessages: string[] = [];
 AfterAll(function () {
@@ -38,11 +38,12 @@ export class LocationAnalyzerWorld {
         }
     }
 
-    protected updatePositionFromArray(position: CoordPair | CoordPairWithAccuracy): void {
+    protected updatePositionFromArray(position: CoordPair | CoordPairWithAccuracyAndSpeed): void {
         const status = this.locationAnalyzer.updatePosition({
             latitude: position[0],
             longitude: position[1],
-            accuracy: position[2] ?? 4
+            accuracy: position[2] ?? 4,
+            speed: position[3] ?? 1
         });
         this.statusList.push(status);
     }
@@ -51,6 +52,7 @@ export class LocationAnalyzerWorld {
         const coords: CoordPair = [position.latitude, position.longitude];
         if (isLocationPosition(position)) {
             coords.push(position.accuracy);
+            coords.push(position.speed);
         }
         this.updatePositionFromArray(coords);
     }
