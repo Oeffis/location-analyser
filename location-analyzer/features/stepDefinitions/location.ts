@@ -4,7 +4,7 @@ import { parse, stringify } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
 import { GeoPosition, ResultStatus, Status, isStopDistance } from "../../src/locationAnalyzer.js";
-import { LocationAnalyzerWorld } from "../world.js";
+import { LocationAnalyzerWorld, TrackSection } from "../world.js";
 import { locationMap } from "./helpers/locationMap.js";
 
 interface RawDataTable { rawTable: string[][] }
@@ -78,10 +78,66 @@ Then<LocationAnalyzerWorld>("the following vehicles and stops should be detected
     assert.equal(this.statusList.length, this.track.length);
     printSimulationResults(this.statusList, this.track);
 
-    const expectedValues = data.rawTable.slice(1).map(row => {
+    const expectedRules = data.rawTable.slice(1).map(row => {
         const startTime = row[0];
+        const endTime = row[1];
+        const vehicleOrStop = row[2];
+        return { startTime, endTime, vehicleOrStop };
     });
 
+    let correct = 0;
+    let wrong = 0;
+    let correctAllowingExtra = 0;
+    let wrongAllowingExtra = 0;
+
+    for (let trackIndex = 0; trackIndex < this.track.length; trackIndex++) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const trackSection = this.track[trackIndex]!;
+        const status = this.statusList[trackIndex] ?? { guesses: [] };
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const expected = expectedRules.filter(rule => rule.startTime! <= trackSection["date-local"].slice(11, 19)! && rule.endTime! >= trackSection["date-local"].slice(11, 19)!);
+        if (expected.length === 0) continue;
+
+        const matched = status.guesses.filter(guess => {
+            if (isStopDistance(guess)) {
+                return expected.some(rule => rule.vehicleOrStop === guess.poi.name);
+            }
+            const targetString = `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}'`;
+            return expected.some(rule => rule.vehicleOrStop === targetString);
+        });
+
+        if (matched.length === status.guesses.length) {
+            correct++;
+        } else {
+            wrong++;
+        }
+
+        if (matched.length === expected.length) {
+            correctAllowingExtra++;
+        } else {
+            wrongAllowingExtra++;
+        }
+    }
+
+    const score = parseFloat((correct * 100 / (correct + wrong)).toFixed(2));
+    const scoreAllowingExtra = parseFloat((correctAllowingExtra * 100 / (correctAllowingExtra + wrongAllowingExtra)).toFixed(2));
+
+    let previousScores: { base: number, allowingExtra: number };
+    try {
+        const file = readFileSync("features/data/testTrackScores.json", { encoding: "utf-8" });
+        previousScores = JSON.parse(file) as { base: number, allowingExtra: number };
+    } catch {
+        previousScores = { base: 0, allowingExtra: 0 };
+    }
+
+    assert.isAtLeast(score, previousScores.base, `Score has declined, was ${previousScores.base}%, is now ${score}%`);
+    assert.isAtLeast(scoreAllowingExtra, previousScores.allowingExtra, `Score allowing extra has declined, was ${previousScores.allowingExtra}%, is now ${scoreAllowingExtra}%`);
+
+    writeFileSync("features/data/testTrackScores.json", JSON.stringify({ base: score, allowingExtra: scoreAllowingExtra }));
+
+    // console.log(`Score is ${score}% (${correct} correct, ${wrong} wrong)`);
+    // console.log(`Score including extra is ${scoreIncludingExtra}% (${correctIncludingExtra} correct, ${wrongIncludingExtra} wrong)`);
 });
 
 Then<LocationAnalyzerWorld>("there are {int} pois left", function (amount: number) {

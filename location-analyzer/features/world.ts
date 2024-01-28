@@ -15,7 +15,7 @@ export class LocationAnalyzerWorld {
     public expectedRoutes: Partial<Route>[] = [];
     public routeOrderMatters = true;
     public statusList: ResultStatus[] = [];
-    public track: GeoPosition[] = [];
+    public track: TrackSection[] = [];
 
     public updatePosition(...positions: Coords[]): void {
         for (const position of positions) {
@@ -88,4 +88,13 @@ setWorldConstructor(LocationAnalyzerWorld);
 
 function isLocationPosition(position: GeoPosition | GeoLocation): position is GeoPosition {
     return Object.hasOwn(position, "accuracy");
+}
+
+export interface TrackSection extends GeoPosition {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    "date-gmt": string;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    "date-local": string;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    "date-relative": string;
 }
