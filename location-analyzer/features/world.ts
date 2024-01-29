@@ -1,5 +1,7 @@
-import { AfterAll, setWorldConstructor } from "@cucumber/cucumber";
+import { AfterAll, BeforeAll, setWorldConstructor } from "@cucumber/cucumber";
 import { assert } from "chai";
+import { parse } from "csv/sync";
+import { readFileSync, writeFileSync } from "fs";
 import { RouteWithDistance, StopWithDistance } from "../src/distanceCalculator.js";
 import { GeoLocation, GeoPosition, LocationAnalyzer, ResultStatus, Route, Status } from "../src/locationAnalyzer.js";
 import { TransitPOI } from "../src/routeMap.js";
@@ -9,6 +11,26 @@ import { getVrrStops } from "./getVrrStops.js";
 type Coords = CoordPair | CoordPairWithAccuracyAndSpeed | GeoPosition | GeoLocation;
 type CoordPair = [number, number];
 type CoordPairWithAccuracyAndSpeed = [number, number, number, number];
+
+interface TrackScores {
+    base: number;
+    allowingExtra: number;
+}
+
+let previousScores: Record<number, TrackScores>;
+
+BeforeAll(function () {
+    try {
+        const file = readFileSync("features/data/testTrackScores.json", { encoding: "utf-8" });
+        previousScores = JSON.parse(file) as Record<number, TrackScores>;
+    } catch {
+        previousScores = {};
+    }
+});
+
+AfterAll(function () {
+    writeFileSync(`features/data/testTrackScores.json`, JSON.stringify(previousScores));
+});
 
 const postRunMessages: string[] = [];
 AfterAll(function () {
@@ -27,6 +49,7 @@ export class LocationAnalyzerWorld {
     public routeOrderMatters = true;
     public statusList: ResultStatus[] = [];
     public track: TrackSection[] = [];
+    public usedTrack?: number;
 
     public updatePosition(...positions: Coords[]): void {
         for (const position of positions) {
@@ -98,6 +121,26 @@ export class LocationAnalyzerWorld {
 
     public postRunLog(...messages: string[]): void {
         postRunMessages.push(...messages);
+    }
+
+    public simulateTrack(trackNumber: number): void {
+        this.usedTrack = trackNumber;
+        const data = readFileSync(`features/data/testTrack${trackNumber}.csv`);
+        this.track = parse(data, { columns: true, delimiter: ";" }) as TrackSection[];
+
+        this.updatePosition(...this.track);
+    }
+
+    public getScore(): TrackScores {
+        const trackNumber = this.usedTrack;
+        if (trackNumber === undefined) throw new Error("No track was simulated");
+        return previousScores[trackNumber] ?? { base: 0, allowingExtra: 0 };
+    }
+
+    public updateScore(score: TrackScores): void {
+        const trackNumber = this.usedTrack;
+        if (trackNumber === undefined) throw new Error("No track was simulated");
+        previousScores[trackNumber] = score;
     }
 }
 

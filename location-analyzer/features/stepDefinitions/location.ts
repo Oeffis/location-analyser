@@ -1,10 +1,10 @@
 import { Given, Then, When } from "@cucumber/cucumber";
 import { assert } from "chai";
-import { parse, stringify } from "csv/sync";
-import { readFileSync, writeFileSync } from "fs";
+import { stringify } from "csv/sync";
+import { writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
 import { GeoPosition, ResultStatus, Status, isStopDistance } from "../../src/locationAnalyzer.js";
-import { LocationAnalyzerWorld, TrackSection } from "../world.js";
+import { LocationAnalyzerWorld } from "../world.js";
 import { locationMap } from "./helpers/locationMap.js";
 
 interface RawDataTable { rawTable: string[][] }
@@ -28,6 +28,7 @@ Given<LocationAnalyzerWorld>("I am {double} m {word} of {string}", function (dis
 Given<LocationAnalyzerWorld>("No location was set", function () {
     // This is the default
 });
+
 
 
 Given<LocationAnalyzerWorld>("I travel on the 302 from Kennedyplatz to Musiktheater station", function () {
@@ -75,6 +76,17 @@ When<LocationAnalyzerWorld>("my next positions are back on the track", function 
 });
 
 Then<LocationAnalyzerWorld>("the following vehicles and stops should be detected", function (data: RawDataTable) {
+    checkTrack.call(this, data);
+});
+
+Then<LocationAnalyzerWorld>("there are {int} pois left", function (amount: number) {
+    const status = this.getStatus();
+    assert.equal(status.guesses.length, amount, `Expected ${amount} pois, but got ${status.guesses.length}`);
+});
+
+type Direction = "north" | "east" | "south" | "west";
+
+function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
     assert.equal(this.statusList.length, this.track.length);
     printSimulationResults(this.statusList, this.track);
 
@@ -129,36 +141,19 @@ Then<LocationAnalyzerWorld>("the following vehicles and stops should be detected
     const score = parseFloat((correct * 100 / (correct + wrong)).toFixed(2));
     const scoreAllowingExtra = parseFloat((correctAllowingExtra * 100 / (correctAllowingExtra + wrongAllowingExtra)).toFixed(2));
 
-    let previousScores: { base: number, allowingExtra: number };
-    try {
-        const file = readFileSync("features/data/testTrackScores.json", { encoding: "utf-8" });
-        previousScores = JSON.parse(file) as { base: number, allowingExtra: number };
-    } catch {
-        previousScores = { base: 0, allowingExtra: 0 };
-    }
-
+    const previousScores = this.getScore();
     assert.isAtLeast(score, previousScores.base, `Score has declined, was ${previousScores.base}%, is now ${score}%`);
     assert.isAtLeast(scoreAllowingExtra, previousScores.allowingExtra, `Score allowing extra has declined, was ${previousScores.allowingExtra}%, is now ${scoreAllowingExtra}%`);
 
     if (score > previousScores.base) {
-        this.postRunLog(`🚀 Score has improved, was ${previousScores.base}%, is now ${score}%`);
+        this.postRunLog(`🚀 Score of track ${this.usedTrack} has improved, was ${previousScores.base}%, is now ${score}%`);
     }
     if (scoreAllowingExtra > previousScores.allowingExtra) {
-        this.postRunLog(`🚀 Score allowing extra has improved, was ${previousScores.allowingExtra}%, is now ${scoreAllowingExtra}%`);
+        this.postRunLog(`🚀 Score of track ${this.usedTrack} allowing extra has improved, was ${previousScores.allowingExtra}%, is now ${scoreAllowingExtra}%`);
     }
 
-    writeFileSync("features/data/testTrackScores.json", JSON.stringify({ base: score, allowingExtra: scoreAllowingExtra }));
-
-    // console.log(`Score is ${score}% (${correct} correct, ${wrong} wrong)`);
-    // console.log(`Score including extra is ${scoreIncludingExtra}% (${correctIncludingExtra} correct, ${wrongIncludingExtra} wrong)`);
-});
-
-Then<LocationAnalyzerWorld>("there are {int} pois left", function (amount: number) {
-    const status = this.getStatus();
-    assert.equal(status.guesses.length, amount, `Expected ${amount} pois, but got ${status.guesses.length}`);
-});
-
-type Direction = "north" | "east" | "south" | "west";
+    this.updateScore({ base: score, allowingExtra: scoreAllowingExtra });
+}
 
 function printSimulationResults(statusList: ResultStatus[], track: GeoPosition[]): void {
     function makeOutput(status: Status): string {
