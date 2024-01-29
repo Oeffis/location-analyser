@@ -3,7 +3,7 @@ import { assert } from "chai";
 import { stringify } from "csv/sync";
 import { writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
-import { GeoPosition, ResultStatus, Status, isStopDistance } from "../../src/locationAnalyzer.js";
+import { Status, isStopDistance } from "../../src/locationAnalyzer.js";
 import { LocationAnalyzerWorld } from "../world.js";
 import { locationMap } from "./helpers/locationMap.js";
 
@@ -88,7 +88,7 @@ type Direction = "north" | "east" | "south" | "west";
 
 function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
     assert.equal(this.statusList.length, this.track.length);
-    printSimulationResults(this.statusList, this.track);
+    printSimulationResults.call(this);
 
     const expectedRules = data.rawTable.slice(1).map(row => {
         const startTime = row[0];
@@ -125,13 +125,14 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
             return expected.some(rule => rule.vehicleOrStop === targetString);
         });
 
-        if (matched.length === status.guesses.length) {
+        const allMatched = matched.length === status.guesses.length;
+        if (allMatched) {
             correct++;
         } else {
             wrong++;
         }
 
-        if (matched.length === expected.length && expected.length > 0) {
+        if (matched.length === expected.length && expected.length > 0 || status.guesses.length === 0) {
             correctAllowingExtra++;
         } else {
             wrongAllowingExtra++;
@@ -155,7 +156,7 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
     this.updateScore({ base: score, allowingExtra: scoreAllowingExtra });
 }
 
-function printSimulationResults(statusList: ResultStatus[], track: GeoPosition[]): void {
+function printSimulationResults(this: LocationAnalyzerWorld): void {
     function makeOutput(status: Status): string {
         if (status.guesses.length === 0) return "none";
 
@@ -168,13 +169,13 @@ function printSimulationResults(statusList: ResultStatus[], track: GeoPosition[]
         }).join(", ");
     }
 
-    const results = statusList.map((status, index) => ({
-        latitude: track[index]?.latitude,
-        longitude: track[index]?.longitude,
+    const results = this.statusList.map((status, index) => ({
+        latitude: this.track[index]?.latitude,
+        longitude: this.track[index]?.longitude,
         result: makeOutput(status)
     }));
 
-    writeFileSync("features/data/testTrackResults.csv", stringify(results, { header: true }));
+    writeFileSync(`features/data/testTrack${this.usedTrack}Results.csv`, stringify(results, { header: true }));
 }
 
 function directionToBearing(direction: Direction): number {
