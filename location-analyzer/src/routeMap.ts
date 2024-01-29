@@ -124,40 +124,44 @@ class GeoMapKey {
     protected static readonly ROUNDING_FACTOR = Math.pow(10, GeoMapKey.DIGITS_AFTER_DECIMAL);
     protected static readonly TILING_FACTOR = Math.pow(10, GeoMapKey.TOTAL_DIGITS);
 
-    public constructor(
-        public readonly latitude: number,
-        public readonly longitude: number
-    ) {
-        this.latitude = GeoMapKey.round(latitude);
-        this.longitude = GeoMapKey.round(longitude);
-    }
+    protected constructor(
+        protected readonly latInt: number,
+        protected readonly lonInt: number
+    ) { }
 
-    protected static round(value: number): number {
-        return Math.round(value * GeoMapKey.ROUNDING_FACTOR) / GeoMapKey.ROUNDING_FACTOR;
+    protected static toRoundedInt(value: number): number {
+        return Math.round(value * GeoMapKey.ROUNDING_FACTOR);
     }
 
     public numeric(): number {
-        return this.latitude * GeoMapKey.TILING_FACTOR + this.longitude;
+        return this.latInt * GeoMapKey.TILING_FACTOR + this.lonInt;
     }
 
     public withLatOffset(latOffset: number): GeoMapKey {
-        return new GeoMapKey(this.latitude + latOffset, this.longitude);
+        return new GeoMapKey(this.latInt + latOffset, this.lonInt);
     }
 
     public withLonOffset(lonOffset: number): GeoMapKey {
-        return new GeoMapKey(this.latitude, this.longitude + lonOffset);
+        return new GeoMapKey(this.latInt, this.lonInt + lonOffset);
+    }
+
+    public static fromRaw(latitude: number, longitude: number): GeoMapKey {
+        return new GeoMapKey(
+            GeoMapKey.toRoundedInt(latitude),
+            GeoMapKey.toRoundedInt(longitude)
+        );
     }
 
     public static fromGeoLocation(location: GeoLocation): GeoMapKey {
-        return new GeoMapKey(location.latitude, location.longitude);
+        return GeoMapKey.fromRaw(location.latitude, location.longitude);
     }
 
     public static fromSection(section: Section): GeoMapKey {
-        return new GeoMapKey(section.lat, section.lon);
+        return GeoMapKey.fromRaw(section.lat, section.lon);
     }
 
     public static fromStopBoundaryPoint(boundary: GeoLocation): GeoMapKey {
-        return new GeoMapKey(boundary.latitude, boundary.longitude);
+        return GeoMapKey.fromRaw(boundary.latitude, boundary.longitude);
     }
 }
 
