@@ -17,19 +17,30 @@ interface TrackScores {
     allowingExtra: number;
 }
 
-let previousScores: Record<number, TrackScores>;
+let originalScores: Record<number, TrackScores>;
+let scores: Record<number, TrackScores>;
 
 BeforeAll(function () {
     try {
         const file = readFileSync("features/data/testTrackScores.json", { encoding: "utf-8" });
-        previousScores = JSON.parse(file) as Record<number, TrackScores>;
+        originalScores = JSON.parse(file) as Record<number, TrackScores>;
     } catch {
-        previousScores = {};
+        originalScores = {};
     }
+    scores = { ...originalScores };
 });
 
 AfterAll(function () {
-    writeFileSync(`features/data/testTrackScores.json`, JSON.stringify(previousScores));
+    // if all scores are better than the previous ones, write them to the file
+    const allBetter = Object.keys(scores).every(score => {
+        const current = scores[parseInt(score)];
+        const original = originalScores[parseInt(score)];
+        if (current === undefined || original === undefined) return true;
+        return current.base > original.base && current.allowingExtra > original.allowingExtra;
+    });
+    if (allBetter) {
+        writeFileSync("features/data/testTrackScores.json", JSON.stringify(scores, undefined, 4));
+    }
 });
 
 const postRunMessages: string[] = [];
@@ -134,13 +145,13 @@ export class LocationAnalyzerWorld {
     public getScore(): TrackScores {
         const trackNumber = this.usedTrack;
         if (trackNumber === undefined) throw new Error("No track was simulated");
-        return previousScores[trackNumber] ?? { base: 0, allowingExtra: 0 };
+        return scores[trackNumber] ?? { base: 0, allowingExtra: 0 };
     }
 
     public updateScore(score: TrackScores): void {
         const trackNumber = this.usedTrack;
         if (trackNumber === undefined) throw new Error("No track was simulated");
-        previousScores[trackNumber] = score;
+        scores[trackNumber] = score;
     }
 }
 

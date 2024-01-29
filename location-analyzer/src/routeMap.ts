@@ -50,48 +50,54 @@ export class RouteMap {
         }
         consecutiveSection.forEach((section, index, others) => {
             const next = others[index + 1];
-            if (next === undefined) {
-                return;
-            }
+            if (next === undefined) return;
             this.addSection(section, next, route);
         });
     }
 
     protected addSection(section: Section, next: Section, route: Route): void {
-        const key = GeoMapKey.fromSection(section).numeric();
-        const routes = this.coordinateMap.get(key) ?? [];
-        routes.push({
-            poi: route,
-            consecutiveSection: section.consecutiveSection,
-            section: section.sequence,
-            start: {
-                latitude: section.lat,
-                longitude: section.lon
-            },
-            end: {
-                latitude: next.lat,
-                longitude: next.lon
-            }
-        } as RouteReference);
-        this.coordinateMap.set(key, routes);
+        const keys = GeoMapKey
+            .fromSection(section, next)
+            .map(key => key.numeric());
+
+        for (const key of keys) {
+            const routes = this.coordinateMap.get(key) ?? [];
+            routes.push({
+                poi: route,
+                consecutiveSection: section.consecutiveSection,
+                section: section.sequence,
+                start: {
+                    latitude: section.lat,
+                    longitude: section.lon
+                },
+                end: {
+                    latitude: next.lat,
+                    longitude: next.lon
+                }
+            } as RouteReference);
+            this.coordinateMap.set(key, routes);
+        }
     }
 
     protected addStop(stop: Stop): void {
         stop.boundaries.forEach((section, index, others) => {
             const next = others[index + 1];
+            if (next === undefined) return;
             this.addStopBoundary(section, next, stop);
         });
     }
 
-    protected addStopBoundary(location: GeoLocation, next: GeoLocation | undefined, stop: Stop): void {
-        const key = GeoMapKey.fromGeoLocation(location).numeric();
-        const routes = this.coordinateMap.get(key) ?? [];
-        routes.push({
-            poi: stop,
-            start: location,
-            end: next
-        });
-        this.coordinateMap.set(key, routes);
+    protected addStopBoundary(location: GeoLocation, next: GeoLocation, stop: Stop): void {
+        const keys = GeoMapKey.fromStopBoundary(location, next);
+        for (const key of keys) {
+            const routes = this.coordinateMap.get(key.numeric()) ?? [];
+            routes.push({
+                poi: stop,
+                start: location,
+                end: next
+            } as StopReference);
+            this.coordinateMap.set(key.numeric(), routes);
+        }
     }
 
     public getPOIsAtLocation(location: GeoLocation): POIReference[] {
@@ -117,7 +123,7 @@ export class RouteMap {
 
 class GeoMapKey {
     protected static readonly DIGITS_BEFORE_DECIMAL = 3;
-    protected static readonly DIGITS_AFTER_DECIMAL = 2;
+    protected static readonly DIGITS_AFTER_DECIMAL = 3;
     protected static readonly TOTAL_DIGITS =
         GeoMapKey.DIGITS_BEFORE_DECIMAL
         + GeoMapKey.DIGITS_AFTER_DECIMAL;
@@ -156,12 +162,31 @@ class GeoMapKey {
         return GeoMapKey.fromRaw(location.latitude, location.longitude);
     }
 
-    public static fromSection(section: Section): GeoMapKey {
-        return GeoMapKey.fromRaw(section.lat, section.lon);
+    public static fromSection(section: Section, sectionEnd: Section): GeoMapKey[] {
+        const start = GeoMapKey.fromRaw(section.lat, section.lon);
+        const end = GeoMapKey.fromRaw(sectionEnd.lat, sectionEnd.lon);
+
+        return GeoMapKey.fromRange(start.latInt, end.latInt, start.lonInt, end.lonInt);
     }
 
-    public static fromStopBoundaryPoint(boundary: GeoLocation): GeoMapKey {
-        return GeoMapKey.fromRaw(boundary.latitude, boundary.longitude);
+    public static fromStopBoundary(boundary: GeoLocation, next: GeoLocation): GeoMapKey[] {
+        const start = GeoMapKey.fromRaw(boundary.latitude, boundary.longitude);
+        const end = GeoMapKey.fromRaw(next.latitude, next.longitude);
+
+        return GeoMapKey.fromRange(start.latInt, end.latInt, start.lonInt, end.lonInt);
+    }
+
+    protected static fromRange(startLat: number, endLat: number, startLon: number, endLon: number): GeoMapKey[] {
+        const keys = [];
+        [startLat, endLat] = [Math.min(startLat, endLat), Math.max(startLat, endLat)];
+        [startLon, endLon] = [Math.min(startLon, endLon), Math.max(startLon, endLon)];
+
+        for (let lat = startLat; lat <= endLat; lat++) {
+            for (let lon = startLon; lon <= endLon; lon++) {
+                keys.push(new GeoMapKey(lat, lon));
+            }
+        }
+        return keys;
     }
 }
 
