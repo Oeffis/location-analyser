@@ -28,25 +28,10 @@ Feature: Nearby Platforms Detection
     Scenario: Detects multiple nearby platforms
         Given I am at "Platform 7 of Gelsenkirchen Hbf"
         Then the ids of the nearest platforms are:
-            | 4250657    |
-            | 4250655    |
-            | 4250656    |
-            | 230302908  |
-            | 3826948947 |
-            | 3826948945 |
-            | 293112817  |
-            | 293112824  |
-            | 3119213571 |
-            | 454116273  |
-            | 454116278  |
-            | 454116276  |
-            | 3835813460 |
-            | 3835813457 |
-            | 293112785  |
-            | 293112790  |
-            | 448942759  |
-            | 448942760  |
-            | 293112656  |
+            | 4250657   |
+            | 4250655   |
+            | 4250656   |
+            | 230302908 |
 
     Scenario: No stops added
         Given I do not configure any stops initially

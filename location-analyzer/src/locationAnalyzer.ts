@@ -46,6 +46,7 @@ export class LocationAnalyzer {
                     const prePreviousDistance = this.history[this.history.length - 2]?.guesses.find(isGuessFor(guess.poi))?.distance.value;
                     if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
                     const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
+                    if (cumulatedDistance / 10 > location.accuracy) return undefined;
                     return {
                         guess,
                         cumulatedDistance
@@ -56,6 +57,7 @@ export class LocationAnalyzer {
                 const prePreviousDistance = this.history[this.history.length - 2]?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
                 if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
                 const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
+                if (cumulatedDistance / 3 > location.accuracy) return undefined;
                 return {
                     guess,
                     cumulatedDistance
