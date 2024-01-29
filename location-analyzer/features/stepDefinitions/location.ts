@@ -96,8 +96,14 @@ Then<LocationAnalyzerWorld>("the following vehicles and stops should be detected
         const status = this.statusList[trackIndex] ?? { guesses: [] };
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const expected = expectedRules.filter(rule => rule.startTime! <= trackSection["date-local"].slice(11, 19)! && rule.endTime! >= trackSection["date-local"].slice(11, 19)!);
+        let expected = expectedRules.filter(rule => rule.startTime! <= trackSection["date-local"].slice(11, 19)! && rule.endTime! >= trackSection["date-local"].slice(11, 19)!);
         if (expected.length === 0) continue;
+        if (expected.some(rule => rule.vehicleOrStop === "none")) {
+            if (expected.length > 1) {
+                throw new Error("You can't have 'none' and other rules at the same time");
+            }
+            expected = [];
+        }
 
         const matched = status.guesses.filter(guess => {
             if (isStopDistance(guess)) {
@@ -113,7 +119,7 @@ Then<LocationAnalyzerWorld>("the following vehicles and stops should be detected
             wrong++;
         }
 
-        if (matched.length === expected.length) {
+        if (matched.length === expected.length && expected.length > 0) {
             correctAllowingExtra++;
         } else {
             wrongAllowingExtra++;
