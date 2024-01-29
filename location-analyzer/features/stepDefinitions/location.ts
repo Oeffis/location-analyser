@@ -3,7 +3,7 @@ import { assert } from "chai";
 import { stringify } from "csv/sync";
 import { writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
-import { Status, isStopDistance } from "../../src/locationAnalyzer.js";
+import { isStopDistance } from "../../src/locationAnalyzer.js";
 import { LocationAnalyzerWorld } from "../world.js";
 import { locationMap } from "./helpers/locationMap.js";
 
@@ -88,7 +88,6 @@ type Direction = "north" | "east" | "south" | "west";
 
 function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
     assert.equal(this.statusList.length, this.track.length);
-    printSimulationResults.call(this);
 
     const expectedRules = data.rawTable.slice(1).map(row => {
         const startTime = row[0];
@@ -101,6 +100,7 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
     let wrong = 0;
     let correctAllowingExtra = 0;
     let wrongAllowingExtra = 0;
+    const output = [];
 
     for (let trackIndex = 0; trackIndex < this.track.length; trackIndex++) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -132,12 +132,31 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
             wrong++;
         }
 
-        if (matched.length === expected.length && expected.length > 0 || status.guesses.length === 0) {
+        const allowingExtraCorrect = matched.length === expected.length && expected.length > 0 || status.guesses.length === 0;
+        if (allowingExtraCorrect) {
             correctAllowingExtra++;
         } else {
             wrongAllowingExtra++;
         }
+
+        output.push({
+            correct: allMatched ? "✅" : "❌",
+            allowingExtra: allowingExtraCorrect ? "✅" : "❌",
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            "date-local": trackSection["date-local"].slice(11, 19),
+            latitude: trackSection.latitude,
+            longitude: trackSection.longitude,
+            result: status.guesses.map(guess => {
+                if (isStopDistance(guess)) {
+                    return guess.poi.name;
+                }
+                return `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}'`;
+            }).join(", ") || "none",
+            expected: expected.map(rule => rule.vehicleOrStop).join(", ") || "none"
+        });
     }
+
+    writeFileSync(`features/data/testTrack${this.usedTrack}Results.csv`, stringify(output, { header: true }));
 
     const score = parseFloat((correct * 100 / (correct + wrong)).toFixed(2));
     const scoreAllowingExtra = parseFloat((correctAllowingExtra * 100 / (correctAllowingExtra + wrongAllowingExtra)).toFixed(2));
@@ -154,28 +173,6 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
     }
 
     this.updateScore({ base: score, allowingExtra: scoreAllowingExtra });
-}
-
-function printSimulationResults(this: LocationAnalyzerWorld): void {
-    function makeOutput(status: Status): string {
-        if (status.guesses.length === 0) return "none";
-
-        return status.guesses.map(poi => {
-            if (isStopDistance(poi)) {
-                return `stop ${poi.poi.name || "without name"}`;
-            }
-
-            return `route ${poi.poi.ref} from ${poi.poi.from} to ${poi.poi.to}`;
-        }).join(", ");
-    }
-
-    const results = this.statusList.map((status, index) => ({
-        latitude: this.track[index]?.latitude,
-        longitude: this.track[index]?.longitude,
-        result: makeOutput(status)
-    }));
-
-    writeFileSync(`features/data/testTrack${this.usedTrack}Results.csv`, stringify(results, { header: true }));
 }
 
 function directionToBearing(direction: Direction): number {
