@@ -2,11 +2,13 @@ import { getDistance } from "geolib";
 import { Buffer } from "./buffer.js";
 import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistance } from "./distanceCalculator.js";
 import { TransitPOI, isRoute } from "./routeMap.js";
+import { InitialState } from "./states/initialState.js";
 
 export class LocationAnalyzer {
     protected readonly historyLimit = 10;
     protected readonly history = new Buffer<ResultStatus>(this.historyLimit);
     protected readonly distanceCalculator = new DistanceCalculator();
+    protected currentState = new InitialState();
 
     public constructor(pois: TransitPOI[] = []) {
         this.updatePOIs(pois);
@@ -34,63 +36,12 @@ export class LocationAnalyzer {
         const rightDirectionPois = this.getRightDirectionPois(location);
         const uniqueRightDirectionPois = this.keepClosestOfEachPoi(rightDirectionPois);
         const nearbyPlatforms = this.getNearbyPlatformsIn(uniqueRightDirectionPois);
-        const closePoints = uniqueRightDirectionPois
-            .filter(isCloserThan(location.accuracy))
-            .sort(byProximity);
-
-        const intermediate = uniqueRightDirectionPois
-            .map(guess => {
-                const currentDistance = guess.distance.value;
-                if (isRouteDistance(guess)) {
-                    const previousDistance = this.history.last()?.guesses.find(isGuessFor(guess.poi))?.distance.value;
-                    const prePreviousDistance = this.history[this.history.length - 2]?.guesses.find(isGuessFor(guess.poi))?.distance.value;
-                    if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
-                    const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
-                    if (cumulatedDistance / 10 > location.accuracy) return undefined;
-                    return {
-                        guess,
-                        cumulatedDistance
-                    };
-                }
-                if (location.speed > 2) return undefined;
-                const previousDistance = this.history.last()?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
-                const prePreviousDistance = this.history[this.history.length - 2]?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
-                if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
-                const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
-                if (cumulatedDistance / 3 > location.accuracy) return undefined;
-                return {
-                    guess,
-                    cumulatedDistance
-                } as { guess: POIWithDistance, cumulatedDistance: number };
-            })
-            .filter((guess): guess is { guess: POIWithDistance, cumulatedDistance: number } => guess !== undefined)
-            .sort((a, b) => a.cumulatedDistance - b.cumulatedDistance);
-
-        const reSeenPoints = intermediate
-            .reduce((acc, guess) => {
-                if (acc.minDistance < guess.cumulatedDistance) return acc;
-                if (acc.minDistance === guess.cumulatedDistance) {
-                    acc.points.push(guess.guess);
-                    return acc;
-                }
-                return {
-                    minDistance: guess.cumulatedDistance,
-                    points: [guess.guess]
-                };
-            }, { minDistance: Infinity, points: [] as POIWithDistance[] })
-            .points;
-
-        let guesses = closePoints;
-        if (reSeenPoints.length > 0) {
-            guesses = reSeenPoints;
-        }
-
-        const status = {
+        return this.currentState = this.currentState.getNext(
             location,
-            guesses,
+            uniqueRightDirectionPois,
+            this.history,
             nearbyPlatforms
-        };
-        return status;
+        );
     }
 
     protected getRightDirectionPois(currentLocation: GeoPosition): POIWithDistance[] {
@@ -170,15 +121,15 @@ class MatchingDirectionFilter {
     }
 }
 
-function byProximity(a: POIWithDistance, b: POIWithDistance): number {
+export function byProximity(a: POIWithDistance, b: POIWithDistance): number {
     return a.distance.value - b.distance.value;
 }
 
-function isCloserThan(maxDistance: number): (poi: POIWithDistance) => boolean {
+export function isCloserThan(maxDistance: number): (poi: POIWithDistance) => boolean {
     return poi => poi.distance.value <= maxDistance;
 }
 
-function isGuessFor(poi: TransitPOI): (guess: POIWithDistance) => boolean {
+export function isGuessFor(poi: TransitPOI): (guess: POIWithDistance) => boolean {
     return guess => guess.poi.id === poi.id;
 }
 
