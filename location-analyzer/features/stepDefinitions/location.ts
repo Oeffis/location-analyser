@@ -3,7 +3,7 @@ import { assert } from "chai";
 import { stringify } from "csv/sync";
 import { writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
-import { isStopDistance } from "../../src/locationAnalyzer.js";
+import { isStopDistance } from "../../src/index.js";
 import { LocationAnalyzerWorld } from "../world.js";
 import { locationMap } from "./helpers/locationMap.js";
 

@@ -1,4 +1,4 @@
-import { GeoPosition } from "../../../src/locationAnalyzer.js";
+import { GeoPosition } from "../../../src/";
 
 export const locationMap: Record<string, { location: GeoPosition; id?: string; }> = {
     /* eslint-disable @typescript-eslint/naming-convention */

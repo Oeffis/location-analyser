@@ -1,4 +1,4 @@
-import { GeoLocation, Route, Section, Stop } from "./locationAnalyzer";
+import { GeoLocation, Route, Section, Stop } from "./index.js";
 
 export type TransitPOI = Route | Stop;
 

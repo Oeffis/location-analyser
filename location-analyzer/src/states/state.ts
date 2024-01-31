@@ -1,6 +1,6 @@
 import { getDistance } from "geolib";
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistance } from "../distanceCalculator.js";
+import { DistanceCalculator, type POIWithDistance, type RouteWithDistance, type StopWithDistance } from "../distanceCalculator.js";
 import { TransitPOI, isRoute } from "../routeMap.js";
 import { type FilledState } from "./filledState.js";
 

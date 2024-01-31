@@ -1,6 +1,6 @@
 import { Then } from "@cucumber/cucumber";
 import { assert } from "chai";
-import { isStopDistance } from "../../src/locationAnalyzer.js";
+import { isStopDistance } from "../../src/index.js";
 import { LocationAnalyzerWorld } from "../world.js";
 import { locationMap } from "./helpers/locationMap.js";
 

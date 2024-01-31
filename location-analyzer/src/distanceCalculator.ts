@@ -1,6 +1,6 @@
 import { getDistance, isPointInPolygon } from "geolib";
+import { GeoPosition, Route, Stop } from "./index.js";
 import { getDistanceFromLine } from "./getDistanceFromLine.js";
-import { GeoPosition, Route, Stop } from "./locationAnalyzer.js";
 import { POIReference, RouteMap, RouteReference, StopReference, TransitPOI, isRouteRef } from "./routeMap.js";
 
 export class DistanceCalculator {
