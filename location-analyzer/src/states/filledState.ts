@@ -1,6 +1,6 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, POIWithDistance, StopWithDistance } from "../distanceCalculator.js";
-import { GeoPosition, ResultStatus, RouteState, State, byProximity, isCloserThan, isGuessFor, isRouteDistance } from "./states.js";
+import { GeoPosition, ResultStatus, RouteState, State, StopState, byProximity, isCloserThan, isGuessFor, isRouteDistance, isStopDistance } from "./states.js";
 
 export class FilledState extends State implements ResultStatus {
     public constructor(
@@ -61,15 +61,18 @@ export class FilledState extends State implements ResultStatus {
             }, { minDistance: Infinity, points: [] as POIWithDistance[] })
             .points;
 
-        let guesses = uniqueRightDirectionPois
+        const guesses = uniqueRightDirectionPois
             .filter(isCloserThan(location.accuracy))
             .sort(byProximity);
 
         if (reSeenPoints.length > 0) {
             if (reSeenPoints.every(isRouteDistance)) {
                 return new RouteState(this.history, this.distanceCalculator, location, reSeenPoints, nearbyPlatforms);
+            } else if (reSeenPoints.every(isStopDistance)) {
+                return new StopState(this.history, this.distanceCalculator, location, reSeenPoints, nearbyPlatforms);
+            } else {
+                throw new Error("Mixed re-seen points");
             }
-            guesses = reSeenPoints;
         }
 
         return new FilledState(this.history, this.distanceCalculator, location, guesses, nearbyPlatforms);
