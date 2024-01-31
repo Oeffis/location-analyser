@@ -1,4 +1,4 @@
-import { FilledState } from "./filledState.js";
+import { FilledState } from "./states.js";
 
 export class UnknownState extends FilledState {
 
