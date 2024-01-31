@@ -1,25 +1,32 @@
 import { Buffer } from "../buffer.js";
-import { POIWithDistance, StopWithDistance } from "../distanceCalculator.js";
-import { GeoPosition, ResultStatus, Status, byProximity, isCloserThan, isGuessFor, isRouteDistance } from "../locationAnalyzer.js";
+import { DistanceCalculator, POIWithDistance, StopWithDistance } from "../distanceCalculator.js";
+import { GeoPosition, ResultStatus, byProximity, isCloserThan, isGuessFor, isRouteDistance } from "../locationAnalyzer.js";
 import { State } from "./state.js";
 import { UnknownState } from "./unknownState.js";
 
 export abstract class FilledState extends State implements ResultStatus {
     public constructor(
+        history: Buffer<ResultStatus>,
+        distanceCalculator: DistanceCalculator,
         public readonly location: GeoPosition,
         public readonly guesses: POIWithDistance[],
         public readonly nearbyPlatforms: StopWithDistance[]
     ) {
-        super(guesses, nearbyPlatforms);
+        super(history, distanceCalculator, guesses, nearbyPlatforms);
+        this.history.append(this);
     }
 
-    public getNext(location: GeoPosition, uniqueRightDirectionPois: POIWithDistance[], history: Buffer<Status>, nearbyPlatforms: StopWithDistance[]): FilledState {
+    public getNext(location: GeoPosition): FilledState {
+        const rightDirectionPois = this.getRightDirectionPois(location);
+        const uniqueRightDirectionPois = this.keepClosestOfEachPoi(rightDirectionPois);
+        const nearbyPlatforms = this.getNearbyPlatformsIn(uniqueRightDirectionPois);
+
         const intermediate = uniqueRightDirectionPois
             .map(guess => {
                 const currentDistance = guess.distance.value;
                 if (isRouteDistance(guess)) {
-                    const previousDistance = history.last()?.guesses.find(isGuessFor(guess.poi))?.distance.value;
-                    const prePreviousDistance = history[history.length - 2]?.guesses.find(isGuessFor(guess.poi))?.distance.value;
+                    const previousDistance = this.history.last()?.guesses.find(isGuessFor(guess.poi))?.distance.value;
+                    const prePreviousDistance = this.history[this.history.length - 2]?.guesses.find(isGuessFor(guess.poi))?.distance.value;
                     if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
                     const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
                     if (cumulatedDistance / 10 > location.accuracy) return undefined;
@@ -29,8 +36,8 @@ export abstract class FilledState extends State implements ResultStatus {
                     };
                 }
                 if (location.speed > 2) return undefined;
-                const previousDistance = history.last()?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
-                const prePreviousDistance = history[history.length - 2]?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
+                const previousDistance = this.history.last()?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
+                const prePreviousDistance = this.history[this.history.length - 2]?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
                 if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
                 const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
                 if (cumulatedDistance / 3 > location.accuracy) return undefined;
@@ -64,6 +71,6 @@ export abstract class FilledState extends State implements ResultStatus {
             guesses = reSeenPoints;
         }
 
-        return new UnknownState(location, guesses, nearbyPlatforms);
+        return new UnknownState(this.history, this.distanceCalculator, location, guesses, nearbyPlatforms);
     }
 }

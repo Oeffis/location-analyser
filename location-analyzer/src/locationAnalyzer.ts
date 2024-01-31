@@ -16,16 +16,14 @@ export class LocationAnalyzer {
 
     public updatePOIs(pois: TransitPOI[]): void {
         this.distanceCalculator.updatePOIs(pois);
+        this.currentState.updatePOIs(pois);
 
         const status = this.getStatus();
         isResultStatus(status) && this.updatePosition(status.location);
     }
 
     public getStatus(): Status {
-        return this.history.last() ?? {
-            guesses: [],
-            nearbyPlatforms: []
-        };
+        return this.currentState;
     }
 
     public updatePosition(location: GeoPosition): ResultStatus {
@@ -33,15 +31,7 @@ export class LocationAnalyzer {
     }
 
     private getNextStatus(location: GeoPosition): ResultStatus {
-        const rightDirectionPois = this.getRightDirectionPois(location);
-        const uniqueRightDirectionPois = this.keepClosestOfEachPoi(rightDirectionPois);
-        const nearbyPlatforms = this.getNearbyPlatformsIn(uniqueRightDirectionPois);
-        return this.currentState = this.currentState.getNext(
-            location,
-            uniqueRightDirectionPois,
-            this.history,
-            nearbyPlatforms
-        );
+        return this.currentState = this.currentState.getNext(location);
     }
 
     protected getRightDirectionPois(currentLocation: GeoPosition): POIWithDistance[] {
