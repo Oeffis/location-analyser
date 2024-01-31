@@ -1,7 +1,6 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, POIWithDistance, StopWithDistance } from "../distanceCalculator.js";
-import { GeoPosition, ResultStatus, byProximity, isCloserThan, isGuessFor, isRouteDistance } from "../locationAnalyzer.js";
-import { State } from "./state.js";
+import { GeoPosition, ResultStatus, State, byProximity, isCloserThan, isGuessFor, isRouteDistance } from "./state.js";
 import { UnknownState } from "./unknownState.js";
 
 export abstract class FilledState extends State implements ResultStatus {

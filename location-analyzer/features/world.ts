@@ -163,14 +163,6 @@ export class LocationAnalyzerWorld {
 
 setWorldConstructor(LocationAnalyzerWorld);
 
-function hasAccuracy(position: GeoPosition | GeoLocation): position is GeoLocation & { accuracy: number } {
-    return Object.hasOwn(position, "accuracy");
-}
-
-function hasSpeed(position: GeoPosition | GeoLocation): position is GeoLocation & { speed: number } {
-    return Object.hasOwn(position, "speed");
-}
-
 export interface TrackSection extends GeoPosition {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     "date-gmt": string;
