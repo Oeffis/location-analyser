@@ -1,1 +1,10 @@
-{"1":{"base":96.38,"allowingExtra":97.63},"2":{"base":37.92,"allowingExtra":37.92}}
+{
+    "1": {
+        "base": 96.38,
+        "allowingExtra": 97.63
+    },
+    "2": {
+        "base": 74.72,
+        "allowingExtra": 74.97
+    }
+}

@@ -36,7 +36,7 @@ AfterAll(function () {
         const current = scores[parseInt(score)];
         const original = originalScores[parseInt(score)];
         if (current === undefined || original === undefined) return true;
-        return current.base > original.base && current.allowingExtra > original.allowingExtra;
+        return current.base >= original.base && current.allowingExtra >= original.allowingExtra;
     });
     if (allBetter) {
         writeFileSync("features/data/testTrackScores.json", JSON.stringify(scores, undefined, 4));
