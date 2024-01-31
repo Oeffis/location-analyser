@@ -1,6 +1,6 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, RouteWithDistance, StopWithDistance } from "../distanceCalculator.js";
-import { FilledState, GeoPosition, ResultStatus, createState, isRouteDistance } from "./states.js";
+import { FilledState, GeoPosition, ResultStatus, isRouteDistance } from "./states.js";
 
 export class RouteState extends FilledState implements ResultStatus {
     public constructor(
@@ -28,8 +28,7 @@ export class RouteState extends FilledState implements ResultStatus {
                 return acc;
             }, []);
 
-            return createState(
-                "route",
+            return new RouteState(
                 this.history,
                 this.distanceCalculator,
                 location,

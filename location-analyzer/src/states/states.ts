@@ -3,7 +3,6 @@ import { TransitPOI, isRoute } from "../routeMap.js";
 
 export * from "./state.js";
 
-export * from "./factories.js";
 export * from "./filledState.js";
 export * from "./initialState.js";
 export * from "./routeState.js";

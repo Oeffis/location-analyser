@@ -1,6 +1,6 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, POIWithDistance, StopWithDistance } from "../distanceCalculator.js";
-import { GeoPosition, ResultStatus, State, byProximity, createState, isCloserThan, isGuessFor, isRouteDistance } from "./states.js";
+import { GeoPosition, ResultStatus, RouteState, State, byProximity, isCloserThan, isGuessFor, isRouteDistance } from "./states.js";
 
 export class FilledState extends State implements ResultStatus {
     public constructor(
@@ -67,11 +67,11 @@ export class FilledState extends State implements ResultStatus {
 
         if (reSeenPoints.length > 0) {
             if (reSeenPoints.every(isRouteDistance)) {
-                return createState("route", this.history, this.distanceCalculator, location, reSeenPoints, nearbyPlatforms);
+                return new RouteState(this.history, this.distanceCalculator, location, reSeenPoints, nearbyPlatforms);
             }
             guesses = reSeenPoints;
         }
 
-        return createState("filled", this.history, this.distanceCalculator, location, guesses, nearbyPlatforms);
+        return new FilledState(this.history, this.distanceCalculator, location, guesses, nearbyPlatforms);
     }
 }
