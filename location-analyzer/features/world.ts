@@ -73,22 +73,26 @@ export class LocationAnalyzerWorld {
     }
 
     protected updatePositionFromArray(position: CoordPair | CoordPairWithAccuracyAndSpeed): void {
-        const status = this.locationAnalyzer.updatePosition({
+        this.updatePositionFromObject({
             latitude: position[0],
             longitude: position[1],
-            accuracy: position[2] ?? 4,
-            speed: position[3] ?? 1
+            accuracy: position[2],
+            speed: position[3]
         });
-        this.statusList.push(status);
     }
 
     protected updatePositionFromObject(position: GeoPosition | GeoLocation): void {
-        const coords: CoordPair = [position.latitude, position.longitude];
-        if (isLocationPosition(position)) {
-            coords.push(position.accuracy);
-            coords.push(position.speed);
-        }
-        this.updatePositionFromArray(coords);
+        const accuracy = hasAccuracy(position) ? position.accuracy : 4;
+        const speed = hasSpeed(position) ? position.speed : 1;
+
+        const status = this.locationAnalyzer.updatePosition({
+            latitude: position.latitude,
+            longitude: position.longitude,
+            accuracy,
+            speed
+        });
+
+        this.statusList.push(status);
     }
 
     public updatePOIs(routes: TransitPOI[]): void {
@@ -157,8 +161,12 @@ export class LocationAnalyzerWorld {
 
 setWorldConstructor(LocationAnalyzerWorld);
 
-function isLocationPosition(position: GeoPosition | GeoLocation): position is GeoPosition {
+function hasAccuracy(position: GeoPosition | GeoLocation): position is GeoLocation & { accuracy: number } {
     return Object.hasOwn(position, "accuracy");
+}
+
+function hasSpeed(position: GeoPosition | GeoLocation): position is GeoLocation & { speed: number } {
+    return Object.hasOwn(position, "speed");
 }
 
 export interface TrackSection extends GeoPosition {
