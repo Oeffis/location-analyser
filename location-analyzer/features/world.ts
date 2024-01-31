@@ -1,8 +1,8 @@
 import { AfterAll, BeforeAll, setWorldConstructor } from "@cucumber/cucumber";
-import { GeoLocation, GeoPosition, InitialState, ResultStatus, Route, RouteWithDistance, Status, StopWithDistance, TransitPOI, type State } from "../src/index.js";
 import { assert } from "chai";
 import { parse } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
+import { GeoLocation, GeoPosition, InitialState, ResultStatus, Route, RouteWithDistance, Status, StopWithDistance, TransitPOI, type State } from "../src/index.js";
 import { getVrrRoutes } from "./getVrrRoutes.js";
 import { getVrrStops } from "./getVrrStops.js";
 
@@ -29,15 +29,18 @@ BeforeAll(function () {
 });
 
 AfterAll(function () {
-    // if all scores are better than the previous ones, write them to the file
-    const allBetter = Object.keys(scores).every(score => {
+    const improvedScores = Object.keys(scores).filter(score => {
         const current = scores[parseInt(score)];
         const original = originalScores[parseInt(score)];
         if (current === undefined || original === undefined) return true;
         return current.base >= original.base && current.allowingExtra >= original.allowingExtra;
     });
-    if (allBetter) {
+    if (improvedScores.length === Object.keys(scores).length) {
         writeFileSync("features/data/testTrackScores.json", JSON.stringify(scores, undefined, 4));
+    } else {
+        improvedScores.forEach(score => {
+            console.log(`⚔️  Score for track ${score} has improved, but will not be saved because other worsened. It was ${originalScores[parseInt(score)]?.base}%, is now ${scores[parseInt(score)]?.base}%.`);
+        });
     }
 });
 
