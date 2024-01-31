@@ -82,8 +82,10 @@ export class LocationAnalyzerWorld {
     }
 
     protected updatePositionFromObject(position: GeoPosition | GeoLocation): void {
-        const accuracy = hasAccuracy(position) ? position.accuracy : 4;
-        const speed = hasSpeed(position) ? position.speed : 1;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        const accuracy = (position as GeoPosition).accuracy ?? 4;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        const speed = (position as GeoPosition).speed ?? 1;
 
         const status = this.locationAnalyzer.updatePosition({
             latitude: position.latitude,

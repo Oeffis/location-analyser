@@ -39,10 +39,10 @@ Given<LocationAnalyzerWorld>("the Lines 399 and 342 split at the start of the Ne
 
 Given<LocationAnalyzerWorld>("I traveled from the Westfälische Hochschule to the Neidenburger Straße", function () {
     this.updatePosition(
-        [51.57478, 7.03116],
-        [51.57467, 7.03106],
-        [51.57406, 7.03208],
-        [51.57278, 7.03335]
+        [51.57478, 7.03116, 4.0, 10],
+        [51.57467, 7.03106, 4.0, 10],
+        [51.57406, 7.03208, 4.0, 10],
+        [51.57278, 7.03335, 4.0, 10]
     );
 });
 
