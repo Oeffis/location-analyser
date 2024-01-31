@@ -3,7 +3,7 @@ import { assert } from "chai";
 import { parse } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
 import { RouteWithDistance, StopWithDistance } from "../src/distanceCalculator.js";
-import { GeoLocation, GeoPosition, LocationAnalyzer, ResultStatus, Route, Status } from "../src/locationAnalyzer.js";
+import { GeoLocation, GeoPosition, InitialState, ResultStatus, Route, State, Status } from "../src/locationAnalyzer.js";
 import { TransitPOI } from "../src/routeMap.js";
 import { getVrrRoutes } from "./getVrrRoutes.js";
 import { getVrrStops } from "./getVrrStops.js";
@@ -55,7 +55,7 @@ AfterAll(function () {
 });
 
 export class LocationAnalyzerWorld {
-    protected locationAnalyzer: LocationAnalyzer = new LocationAnalyzer();
+    protected currentState: State = new InitialState();
     public expectedRoutes: Partial<Route>[] = [];
     public routeOrderMatters = true;
     public statusList: ResultStatus[] = [];
@@ -87,18 +87,16 @@ export class LocationAnalyzerWorld {
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         const speed = (position as GeoPosition).speed ?? 1;
 
-        const status = this.locationAnalyzer.updatePosition({
+        this.statusList.push(this.currentState = this.currentState.getNext({
             latitude: position.latitude,
             longitude: position.longitude,
             accuracy,
             speed
-        });
-
-        this.statusList.push(status);
+        }));
     }
 
     public updatePOIs(routes: TransitPOI[]): void {
-        this.locationAnalyzer.updatePOIs(routes);
+        this.currentState.updatePOIs(routes);
     }
 
     public async loadVrrRoutes(): Promise<void> {
@@ -125,7 +123,7 @@ export class LocationAnalyzerWorld {
     }
 
     public getStatus(): Status {
-        return this.statusList[this.statusList.length - 1] ?? this.locationAnalyzer.getStatus();
+        return this.statusList[this.statusList.length - 1] ?? this.currentState;
     }
 
     public getNearestPlatform(): StopWithDistance {
