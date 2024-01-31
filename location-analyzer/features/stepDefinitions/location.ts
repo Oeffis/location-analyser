@@ -125,14 +125,14 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
             return expected.some(rule => rule.vehicleOrStop === targetString);
         });
 
-        const allMatched = matched.length === status.guesses.length;
+        const allMatched = matched.length === status.guesses.length && matched.length === expected.length;
         if (allMatched) {
             correct++;
         } else {
             wrong++;
         }
 
-        const allowingExtraCorrect = matched.length === expected.length && expected.length > 0 || status.guesses.length === 0;
+        const allowingExtraCorrect = matched.length === expected.length && (expected.length > 0 || status.guesses.length === 0);
         if (allowingExtraCorrect) {
             correctAllowingExtra++;
         } else {
