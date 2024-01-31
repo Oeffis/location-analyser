@@ -1,9 +1,10 @@
 import { getDistance, isPointInPolygon } from "geolib";
-import { GeoPosition, Route, Stop } from "./index.js";
 import { getDistanceFromLine } from "./getDistanceFromLine.js";
+import { GeoPosition, Route, Stop } from "./index.js";
 import { POIReference, RouteMap, RouteReference, StopReference, TransitPOI, isRouteRef } from "./routeMap.js";
 
 export class DistanceCalculator {
+    protected pois = new Map<string, TransitPOI>();
     protected routeMap = new RouteMap();
 
     public getUniquePOIsNear(currentLocation: GeoPosition): POIWithDistance[] {
@@ -91,6 +92,7 @@ export class DistanceCalculator {
 
     public updatePOIs(pois: TransitPOI[]): void {
         this.routeMap.update(pois);
+        this.pois = new Map(pois.map(poi => [poi.id, poi]));
     }
 }
 

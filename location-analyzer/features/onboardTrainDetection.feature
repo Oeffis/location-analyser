@@ -47,6 +47,7 @@ Feature: Onboard Train Detection
         When I travel more than ten seconds further along the route of the 399
         Then the detected train is the "399" to "Gelsenkirchen Buer Rathaus"
 
+    @focus
     Scenario: Detects I am on a train when location glitches a little
         Given the 302 travels along the Musiktheater im Revier, where a Bus Stop is North of the track
         And I travel on the 302 from Kennedyplatz to Musiktheater station

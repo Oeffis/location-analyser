@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Stop } from "@oeffis/location-analyzer";
 import { parse } from "csv";
 import { readFile } from "fs/promises";
 import { inflate } from "pako";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
-import { Stop } from "../src/index.js";
 
 export async function getVrrStops(): Promise<Stop[]> {
     const platforms = await loadPlatforms();

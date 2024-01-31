@@ -1,10 +1,8 @@
 import { AfterAll, BeforeAll, setWorldConstructor } from "@cucumber/cucumber";
+import { GeoLocation, GeoPosition, InitialState, ResultStatus, Route, RouteWithDistance, Status, StopWithDistance, TransitPOI, type State } from "../src/index.js";
 import { assert } from "chai";
 import { parse } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
-import { RouteWithDistance, StopWithDistance } from "../src/distanceCalculator.js";
-import { GeoLocation, GeoPosition, InitialState, ResultStatus, Route, State, Status } from "../src/index.js";
-import { TransitPOI } from "../src/routeMap.js";
 import { getVrrRoutes } from "./getVrrRoutes.js";
 import { getVrrStops } from "./getVrrStops.js";
 

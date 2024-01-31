@@ -1,8 +1,6 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, POIWithDistance } from "../distanceCalculator.js";
-import { FilledState } from "./states.js";
-import { GeoPosition, State, byProximity, isCloserThan, isGuessFor, isRouteDistance } from "./state.js";
-import { UnknownState } from "./unknownState.js";
+import { GeoPosition, State, byProximity, createState, isCloserThan, isGuessFor, isRouteDistance, type FilledState } from "./states.js";
 
 export class InitialState extends State {
     public constructor() {
@@ -64,6 +62,6 @@ export class InitialState extends State {
             guesses = reSeenPoints;
         }
 
-        return new UnknownState(this.history, this.distanceCalculator, location, guesses, nearbyPlatforms);
+        return createState("filled", this.history, this.distanceCalculator, location, guesses, nearbyPlatforms);
     }
 }

@@ -1,14 +1,13 @@
 import { getDistance } from "geolib";
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, type POIWithDistance, type RouteWithDistance, type StopWithDistance } from "../distanceCalculator.js";
-import { TransitPOI, isRoute } from "../routeMap.js";
-import { FilledState } from "./states.js";
+import { type DistanceCalculator, type POIWithDistance, type RouteWithDistance, type StopWithDistance } from "../distanceCalculator.js";
+import { TransitPOI } from "../routeMap.js";
+import { byProximity, isResultStatus, isStopDistance, type FilledState, type GeoPosition, type NoResultStatus, type ResultStatus } from "./states.js";
 
 export abstract class State implements NoResultStatus {
-
     protected constructor(
         protected readonly history: Buffer<ResultStatus>,
-        protected readonly distanceCalculator = new DistanceCalculator(),
+        protected readonly distanceCalculator: DistanceCalculator,
         public readonly guesses: POIWithDistance[],
         public readonly nearbyPlatforms: StopWithDistance[]
     ) {
@@ -94,71 +93,4 @@ class MatchingDirectionFilter {
 
         return poi.distance.section > lastPoi.distance.section;
     }
-}
-
-export function byProximity(a: POIWithDistance, b: POIWithDistance): number {
-    return a.distance.value - b.distance.value;
-}
-
-export function isCloserThan(maxDistance: number): (poi: POIWithDistance) => boolean {
-    return poi => poi.distance.value <= maxDistance;
-}
-
-export function isGuessFor(poi: TransitPOI): (guess: POIWithDistance) => boolean {
-    return guess => guess.poi.id === poi.id;
-}
-
-export function isRouteDistance(poi: POIWithDistance): poi is RouteWithDistance {
-    return isRoute(poi.poi);
-}
-
-export function isStopDistance(poi: POIWithDistance): poi is StopWithDistance {
-    return !isRoute(poi.poi);
-}
-
-export function isResultStatus(status: Status): status is ResultStatus {
-    return Object.hasOwn(status, "location");
-}
-
-export type Status = NoResultStatus | ResultStatus;
-
-export type NoResultStatus = Omit<ResultStatus, "location">;
-
-export interface ResultStatus {
-    location: GeoPosition;
-    guesses: POIWithDistance[];
-    nearbyPlatforms: StopWithDistance[];
-}
-
-export interface Stop {
-    id: string;
-    name: string;
-    boundaries: GeoLocation[];
-}
-
-export interface GeoPosition extends GeoLocation {
-    accuracy: number;
-    speed: number;
-}
-
-export interface GeoLocation {
-    latitude: number;
-    longitude: number;
-    altitude?: number;
-}
-
-export interface Route {
-    id: string;
-    from: string;
-    to: string;
-    ref: string;
-    sections: Section[][];
-}
-
-export interface Section {
-    routeId: string;
-    consecutiveSection: number;
-    sequence: number;
-    lat: number;
-    lon: number;
 }
