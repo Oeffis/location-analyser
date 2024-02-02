@@ -29,29 +29,41 @@ BeforeAll(function () {
 });
 
 AfterAll(function () {
-    const improvedScores = Object.keys(scores).filter(score => {
+    const worsenedScores = Object.keys(scores).filter(score => {
+        const current = scores[parseInt(score)];
+        const original = originalScores[parseInt(score)];
+        if (current === undefined || original === undefined) return false;
+        return current.base < original.base || current.allowingExtra < original.allowingExtra;
+    });
+    const improvedBaseScores = Object.keys(scores).filter(score => {
         const current = scores[parseInt(score)];
         const original = originalScores[parseInt(score)];
         if (current === undefined || original === undefined) return true;
-        return current.base >= original.base && current.allowingExtra >= original.allowingExtra;
+        return current.base > original.base;
     });
-    if (improvedScores.length === Object.keys(scores).length) {
-        writeFileSync("features/data/testTrackScores.json", JSON.stringify(scores, undefined, 4));
-    } else {
-        improvedScores.forEach(score => {
-            console.log(`⚔️  Score for track ${score} has improved, but will not be saved because other worsened. It was ${originalScores[parseInt(score)]?.base}%, is now ${scores[parseInt(score)]?.base}%.`);
-        });
-    }
-});
-
-const postRunMessages: string[] = [];
-AfterAll(function () {
-    if (postRunMessages.length === 0) return;
+    const improvedExtraScores = Object.keys(scores).filter(score => {
+        const current = scores[parseInt(score)];
+        const original = originalScores[parseInt(score)];
+        if (current === undefined || original === undefined) return true;
+        return current.allowingExtra > original.allowingExtra;
+    });
 
     console.log("\n\n");
-    console.log("Post-run messages:");
-    for (const message of postRunMessages) {
-        console.log(message);
+    if (worsenedScores.length === 0) {
+        improvedBaseScores.forEach(score => {
+            console.log(`🚀 Base Score of track ${score} has improved, was ${originalScores[parseInt(score)]?.base}%, is now ${scores[parseInt(score)]?.base}`);
+        });
+        improvedExtraScores.forEach(score => {
+            console.log(`🚀 Score allowing extra of track ${score} has improved, was ${originalScores[parseInt(score)]?.allowingExtra}%, is now ${scores[parseInt(score)]?.allowingExtra}`);
+        });
+        writeFileSync("features/data/testTrackScores.json", JSON.stringify(scores, undefined, 4));
+    } else {
+        improvedBaseScores.forEach(score => {
+            console.log(`⚔️  Base Score for track ${score} has improved, but will not be saved because tracks ${worsenedScores.join(",")} worsened. It was ${originalScores[parseInt(score)]?.base}%, is now ${scores[parseInt(score)]?.base}%.`);
+        });
+        improvedExtraScores.forEach(score => {
+            console.log(`⚔️  Score allowing extra for track ${score} has improved, but will not be saved because tracks ${worsenedScores.join(",")} worsened. It was ${originalScores[parseInt(score)]?.allowingExtra}%, is now ${scores[parseInt(score)]?.allowingExtra}%.`);
+        });
     }
 });
 
@@ -133,10 +145,6 @@ export class LocationAnalyzerWorld {
         assert.isDefined(stop, "No stop found");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return stop!;
-    }
-
-    public postRunLog(...messages: string[]): void {
-        postRunMessages.push(...messages);
     }
 
     public simulateTrack(trackNumber: number): void {

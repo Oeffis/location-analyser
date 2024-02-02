@@ -166,13 +166,6 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
     this.updateScore({ base: score, allowingExtra: scoreAllowingExtra });
     assert.isAtLeast(score, previousScores.base, `Score has declined, was ${previousScores.base}%, is now ${score}%`);
     assert.isAtLeast(scoreAllowingExtra, previousScores.allowingExtra, `Score allowing extra has declined, was ${previousScores.allowingExtra}%, is now ${scoreAllowingExtra}%`);
-
-    if (score > previousScores.base) {
-        this.postRunLog(`🚀 Score of track ${this.usedTrack} has improved, was ${previousScores.base}%, is now ${score}%`);
-    }
-    if (scoreAllowingExtra > previousScores.allowingExtra) {
-        this.postRunLog(`🚀 Score of track ${this.usedTrack} allowing extra has improved, was ${previousScores.allowingExtra}%, is now ${scoreAllowingExtra}%`);
-    }
 }
 
 function directionToBearing(direction: Direction): number {
