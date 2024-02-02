@@ -48,7 +48,7 @@ export class RouteState extends FilledState implements ResultStatus {
         }
 
         const rightDirectionPois = closestPois.filter(this.directionFilter(location));
-        const closestByCumulation = this.getClosestByCumulatedDistance(rightDirectionPois, location);
+        const closestByCumulation = this.getClosestByAveragedDistance(rightDirectionPois).map(guess => guess.guess);
         const stopsInClosest = closestByCumulation.filter(isStopDistance);
         if (stopsInClosest.length > 0) {
             return new StopState(

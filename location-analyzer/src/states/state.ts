@@ -2,7 +2,12 @@ import { getDistance } from "geolib";
 import { Buffer } from "../buffer.js";
 import { type DistanceCalculator, type POIWithDistance, type RouteWithDistance, type StopWithDistance } from "../distanceCalculator.js";
 import { TransitPOI } from "../routeMap.js";
-import { byProximity, isGuessFor, isResultStatus, isRouteDistance, isStopDistance, type FilledState, type GeoPosition, type NoResultStatus, type ResultStatus } from "./states.js";
+import { byProximity, isGuessFor, isResultStatus, isStopDistance, type FilledState, type GeoPosition, type NoResultStatus, type ResultStatus } from "./states.js";
+
+interface WithAveragedDistance<T extends POIWithDistance> {
+    guess: T;
+    averagedDistance: number;
+}
 
 export abstract class State implements NoResultStatus {
     protected readonly onRouteSpeedCutoff = 3;
@@ -42,50 +47,35 @@ export abstract class State implements NoResultStatus {
             const currentClosest = closestOfEachPoi.get(poi.poi.id);
             const isCloser = !currentClosest || poi.distance.value < currentClosest.distance.value;
             if (isCloser) closestOfEachPoi.set(poi.poi.id, poi);
-
         });
         return Array.from(closestOfEachPoi.values());
     }
 
-    protected getClosestByCumulatedDistance<T extends POIWithDistance>(rightDirectionPois: T[], location: GeoPosition): T[] {
+    protected getClosestByAveragedDistance<T extends POIWithDistance>(rightDirectionPois: T[]): WithAveragedDistance<T>[] {
         return (rightDirectionPois
             .map(guess => {
                 const currentDistance = guess.distance.value;
-                if (isRouteDistance(guess)) {
-                    const previousDistance = this.history.last()?.guesses.find(isGuessFor(guess.poi))?.distance.value;
-                    const prePreviousDistance = this.history[this.history.length - 2]?.guesses.find(isGuessFor(guess.poi))?.distance.value;
-                    if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
-                    const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
-                    if (cumulatedDistance / 5 > location.accuracy) return undefined;
-                    return {
-                        guess,
-                        cumulatedDistance
-                    };
-                }
-                if (location.speed > 2) return undefined;
-                const previousDistance = this.history.last()?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
-                const prePreviousDistance = this.history[this.history.length - 2]?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
-                if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
-                const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
-                if (cumulatedDistance / 3 > location.accuracy) return undefined;
+                const history = this.fullHistory;
+                const previousDistance = history[history.length - 1]?.find(isGuessFor(guess.poi))?.distance.value ?? currentDistance;
+                const prePreviousDistance = history[history.length - 2]?.find(isGuessFor(guess.poi))?.distance.value ?? previousDistance;
+                const averagedDistance = (currentDistance + previousDistance + prePreviousDistance) / 3;
                 return {
                     guess,
-                    cumulatedDistance
-                } as { guess: T; cumulatedDistance: number; };
+                    averagedDistance
+                };
             })
-            .filter((guess): guess is { guess: T; cumulatedDistance: number; } => guess !== undefined)
-            .sort((a, b) => a.cumulatedDistance - b.cumulatedDistance))
+            .sort((a, b) => a.averagedDistance - b.averagedDistance))
             .reduce((acc, guess) => {
-                if (acc.minDistance < guess.cumulatedDistance) return acc;
-                if (acc.minDistance === guess.cumulatedDistance) {
-                    acc.points.push(guess.guess);
+                if (acc.minDistance < guess.averagedDistance) return acc;
+                if (acc.minDistance === guess.averagedDistance) {
+                    acc.points.push(guess);
                     return acc;
                 }
                 return {
-                    minDistance: guess.cumulatedDistance,
-                    points: [guess.guess]
+                    minDistance: guess.averagedDistance,
+                    points: [guess]
                 };
-            }, { minDistance: Infinity, points: [] as T[] })
+            }, { minDistance: Infinity, points: [] as WithAveragedDistance<T>[] })
             .points;
     }
 

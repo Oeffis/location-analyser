@@ -22,7 +22,7 @@ export class FilledState extends State implements ResultStatus {
         const rightDirectionPois = uniquePois.filter(this.directionFilter(location));
         const nearbyPlatforms = this.getNearbyPlatformsIn(rightDirectionPois);
 
-        const reSeenPoints = this.getClosestByCumulatedDistance(rightDirectionPois, location);
+        const reSeenPoints = this.getClosestByAveragedDistance(rightDirectionPois).map(guess => guess.guess);
 
         const guesses = rightDirectionPois
             .filter(isCloserThan(location.accuracy))
