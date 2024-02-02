@@ -9,33 +9,32 @@ export class RouteState extends FilledState implements ResultStatus {
         distanceCalculator: DistanceCalculator,
         location: GeoPosition,
         public readonly guesses: RouteWithDistance[],
+        protected readonly possibilities: RouteWithDistance[],
         nearbyPlatforms: StopWithDistance[]
     ) {
         super(fullHistory, history, distanceCalculator, location, guesses, nearbyPlatforms);
     }
 
     public getNext(location: GeoPosition): FilledState {
-        const guessIds = this.guesses.map(guess => guess.poi.id);
         const closestPois = this.distanceCalculator.getUniquePOIsNear(location);
         this.fullHistory.append(closestPois);
-        const lastGuessesWithDistance = closestPois
-            .filter(isRouteDistance)
-            .filter(poi => guessIds.includes(poi.poi.id));
-        const closestDistance = Math.min(...lastGuessesWithDistance.map(poi => poi.distance.value));
 
-        if (closestDistance < 1000 && location.speed > this.onRouteSpeedCutoff) {
-            const closestGuesses = lastGuessesWithDistance.reduce<RouteWithDistance[]>((acc, guess) => {
-                if (guess.distance.value > closestDistance) return acc;
-                acc.push(guess);
-                return acc;
-            }, []);
+        if (location.speed > this.onRouteSpeedCutoff) {
+            const possibilityIds = this.possibilities.map(possibility => possibility.poi.id);
+            const rightDirectionRoutes = closestPois
+                .filter(isRouteDistance)
+                .filter(this.directionFilter(location))
+                .filter(poi => possibilityIds.includes(poi.poi.id));
+
+            const closest = this.getClosestRoutesByCumulatedDistance(rightDirectionRoutes);
 
             return new RouteState(
                 this.fullHistory,
                 this.history,
                 this.distanceCalculator,
                 location,
-                closestGuesses,
+                closest,
+                this.possibilities,
                 this.nearbyPlatforms
             );
         }
@@ -50,10 +49,39 @@ export class RouteState extends FilledState implements ResultStatus {
                 this.distanceCalculator,
                 location,
                 guessesInCloses,
+                this.possibilities,
                 this.nearbyPlatforms
             );
         }
 
         return super.getNext(location);
+    }
+
+    protected getClosestRoutesByCumulatedDistance(rightDirectionPois: RouteWithDistance[]): RouteWithDistance[] {
+        return (rightDirectionPois
+            .map(guess => {
+                const currentDistance = guess.distance.value;
+                const history = this.fullHistory;
+                const previousDistance = history[history.length - 1]?.find(isGuessFor(guess.poi))?.distance.value ?? currentDistance;
+                const prePreviousDistance = history[history.length - 2]?.find(isGuessFor(guess.poi))?.distance.value ?? previousDistance;
+                const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
+                return {
+                    guess,
+                    cumulatedDistance
+                };
+            })
+            .sort((a, b) => a.cumulatedDistance - b.cumulatedDistance))
+            .reduce((acc, guess) => {
+                if (acc.minDistance < guess.cumulatedDistance) return acc;
+                if (acc.minDistance === guess.cumulatedDistance) {
+                    acc.points.push(guess.guess);
+                    return acc;
+                }
+                return {
+                    minDistance: guess.cumulatedDistance,
+                    points: [guess.guess]
+                };
+            }, { minDistance: Infinity, points: [] as RouteWithDistance[] })
+            .points;
     }
 }

@@ -1,6 +1,6 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, POIWithDistance, StopWithDistance } from "../index.js";
-import { FilledState, GeoPosition, ResultStatus, isStopDistance } from "./states.js";
+import { FilledState, GeoPosition, ResultStatus, RouteState, isRouteDistance, isStopDistance } from "./states.js";
 
 export class StopState extends FilledState {
     public constructor(
@@ -36,6 +36,24 @@ export class StopState extends FilledState {
                 this.distanceCalculator,
                 location,
                 closestGuesses,
+                this.nearbyPlatforms
+            );
+        }
+
+        if (location.speed > this.onRouteSpeedCutoff) {
+            const routes = closestPois
+                .filter(isRouteDistance)
+                .filter(this.directionFilter(location))
+                // sort out all with distance greater than accuracy
+                .filter(poi => poi.distance.value < location.accuracy * 5);
+
+            return new RouteState(
+                this.fullHistory,
+                this.history,
+                this.distanceCalculator,
+                location,
+                routes,
+                routes,
                 this.nearbyPlatforms
             );
         }

@@ -30,7 +30,7 @@ export class FilledState extends State implements ResultStatus {
 
         if (reSeenPoints.length > 0) {
             if (reSeenPoints.every(isRouteDistance)) {
-                return new RouteState(this.fullHistory, this.history, this.distanceCalculator, location, reSeenPoints, nearbyPlatforms);
+                return new RouteState(this.fullHistory, this.history, this.distanceCalculator, location, reSeenPoints, reSeenPoints, nearbyPlatforms);
             } else if (reSeenPoints.every(isStopDistance)) {
                 return new StopState(this.fullHistory, this.history, this.distanceCalculator, location, reSeenPoints, nearbyPlatforms);
             } else {
