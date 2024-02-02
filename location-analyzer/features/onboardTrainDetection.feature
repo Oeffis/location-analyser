@@ -41,6 +41,7 @@ Feature: Onboard Train Detection
         When I travel further along the route of the 399
         Then the detected train is the "399" to "Gelsenkirchen Buer Rathaus"
 
+    @focus
     Scenario: Stays with longer seen pois even when their appearance leaves the history
         Given the Lines 399 and 342 split at the start of the Neidenburger Straße
         And I traveled from the Westfälische Hochschule to the Neidenburger Straße
