@@ -1,6 +1,6 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistance } from "../distanceCalculator.js";
-import { FilledState, GeoPosition, ResultStatus, isGuessFor, isRouteDistance } from "./states.js";
+import { FilledState, GeoPosition, ResultStatus, StopState, isGuessFor, isRouteDistance, isStopDistance } from "./states.js";
 
 export class RouteState extends FilledState implements ResultStatus {
     public constructor(
@@ -50,6 +50,18 @@ export class RouteState extends FilledState implements ResultStatus {
                 location,
                 guessesInCloses,
                 this.possibilities,
+                this.nearbyPlatforms
+            );
+        }
+
+        const stopsInClosest = closestByCumulation.filter(isStopDistance);
+        if (stopsInClosest.length > 0) {
+            return new StopState(
+                this.fullHistory,
+                this.history,
+                this.distanceCalculator,
+                location,
+                stopsInClosest,
                 this.nearbyPlatforms
             );
         }
