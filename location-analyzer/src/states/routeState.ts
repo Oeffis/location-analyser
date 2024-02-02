@@ -23,7 +23,7 @@ export class RouteState extends FilledState implements ResultStatus {
             .filter(poi => guessIds.includes(poi.poi.id));
         const closestDistance = Math.min(...lastGuessesWithDistance.map(poi => poi.distance.value));
 
-        if (closestDistance < 1000 && location.speed > 2) {
+        if (closestDistance < 1000 && location.speed > this.onRouteSpeedCutoff) {
             const closestGuesses = lastGuessesWithDistance.reduce<RouteWithDistance[]>((acc, guess) => {
                 if (guess.distance.value > closestDistance) return acc;
                 acc.push(guess);

@@ -5,6 +5,8 @@ import { TransitPOI } from "../routeMap.js";
 import { byProximity, isGuessFor, isResultStatus, isRouteDistance, isStopDistance, type FilledState, type GeoPosition, type NoResultStatus, type ResultStatus } from "./states.js";
 
 export abstract class State implements NoResultStatus {
+    protected readonly onRouteSpeedCutoff = 3;
+
     protected constructor(
         protected readonly fullHistory: Buffer<POIWithDistance[]>,
         protected readonly history: Buffer<ResultStatus>,
@@ -45,7 +47,7 @@ export abstract class State implements NoResultStatus {
         return Array.from(closestOfEachPoi.values());
     }
 
-    protected getClosestByCumulatedDistance(rightDirectionPois: POIWithDistance[], location: GeoPosition): POIWithDistance[] {
+    protected getClosestByCumulatedDistance<T extends POIWithDistance>(rightDirectionPois: T[], location: GeoPosition): T[] {
         return (rightDirectionPois
             .map(guess => {
                 const currentDistance = guess.distance.value;
@@ -69,9 +71,9 @@ export abstract class State implements NoResultStatus {
                 return {
                     guess,
                     cumulatedDistance
-                } as { guess: POIWithDistance; cumulatedDistance: number; };
+                } as { guess: T; cumulatedDistance: number; };
             })
-            .filter((guess): guess is { guess: POIWithDistance; cumulatedDistance: number; } => guess !== undefined)
+            .filter((guess): guess is { guess: T; cumulatedDistance: number; } => guess !== undefined)
             .sort((a, b) => a.cumulatedDistance - b.cumulatedDistance))
             .reduce((acc, guess) => {
                 if (acc.minDistance < guess.cumulatedDistance) return acc;
@@ -83,7 +85,7 @@ export abstract class State implements NoResultStatus {
                     minDistance: guess.cumulatedDistance,
                     points: [guess.guess]
                 };
-            }, { minDistance: Infinity, points: [] as POIWithDistance[] })
+            }, { minDistance: Infinity, points: [] as T[] })
             .points;
     }
 
