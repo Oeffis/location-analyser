@@ -1,17 +1,16 @@
 import { getDistance } from "geolib";
 import { Buffer } from "../buffer.js";
-import { type DistanceCalculator, type POIWithDistance, type RouteWithDistance, type StopWithDistance } from "../distanceCalculator.js";
+import { DistanceCalculator, type POIWithDistance, type RouteWithDistance, type StopWithDistance } from "../distanceCalculator.js";
 import { TransitPOI } from "../routeMap.js";
-import { byProximity, isGuessFor, isResultStatus, isStopDistance, type FilledState, type GeoPosition, type NoResultStatus, type ResultStatus } from "./states.js";
+import { RouteState, StopState, UnknownState, byProximity, isGuessFor, isResultStatus, isRouteDistance, isStopDistance, type FilledState, type GeoPosition, type NoResultStatus, type ResultStatus } from "./states.js";
 
 interface WithAveragedDistance<T extends POIWithDistance> {
     guess: T;
     averagedDistance: number;
 }
 
-export abstract class State implements NoResultStatus {
+export class State implements NoResultStatus {
     protected readonly onRouteSpeedCutoff = 3;
-    public abstract readonly nearbyPlatforms: StopWithDistance[];
 
     protected constructor(
         protected readonly fullHistory: Buffer<POIWithDistance[]>,
@@ -21,7 +20,50 @@ export abstract class State implements NoResultStatus {
     ) {
     }
 
-    public abstract getNext(location: GeoPosition): FilledState;
+    public getNext(location: GeoPosition): FilledState {
+        const closestPois = this.distanceCalculator.getUniquePOIsNear(location);
+        this.fullHistory.append(closestPois);
+
+        const closesByAveraged = this.getClosestByAveragedDistance(closestPois);
+        const firstPoi = closesByAveraged[0];
+        if (!firstPoi) {
+            return new UnknownState(
+                this.fullHistory,
+                this.history,
+                this.distanceCalculator,
+                location
+            );
+        }
+
+        const anyIsStop = isStopDistance(firstPoi.guess);
+        if (anyIsStop) {
+            return new StopState(
+                this.fullHistory,
+                this.history,
+                this.distanceCalculator,
+                location,
+                closesByAveraged.map(guess => guess.guess).filter(isStopDistance)
+            );
+        }
+
+        if (location.speed > this.onRouteSpeedCutoff) {
+            return new RouteState(
+                this.fullHistory,
+                this.history,
+                this.distanceCalculator,
+                location,
+                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance),
+                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance)
+            );
+        }
+
+        return new UnknownState(
+            this.fullHistory,
+            this.history,
+            this.distanceCalculator,
+            location
+        );
+    }
 
     protected directionFilter(currentLocation: GeoPosition): (poi: POIWithDistance) => boolean {
         if (!isResultStatus(this)) return () => true;
@@ -71,6 +113,19 @@ export abstract class State implements NoResultStatus {
 
     public updatePOIs(pois: TransitPOI[]): void {
         this.distanceCalculator.updatePOIs(pois);
+    }
+
+    public get nearbyPlatforms(): StopWithDistance[] {
+        return [];
+    }
+
+    public static initial(): State {
+        return new State(
+            new Buffer(10),
+            new Buffer(10),
+            new DistanceCalculator(),
+            []
+        );
     }
 }
 

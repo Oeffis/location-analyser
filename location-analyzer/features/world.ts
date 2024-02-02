@@ -2,7 +2,7 @@ import { AfterAll, BeforeAll, setWorldConstructor } from "@cucumber/cucumber";
 import { assert } from "chai";
 import { parse } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
-import { GeoLocation, GeoPosition, InitialState, ResultStatus, Route, RouteWithDistance, Status, StopWithDistance, TransitPOI, type State } from "../src/index.js";
+import { GeoLocation, GeoPosition, ResultStatus, Route, RouteWithDistance, State, Status, StopWithDistance, TransitPOI } from "../src/index.js";
 import { getVrrRoutes } from "./getVrrRoutes.js";
 import { getVrrStops } from "./getVrrStops.js";
 
@@ -68,7 +68,7 @@ AfterAll(function () {
 });
 
 export class LocationAnalyzerWorld {
-    protected currentState: State = new InitialState();
+    protected currentState = State.initial();
     public expectedRoutes: Partial<Route>[] = [];
     public routeOrderMatters = true;
     public statusList: ResultStatus[] = [];
