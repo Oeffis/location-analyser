@@ -55,34 +55,34 @@ Given<LocationAnalyzerWorld>("the 302 travels along the Musiktheater im Revier, 
 });
 
 When<LocationAnalyzerWorld>("I am on the 302 to Buer Rathaus North of Veltins Arena", function () {
-    this.updatePosition([51.55826, 7.06077]);
+    this.updatePosition([51.55826, 7.06077, 5, 5]);
 });
 
 When<LocationAnalyzerWorld>("I am on the RB43 between Buer Süd and Zoo", function () {
-    this.updatePosition([51.53936, 7.07059]);
+    this.updatePosition([51.53936, 7.07059, 5, 5]);
 });
 
 When<LocationAnalyzerWorld>("I am traveling in the direction of Zoo", function () {
-    this.updatePosition([51.53879, 7.07231]);
+    this.updatePosition([51.53879, 7.07231, 5, 5]);
 });
 
 When<LocationAnalyzerWorld>("I move along the area edge between Gladback and Essen", function () {
     this.updatePosition(
-        [51.5857704, 7.000457],
-        [51.4500238, 7.0000507]
+        [51.5857704, 7.000457, 5, 5],
+        [51.4500238, 7.0000507, 5, 5]
     );
 });
 
 When<LocationAnalyzerWorld>("I am on the S9 to Wuppertal between Essen and Wuppertal", function () {
-    this.updatePosition([51.34504, 7.10074]);
+    this.updatePosition([51.34504, 7.10074, 5, 5]);
 });
 
 When<LocationAnalyzerWorld>("I am on the RE2 at platform 7 of Gelsenkirchen Hbf", function () {
-    this.updatePosition([51.5048071, 7.1028557]);
+    this.updatePosition([51.5048071, 7.1028557, 5, 5]);
 });
 
 When<LocationAnalyzerWorld>("I travel further along the route of the 399", function () {
-    this.updatePosition([51.57275, 7.0334], [51.57287, 7.03364]);
+    this.updatePosition([51.57275, 7.0334, 5, 5], [51.57287, 7.03364, 5, 5]);
 });
 
 When<LocationAnalyzerWorld>("I travel more than ten seconds further along the route of the 399", function () {

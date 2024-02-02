@@ -6,6 +6,7 @@ import { byProximity, isResultStatus, isStopDistance, type FilledState, type Geo
 
 export abstract class State implements NoResultStatus {
     protected constructor(
+        protected readonly fullHistory: Buffer<POIWithDistance[]>,
         protected readonly history: Buffer<ResultStatus>,
         protected readonly distanceCalculator: DistanceCalculator,
         public readonly guesses: POIWithDistance[],
@@ -14,12 +15,6 @@ export abstract class State implements NoResultStatus {
     }
 
     public abstract getNext(location: GeoPosition): FilledState;
-
-    protected getRightDirectionPois(currentLocation: GeoPosition): POIWithDistance[] {
-        return this.distanceCalculator
-            .getUniquePOIsNear(currentLocation)
-            .filter(this.directionFilter(currentLocation));
-    }
 
     protected directionFilter(currentLocation: GeoPosition): (poi: POIWithDistance) => boolean {
         if (!isResultStatus(this)) return () => true;

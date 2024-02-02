@@ -1,21 +1,23 @@
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, StopWithDistance } from "../index.js";
+import { DistanceCalculator, POIWithDistance, StopWithDistance } from "../index.js";
 import { FilledState, GeoPosition, ResultStatus, isStopDistance } from "./states.js";
 
 export class StopState extends FilledState {
     public constructor(
+        fullHistory: Buffer<POIWithDistance[]>,
         history: Buffer<ResultStatus>,
         distanceCalculator: DistanceCalculator,
         location: GeoPosition,
         public readonly guesses: StopWithDistance[],
         nearbyPlatforms: StopWithDistance[]
     ) {
-        super(history, distanceCalculator, location, guesses, nearbyPlatforms);
+        super(fullHistory, history, distanceCalculator, location, guesses, nearbyPlatforms);
     }
 
     public getNext(location: GeoPosition): FilledState {
         const guessIds = this.guesses.map(guess => guess.poi.id);
         const closestPois = this.distanceCalculator.getUniquePOIsNear(location);
+        this.fullHistory.append(closestPois);
         const lastGuessesWithDistance = closestPois
             .filter(isStopDistance)
             .filter(poi => guessIds.includes(poi.poi.id));
@@ -29,6 +31,7 @@ export class StopState extends FilledState {
             }, []);
 
             return new StopState(
+                this.fullHistory,
                 this.history,
                 this.distanceCalculator,
                 location,

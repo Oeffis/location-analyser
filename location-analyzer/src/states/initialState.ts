@@ -1,18 +1,20 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, POIWithDistance } from "../distanceCalculator.js";
-import { FilledState, GeoPosition, State, byProximity, isCloserThan, isGuessFor, isRouteDistance } from "./states.js";
+import { FilledState, GeoPosition, RouteState, State, StopState, byProximity, isCloserThan, isGuessFor, isRouteDistance, isStopDistance } from "./states.js";
 
 export class InitialState extends State {
     public constructor() {
-        super(new Buffer(10), new DistanceCalculator(), [], []);
+        super(new Buffer(10), new Buffer(10), new DistanceCalculator(), [], []);
     }
 
     public getNext(location: GeoPosition): FilledState {
-        const rightDirectionPois = this.getRightDirectionPois(location);
-        const uniqueRightDirectionPois = this.keepClosestOfEachPoi(rightDirectionPois);
-        const nearbyPlatforms = this.getNearbyPlatformsIn(uniqueRightDirectionPois);
+        const pois = this.distanceCalculator.getUniquePOIsNear(location);
+        const uniquePois = this.keepClosestOfEachPoi(pois);
+        this.fullHistory.append(uniquePois);
+        const rightDirectionPois = uniquePois.filter(this.directionFilter(location));
+        const nearbyPlatforms = this.getNearbyPlatformsIn(rightDirectionPois);
 
-        const intermediate = uniqueRightDirectionPois
+        const intermediate = rightDirectionPois
             .map(guess => {
                 const currentDistance = guess.distance.value;
                 if (isRouteDistance(guess)) {
@@ -54,14 +56,20 @@ export class InitialState extends State {
             }, { minDistance: Infinity, points: [] as POIWithDistance[] })
             .points;
 
-        let guesses = uniqueRightDirectionPois
+        const guesses = rightDirectionPois
             .filter(isCloserThan(location.accuracy))
             .sort(byProximity);
 
         if (reSeenPoints.length > 0) {
-            guesses = reSeenPoints;
+            if (reSeenPoints.every(isRouteDistance)) {
+                return new RouteState(this.fullHistory, this.history, this.distanceCalculator, location, reSeenPoints, nearbyPlatforms);
+            } else if (reSeenPoints.every(isStopDistance)) {
+                return new StopState(this.fullHistory, this.history, this.distanceCalculator, location, reSeenPoints, nearbyPlatforms);
+            } else {
+                throw new Error("Mixed re-seen points");
+            }
         }
 
-        return new FilledState(this.history, this.distanceCalculator, location, guesses, nearbyPlatforms);
+        return new FilledState(this.fullHistory, this.history, this.distanceCalculator, location, guesses, nearbyPlatforms);
     }
 }

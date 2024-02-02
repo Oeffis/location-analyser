@@ -4,11 +4,12 @@ import { FilledState, GeoPosition, ResultStatus } from "./states.js";
 
 export class UnknownState extends FilledState {
     public constructor(
+        fullHistory: Buffer<StopWithDistance[]>,
         history: Buffer<ResultStatus>,
         distanceCalculator: DistanceCalculator,
         location: GeoPosition,
         nearbyPlatforms: StopWithDistance[],
     ) {
-        super(history, distanceCalculator, location, [], nearbyPlatforms);
+        super(fullHistory, history, distanceCalculator, location, [], nearbyPlatforms);
     }
 }
