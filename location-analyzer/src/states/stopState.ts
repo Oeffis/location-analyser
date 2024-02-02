@@ -1,6 +1,11 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, POIWithDistance, StopWithDistance } from "../index.js";
-import { FilledState, GeoPosition, ResultStatus, RouteState, isRouteDistance, isStopDistance } from "./states.js";
+import { FilledState, GeoPosition, ResultStatus, RouteState, UnknownState, isGuessFor, isRouteDistance, isStopDistance } from "./states.js";
+
+interface StopWithAveragedDistance {
+    guess: StopWithDistance;
+    averagedDistance: number;
+}
 
 export class StopState extends FilledState {
     public constructor(
@@ -15,30 +20,8 @@ export class StopState extends FilledState {
     }
 
     public getNext(location: GeoPosition): FilledState {
-        const guessIds = this.guesses.map(guess => guess.poi.id);
         const closestPois = this.distanceCalculator.getUniquePOIsNear(location);
         this.fullHistory.append(closestPois);
-        const lastGuessesWithDistance = closestPois
-            .filter(isStopDistance)
-            .filter(poi => guessIds.includes(poi.poi.id));
-        const closestDistance = Math.min(...lastGuessesWithDistance.map(poi => poi.distance.value));
-
-        if (closestDistance < 25 && location.speed < this.onRouteSpeedCutoff) {
-            const closestGuesses = lastGuessesWithDistance.reduce<StopWithDistance[]>((acc, guess) => {
-                if (guess.distance.value > closestDistance) return acc;
-                acc.push(guess);
-                return acc;
-            }, []);
-
-            return new StopState(
-                this.fullHistory,
-                this.history,
-                this.distanceCalculator,
-                location,
-                closestGuesses,
-                this.nearbyPlatforms
-            );
-        }
 
         if (location.speed > this.onRouteSpeedCutoff) {
             const routes = closestPois
@@ -58,6 +41,55 @@ export class StopState extends FilledState {
             );
         }
 
-        return super.getNext(location);
+        const closestGuesses = this.getClosestStopsByAveragedDistance(closestPois.filter(isStopDistance))
+            .filter(guess => guess.averagedDistance < location.accuracy * 2)
+            .map(guess => guess.guess);
+
+        if (closestGuesses.length > 0) {
+            return new StopState(
+                this.fullHistory,
+                this.history,
+                this.distanceCalculator,
+                location,
+                closestGuesses,
+                this.nearbyPlatforms
+            );
+        }
+
+        return new UnknownState(
+            this.fullHistory,
+            this.history,
+            this.distanceCalculator,
+            location,
+            this.nearbyPlatforms
+        );
+    }
+
+    protected getClosestStopsByAveragedDistance(rightDirectionPois: StopWithDistance[]): StopWithAveragedDistance[] {
+        return (rightDirectionPois
+            .map(guess => {
+                const currentDistance = guess.distance.value;
+                const history = this.fullHistory;
+                const previousDistance = history[history.length - 1]?.find(isGuessFor(guess.poi))?.distance.value ?? currentDistance;
+                const prePreviousDistance = history[history.length - 2]?.find(isGuessFor(guess.poi))?.distance.value ?? previousDistance;
+                const averagedDistance = (currentDistance + previousDistance + prePreviousDistance) / 3;
+                return {
+                    guess,
+                    averagedDistance
+                };
+            })
+            .sort((a, b) => a.averagedDistance - b.averagedDistance))
+            .reduce((acc, guess) => {
+                if (acc.minDistance < guess.averagedDistance) return acc;
+                if (acc.minDistance === guess.averagedDistance) {
+                    acc.points.push(guess);
+                    return acc;
+                }
+                return {
+                    minDistance: guess.averagedDistance,
+                    points: [guess]
+                };
+            }, { minDistance: Infinity, points: [] as StopWithAveragedDistance[] })
+            .points;
     }
 }
