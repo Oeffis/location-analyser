@@ -13,10 +13,9 @@ export class StopState extends FilledState {
         history: Buffer<ResultStatus>,
         distanceCalculator: DistanceCalculator,
         location: GeoPosition,
-        public readonly guesses: StopWithDistance[],
-        nearbyPlatforms: StopWithDistance[]
+        public readonly guesses: StopWithDistance[]
     ) {
-        super(fullHistory, history, distanceCalculator, location, guesses, nearbyPlatforms);
+        super(fullHistory, history, distanceCalculator, location, guesses);
     }
 
     public getNext(location: GeoPosition): FilledState {
@@ -36,8 +35,7 @@ export class StopState extends FilledState {
                 this.distanceCalculator,
                 location,
                 routes,
-                routes,
-                this.nearbyPlatforms
+                routes
             );
         }
 
@@ -51,8 +49,7 @@ export class StopState extends FilledState {
                 this.history,
                 this.distanceCalculator,
                 location,
-                closestGuesses,
-                this.nearbyPlatforms
+                closestGuesses
             );
         }
 
@@ -60,8 +57,7 @@ export class StopState extends FilledState {
             this.fullHistory,
             this.history,
             this.distanceCalculator,
-            location,
-            this.nearbyPlatforms
+            location
         );
     }
 

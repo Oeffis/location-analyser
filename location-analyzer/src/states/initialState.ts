@@ -1,75 +1,58 @@
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, POIWithDistance } from "../distanceCalculator.js";
-import { FilledState, GeoPosition, RouteState, State, StopState, byProximity, isCloserThan, isGuessFor, isRouteDistance, isStopDistance } from "./states.js";
+import { DistanceCalculator } from "../distanceCalculator.js";
+import { FilledState, GeoPosition, RouteState, State, StopState, UnknownState, isRouteDistance, isStopDistance } from "./states.js";
 
 export class InitialState extends State {
     public constructor() {
-        super(new Buffer(10), new Buffer(10), new DistanceCalculator(), [], []);
+        super(new Buffer(10), new Buffer(10), new DistanceCalculator(), []);
     }
 
     public getNext(location: GeoPosition): FilledState {
-        const pois = this.distanceCalculator.getUniquePOIsNear(location);
-        const uniquePois = this.keepClosestOfEachPoi(pois);
-        this.fullHistory.append(uniquePois);
-        const rightDirectionPois = uniquePois.filter(this.directionFilter(location));
-        const nearbyPlatforms = this.getNearbyPlatformsIn(rightDirectionPois);
+        const closestPois = this.distanceCalculator.getUniquePOIsNear(location);
+        this.fullHistory.append(closestPois);
 
-        const intermediate = rightDirectionPois
-            .map(guess => {
-                const currentDistance = guess.distance.value;
-                if (isRouteDistance(guess)) {
-                    const previousDistance = this.history.last()?.guesses.find(isGuessFor(guess.poi))?.distance.value;
-                    const prePreviousDistance = this.history[this.history.length - 2]?.guesses.find(isGuessFor(guess.poi))?.distance.value;
-                    if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
-                    const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
-                    if (cumulatedDistance / 10 > location.accuracy) return undefined;
-                    return {
-                        guess,
-                        cumulatedDistance
-                    };
-                }
-                if (location.speed > 2) return undefined;
-                const previousDistance = this.history.last()?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
-                const prePreviousDistance = this.history[this.history.length - 2]?.nearbyPlatforms.find(isGuessFor(guess.poi))?.distance.value;
-                if (previousDistance === undefined || prePreviousDistance === undefined) return undefined;
-                const cumulatedDistance = currentDistance + previousDistance + prePreviousDistance;
-                if (cumulatedDistance / 3 > location.accuracy) return undefined;
-                return {
-                    guess,
-                    cumulatedDistance
-                } as { guess: POIWithDistance, cumulatedDistance: number };
-            })
-            .filter((guess): guess is { guess: POIWithDistance, cumulatedDistance: number } => guess !== undefined)
-            .sort((a, b) => a.cumulatedDistance - b.cumulatedDistance);
-
-        const reSeenPoints = intermediate
-            .reduce((acc, guess) => {
-                if (acc.minDistance < guess.cumulatedDistance) return acc;
-                if (acc.minDistance === guess.cumulatedDistance) {
-                    acc.points.push(guess.guess);
-                    return acc;
-                }
-                return {
-                    minDistance: guess.cumulatedDistance,
-                    points: [guess.guess]
-                };
-            }, { minDistance: Infinity, points: [] as POIWithDistance[] })
-            .points;
-
-        const guesses = rightDirectionPois
-            .filter(isCloserThan(location.accuracy))
-            .sort(byProximity);
-
-        if (reSeenPoints.length > 0) {
-            if (reSeenPoints.every(isRouteDistance)) {
-                return new RouteState(this.fullHistory, this.history, this.distanceCalculator, location, reSeenPoints, reSeenPoints, nearbyPlatforms);
-            } else if (reSeenPoints.every(isStopDistance)) {
-                return new StopState(this.fullHistory, this.history, this.distanceCalculator, location, reSeenPoints, nearbyPlatforms);
-            } else {
-                throw new Error("Mixed re-seen points");
-            }
+        const closesByAveraged = this.getClosestByAveragedDistance(closestPois);
+        const firstPoi = closesByAveraged[0];
+        if (!firstPoi) {
+            return new UnknownState(
+                this.fullHistory,
+                this.history,
+                this.distanceCalculator,
+                location
+            );
         }
 
-        return new FilledState(this.fullHistory, this.history, this.distanceCalculator, location, guesses, nearbyPlatforms);
+        const anyIsStop = isStopDistance(firstPoi.guess);
+        if (anyIsStop) {
+            return new StopState(
+                this.fullHistory,
+                this.history,
+                this.distanceCalculator,
+                location,
+                closesByAveraged.map(guess => guess.guess).filter(isStopDistance)
+            );
+        }
+
+        if (location.speed > this.onRouteSpeedCutoff) {
+            return new RouteState(
+                this.fullHistory,
+                this.history,
+                this.distanceCalculator,
+                location,
+                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance),
+                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance)
+            );
+        }
+
+        return new UnknownState(
+            this.fullHistory,
+            this.history,
+            this.distanceCalculator,
+            location
+        );
+    }
+
+    public get nearbyPlatforms(): [] {
+        return [];
     }
 }

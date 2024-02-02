@@ -11,13 +11,13 @@ interface WithAveragedDistance<T extends POIWithDistance> {
 
 export abstract class State implements NoResultStatus {
     protected readonly onRouteSpeedCutoff = 3;
+    public abstract readonly nearbyPlatforms: StopWithDistance[];
 
     protected constructor(
         protected readonly fullHistory: Buffer<POIWithDistance[]>,
         protected readonly history: Buffer<ResultStatus>,
         protected readonly distanceCalculator: DistanceCalculator,
-        public readonly guesses: POIWithDistance[],
-        public readonly nearbyPlatforms: StopWithDistance[]
+        public readonly guesses: POIWithDistance[]
     ) {
     }
 
@@ -39,16 +39,6 @@ export abstract class State implements NoResultStatus {
         return pois
             .filter(isStopDistance)
             .sort(byProximity);
-    }
-
-    protected keepClosestOfEachPoi(pois: POIWithDistance[]): POIWithDistance[] {
-        const closestOfEachPoi = new Map<string, POIWithDistance>();
-        pois.forEach(poi => {
-            const currentClosest = closestOfEachPoi.get(poi.poi.id);
-            const isCloser = !currentClosest || poi.distance.value < currentClosest.distance.value;
-            if (isCloser) closestOfEachPoi.set(poi.poi.id, poi);
-        });
-        return Array.from(closestOfEachPoi.values());
     }
 
     protected getClosestByAveragedDistance<T extends POIWithDistance>(rightDirectionPois: T[]): WithAveragedDistance<T>[] {

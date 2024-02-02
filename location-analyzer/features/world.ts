@@ -128,11 +128,17 @@ export class LocationAnalyzerWorld {
         this.updatePOIs(both.flat());
     }
 
-    public getFirstRoute(): Route {
+    public getFirstRoute(): Route | undefined {
         const status = this.getStatus();
-        const route = status.guesses[0] as RouteWithDistance;
-        assert.exists(route, "There is no route to check against.");
-        return route.poi;
+        const route = status.guesses[0] as RouteWithDistance | undefined;
+        return route?.poi;
+    }
+
+    public getFirstRouteOrThrow(): Route {
+        const route = this.getFirstRoute();
+        assert.isDefined(route, "No route found");
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return route!;
     }
 
     public getStatus(): Status {

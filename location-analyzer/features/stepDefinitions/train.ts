@@ -112,7 +112,7 @@ When<LocationAnalyzerWorld>("I travel more than ten seconds further along the ro
 });
 
 Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", function (line: string, destination: string) {
-    const route = this.getFirstRoute();
+    const route = this.getFirstRouteOrThrow();
     assert.strictEqual(route.ref, line);
     assert.strictEqual(route.to, destination);
 });
@@ -134,9 +134,8 @@ Then<LocationAnalyzerWorld>("one of the detected trains is the {string} to {stri
 
 Then<LocationAnalyzerWorld>("the train {string} to {string} is not detected", function (line: string, destination: string) {
     const route = this.getFirstRoute();
-
-    const sameLine = route.ref === line;
-    const sameDestination = route.to === destination;
+    const sameLine = route?.ref === line;
+    const sameDestination = route?.to === destination;
     assert.isFalse(sameLine && sameDestination, `The train ${line} to ${destination} is detected, but should not be.`);
 });
 

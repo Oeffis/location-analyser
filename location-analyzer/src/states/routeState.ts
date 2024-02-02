@@ -1,5 +1,5 @@
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistance } from "../distanceCalculator.js";
+import { DistanceCalculator, POIWithDistance, RouteWithDistance } from "../distanceCalculator.js";
 import { FilledState, GeoPosition, ResultStatus, StopState, UnknownState, isGuessFor, isRouteDistance, isStopDistance } from "./states.js";
 
 interface RouteWithAveragedDistance {
@@ -14,10 +14,9 @@ export class RouteState extends FilledState implements ResultStatus {
         distanceCalculator: DistanceCalculator,
         location: GeoPosition,
         public readonly guesses: RouteWithDistance[],
-        protected readonly possibilities: RouteWithDistance[],
-        nearbyPlatforms: StopWithDistance[]
+        protected readonly possibilities: RouteWithDistance[]
     ) {
-        super(fullHistory, history, distanceCalculator, location, guesses, nearbyPlatforms);
+        super(fullHistory, history, distanceCalculator, location, guesses);
     }
 
     public getNext(location: GeoPosition): FilledState {
@@ -42,8 +41,7 @@ export class RouteState extends FilledState implements ResultStatus {
                 this.distanceCalculator,
                 location,
                 closest.map(route => route.guess),
-                this.possibilities,
-                this.nearbyPlatforms
+                this.possibilities
             );
         }
 
@@ -56,8 +54,7 @@ export class RouteState extends FilledState implements ResultStatus {
                 this.history,
                 this.distanceCalculator,
                 location,
-                stopsInClosest,
-                this.nearbyPlatforms
+                stopsInClosest
             );
         }
 
@@ -65,8 +62,7 @@ export class RouteState extends FilledState implements ResultStatus {
             this.fullHistory,
             this.history,
             this.distanceCalculator,
-            location,
-            this.nearbyPlatforms,
+            location
         );
     }
 

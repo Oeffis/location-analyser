@@ -1,5 +1,5 @@
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, POIWithDistance, StopWithDistance } from "../distanceCalculator.js";
+import { DistanceCalculator, POIWithDistance } from "../distanceCalculator.js";
 import { FilledState, GeoPosition, ResultStatus, RouteState, StopState, isRouteDistance, isStopDistance } from "./states.js";
 
 export class UnknownState extends FilledState {
@@ -7,10 +7,9 @@ export class UnknownState extends FilledState {
         fullHistory: Buffer<POIWithDistance[]>,
         history: Buffer<ResultStatus>,
         distanceCalculator: DistanceCalculator,
-        location: GeoPosition,
-        nearbyPlatforms: StopWithDistance[],
+        location: GeoPosition
     ) {
-        super(fullHistory, history, distanceCalculator, location, [], nearbyPlatforms);
+        super(fullHistory, history, distanceCalculator, location, []);
     }
 
     public getNext(location: GeoPosition): FilledState {
@@ -24,8 +23,7 @@ export class UnknownState extends FilledState {
                 this.fullHistory,
                 this.history,
                 this.distanceCalculator,
-                location,
-                this.nearbyPlatforms
+                location
             );
         }
 
@@ -36,8 +34,7 @@ export class UnknownState extends FilledState {
                 this.history,
                 this.distanceCalculator,
                 location,
-                closesByAveraged.map(guess => guess.guess).filter(isStopDistance),
-                this.nearbyPlatforms
+                closesByAveraged.map(guess => guess.guess).filter(isStopDistance)
             );
         }
 
@@ -48,8 +45,7 @@ export class UnknownState extends FilledState {
                 this.distanceCalculator,
                 location,
                 closesByAveraged.map(guess => guess.guess).filter(isRouteDistance),
-                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance),
-                this.nearbyPlatforms
+                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance)
             );
         }
 
@@ -57,8 +53,7 @@ export class UnknownState extends FilledState {
             this.fullHistory,
             this.history,
             this.distanceCalculator,
-            location,
-            this.nearbyPlatforms
+            location
         );
     }
 }
