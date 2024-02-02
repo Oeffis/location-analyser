@@ -1,10 +1,15 @@
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator } from "../distanceCalculator.js";
-import { FilledState, GeoPosition, RouteState, State, StopState, UnknownState, isRouteDistance, isStopDistance } from "./states.js";
+import { DistanceCalculator, POIWithDistance, StopWithDistance } from "../distanceCalculator.js";
+import { FilledState, GeoPosition, ResultStatus, RouteState, State, StopState, UnknownState, isRouteDistance, isStopDistance } from "./states.js";
 
 export class InitialState extends State {
-    public constructor() {
-        super(new Buffer(10), new Buffer(10), new DistanceCalculator(), []);
+    public constructor(
+        fullHistory = new Buffer<POIWithDistance[]>(10),
+        history = new Buffer<ResultStatus>(10),
+        distanceCalculator = new DistanceCalculator(),
+        guesses = new Array<POIWithDistance>()
+    ) {
+        super(fullHistory, history, distanceCalculator, guesses);
     }
 
     public getNext(location: GeoPosition): FilledState {
@@ -52,7 +57,7 @@ export class InitialState extends State {
         );
     }
 
-    public get nearbyPlatforms(): [] {
+    public get nearbyPlatforms(): StopWithDistance[] {
         return [];
     }
 }

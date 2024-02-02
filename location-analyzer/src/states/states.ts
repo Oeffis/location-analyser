@@ -1,10 +1,10 @@
 import { POIWithDistance, RouteWithDistance, StopWithDistance } from "../distanceCalculator.js";
 import { TransitPOI, isRoute } from "../routeMap.js";
-
 export * from "./state.js";
 
-export * from "./filledState.js";
 export * from "./initialState.js";
+
+export * from "./filledState.js";
 export * from "./routeState.js";
 export * from "./stopState.js";
 export * from "./unknownState.js";
