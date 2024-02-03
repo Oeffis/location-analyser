@@ -19,9 +19,10 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { LocationAnalyzer, Route, Section, Status, Stop, isRouteDistance } from "@oeffis/location-analyzer";
+import { Route, Section, State, Stop, isRouteDistance } from "@oeffis/location-analyzer";
 import { POIWithDistance } from "@oeffis/location-analyzer/dist/distanceCalculator";
 import { parse } from "csv-parse/browser/esm/sync";
+import { getSpeed } from "geolib";
 import { inflate } from "pako";
 import { useEffect, useState } from "react";
 import "./theme/variables.css";
@@ -29,10 +30,13 @@ import "./theme/variables.css";
 setupIonicReact();
 
 const App: React.FC = () => {
-  const position = usePosition();
+  const positions = usePosition();
   const pois = usePois();
-  const [status, setStatus] = useState<Status>();
-  const analyzer = new LocationAnalyzer(pois);
+  const [state, setState] = useState<State>(State.initial());
+
+  useEffect(() => {
+    state.updatePOIs(pois);
+  }, [pois]);
 
   function getName(poi: POIWithDistance): string {
     if (isRouteDistance(poi)) {
@@ -42,19 +46,31 @@ const App: React.FC = () => {
   }
 
   useEffect(() => {
-    if (position.isError) {
-      setStatus({ guesses: [], nearbyPlatforms: [] });
+    if (positions.isError) {
       return;
     }
 
-    analyzer.updatePosition({
-      latitude: position.position.coords.latitude,
-      longitude: position.position.coords.longitude,
-      accuracy: position.position.coords.accuracy
-    });
-    const status = analyzer.getStatus();
-    setStatus(status);
-  }, [position, analyzer]);
+    const currentPosition = positions.currentPosition;
+    const previousPosition = positions.lastPosition;
+    const currentCoords = {
+      ...currentPosition.coords,
+      altitude: undefined,
+      time: currentPosition.timestamp
+    };
+    const previousCoords = previousPosition ? {
+      ...previousPosition.coords,
+      altitude: undefined,
+      time: previousPosition.timestamp
+    } : undefined;
+    const calculatedSpeed = previousCoords ? getSpeed(previousCoords, currentCoords) : 0;
+
+    setState(state.getNext({
+      latitude: currentPosition.coords.latitude,
+      longitude: currentPosition.coords.longitude,
+      accuracy: currentPosition.coords.accuracy,
+      speed: currentPosition.coords.speed ?? calculatedSpeed
+    }));
+  }, [positions, state]);
 
   return (<IonApp>
     <IonPage>
@@ -65,28 +81,28 @@ const App: React.FC = () => {
       </IonHeader>
       <IonContent className="ion-padding">
         <h1>Position</h1>
-        {position.isError && <p color="red">{(position.error as Error).message}</p>}
-        {!position.isError && (<p>
-          Latitude: {position.position.coords.latitude}°< br />
-          Longitude: {position.position.coords.longitude}°<br />
-          Accuracy: {position.position.coords.accuracy}m<br />
-          Time: {new Date(position.position.timestamp).toTimeString()}<br />
+        {positions.isError && <p color="red">{(positions.error as Error).message}</p>}
+        {!positions.isError && (<p>
+          Latitude: {positions.currentPosition.coords.latitude}°< br />
+          Longitude: {positions.currentPosition.coords.longitude}°<br />
+          Accuracy: {positions.currentPosition.coords.accuracy}m<br />
+          Time: {new Date(positions.currentPosition.timestamp).toTimeString()}<br />
         </p>)}
         <h1>Guesses</h1>
-        {status?.guesses.map(guess => (<p key={guess.poi.id}>
+        {state.guesses.map(guess => (<p key={guess.poi.id}>
           {isRouteDistance(guess) ? "Route" : "Stop"}
           ID: {guess.poi.id}<br />
           Name: {getName(guess)}<br />
           Distance: {guess.distance.value}m<br />
         </p>))}
-        {(status?.guesses ?? []).length === 0 && <p>No Guesses</p>}
+        {state.guesses.length === 0 && <p>No Guesses</p>}
         <h1>Nearby Platforms</h1>
-        {status?.nearbyPlatforms.map(platform => (<p key={platform.poi.id}>
+        {state.nearbyPlatforms.map(platform => (<p key={platform.poi.id}>
           ID: {platform.poi.id}<br />
           Name: {platform.poi.name}<br />
           Distance: {platform.distance.value}m<br />
         </p>))}
-        {(status?.nearbyPlatforms ?? []).length === 0 && <p>No Nearby Platforms</p>}
+        {state.nearbyPlatforms.length === 0 && <p>No Nearby Platforms</p>}
       </IonContent>
     </IonPage>
   </IonApp>
@@ -97,7 +113,8 @@ type PositionResult = PositionSuccessResult | PositionErrorResult;
 
 interface PositionSuccessResult {
   isError: false;
-  position: Position;
+  currentPosition: Position;
+  lastPosition?: Position;
 }
 
 interface PositionErrorResult {
@@ -116,7 +133,7 @@ function usePosition(): PositionResult {
       enableHighAccuracy: true,
       timeout: 60000,
       maximumAge: 5000
-    }, (position, err) => {
+    }, (newPosition, err) => {
       if (err) {
         setPosition({
           isError: true,
@@ -124,7 +141,7 @@ function usePosition(): PositionResult {
         });
         return;
       }
-      if (!position) {
+      if (!newPosition) {
         setPosition({
           isError: true,
           error: new Error("No error, but still no position")
@@ -133,7 +150,8 @@ function usePosition(): PositionResult {
       }
       setPosition({
         isError: false,
-        position: position
+        currentPosition: newPosition,
+        lastPosition: position.isError ? undefined : position.currentPosition
       });
     }).catch(err => {
       setPosition({

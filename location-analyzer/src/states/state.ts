@@ -117,21 +117,22 @@ export class State implements NoResultStatus {
             .points;
     }
 
-    public updatePOIs(pois: TransitPOI[]): void {
+    public updatePOIs(pois: TransitPOI[]): this {
         this.distanceCalculator.updatePOIs(pois);
+        return this;
     }
 
     public get nearbyPlatforms(): StopWithDistance[] {
         return [];
     }
 
-    public static initial(): State {
+    public static initial(pois: TransitPOI[] = []): State {
         return new State(
             new Buffer(10),
             new Buffer(10),
             new DistanceCalculator(),
             []
-        );
+        ).updatePOIs(pois);
     }
 }
 
