@@ -10,6 +10,7 @@ export class StopState extends FilledState {
         location: GeoPosition,
         public readonly guesses: StopWithDistance[]
     ) {
+        if (guesses.length === 0) throw new Error("StopState needs at least one guess");
         super(fullHistory, history, distanceCalculator, location, guesses);
     }
 }
