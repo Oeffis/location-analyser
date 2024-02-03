@@ -31,12 +31,8 @@ setupIonicReact();
 
 const App: React.FC = () => {
   const positions = usePosition();
-  const pois = usePois();
   const [state, setState] = useState<State>(State.initial());
-
-  useEffect(() => {
-    state.updatePOIs(pois);
-  }, [pois]);
+  poiPromise.then(pois => state.updatePOIs(pois)).catch(err => console.error(err));
 
   function getName(poi: POIWithDistance): string {
     if (isRouteDistance(poi)) {
@@ -70,7 +66,7 @@ const App: React.FC = () => {
       accuracy: currentPosition.coords.accuracy,
       speed: currentPosition.coords.speed ?? calculatedSpeed
     }));
-  }, [positions, state]);
+  }, [positions]);
 
   return (<IonApp>
     <IonPage>
@@ -164,16 +160,14 @@ function usePosition(): PositionResult {
   return position;
 }
 
-function usePois(): (Stop | Route)[] {
-  const [stops, setStops] = useState<(Stop | Route)[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      const data = await Promise.all([loadFullRoutes(), getVrrStops()]);
-      setStops(data.flat());
-    })().catch(console.error);
-  });
-  return stops;
+const poiPromise = getPois().catch(error => {
+  console.error(error);
+  return [];
+});
+async function getPois(): Promise<(Route | Stop)[]> {
+  console.log("Loading POIs");
+  const data = await Promise.all([loadFullRoutes(), getVrrStops()]);
+  return data.flat();
 }
 
 export async function getVrrStops(): Promise<Stop[]> {
