@@ -16,8 +16,8 @@ export class RouteState extends FilledState implements ResultStatus {
         public readonly guesses: RouteWithDistance[],
         protected readonly possibilities: RouteWithDistance[]
     ) {
-        if (guesses.length === 0) throw new Error("RouteState needs at least one guess");
         super(fullHistory, history, distanceCalculator, location, guesses);
+        if (guesses.length === 0) throw new Error("RouteState needs at least one guess");
     }
 
     public getNext(location: GeoPosition): FilledState {
