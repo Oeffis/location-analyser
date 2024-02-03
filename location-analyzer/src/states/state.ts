@@ -21,7 +21,9 @@ export class State implements NoResultStatus {
     }
 
     public getNext(location: GeoPosition): FilledState {
-        const closestPois = this.distanceCalculator.getUniquePOIsNear(location);
+        const closestPois = this.distanceCalculator
+            .getUniquePOIsNear(location)
+            .filter(this.directionFilter(location));
         this.fullHistory.append(closestPois);
 
         const closesByAveraged = this.getClosestByAveragedDistance(closestPois);
@@ -35,8 +37,11 @@ export class State implements NoResultStatus {
             );
         }
 
-        const anyIsStop = isStopDistance(firstPoi.guess);
-        if (anyIsStop) {
+        const stops = closesByAveraged
+            .filter(guess => guess.averagedDistance < location.accuracy / 2)
+            .map(guess => guess.guess)
+            .filter(isStopDistance);
+        if (stops.length > 0) {
             return new StopState(
                 this.fullHistory,
                 this.history,
