@@ -3,6 +3,7 @@ import { DistanceCalculator, POIWithDistance, RouteWithDistance } from "../dista
 import { FilledState, GeoPosition, ResultStatus, StopState, UnknownState, isRouteDistance, isStopDistance } from "./states.js";
 
 export class RouteState extends FilledState implements ResultStatus {
+    public readonly possibilityIds = new Set<string>();
     public constructor(
         fullHistory: Buffer<POIWithDistance[]>,
         history: Buffer<ResultStatus>,
@@ -13,6 +14,8 @@ export class RouteState extends FilledState implements ResultStatus {
     ) {
         super(fullHistory, history, distanceCalculator, location, guesses);
         if (guesses.length === 0) throw new Error("RouteState needs at least one guess");
+        if (possibilities.length === 0) throw new Error("RouteState needs at least one possibility");
+        possibilities.forEach(possibility => this.possibilityIds.add(possibility.poi.id));
     }
 
     public getNext(location: GeoPosition): FilledState {
@@ -21,10 +24,9 @@ export class RouteState extends FilledState implements ResultStatus {
             .filter(this.directionFilter(location));
         this.fullHistory.append(closestPois);
 
-        const possibilityIds = this.possibilities.map(possibility => possibility.poi.id);
         const rightDirectionRoutes = closestPois
             .filter(isRouteDistance)
-            .filter(poi => possibilityIds.includes(poi.poi.id));
+            .filter(poi => this.possibilityIds.has(poi.poi.id));
         let closest = this.getClosestByAveragedDistance(rightDirectionRoutes);
 
         if (location.speed < this.onRouteSpeedCutoff) {
