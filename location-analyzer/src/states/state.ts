@@ -27,15 +27,6 @@ export class State implements NoResultStatus {
         this.fullHistory.append(closestPois);
 
         const closesByAveraged = this.getClosestByAveragedDistance(closestPois);
-        const firstPoi = closesByAveraged[0];
-        if (!firstPoi) {
-            return new UnknownState(
-                this.fullHistory,
-                this.history,
-                this.distanceCalculator,
-                location
-            );
-        }
 
         const routesInClosest = closesByAveraged.map(guess => guess.guess).filter(isRouteDistance);
         if (location.speed > this.onRouteSpeedCutoff && routesInClosest.length > 0) {
