@@ -35,8 +35,8 @@ export class State implements NoResultStatus {
                 this.history,
                 this.distanceCalculator,
                 location,
-                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance),
-                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance)
+                routesInClosest,
+                routesInClosest
             );
         }
 
