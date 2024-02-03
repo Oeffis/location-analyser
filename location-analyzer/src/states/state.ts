@@ -4,7 +4,7 @@ import { DistanceCalculator, type POIWithDistance, type RouteWithDistance, type 
 import { TransitPOI } from "../routeMap.js";
 import { RouteState, StopState, UnknownState, byProximity, isGuessFor, isResultStatus, isRouteDistance, isStopDistance, type FilledState, type GeoPosition, type NoResultStatus, type ResultStatus } from "./states.js";
 
-interface WithAveragedDistance<T extends POIWithDistance> {
+export interface WithAveragedDistance<T extends POIWithDistance> {
     guess: T;
     averagedDistance: number;
 }
