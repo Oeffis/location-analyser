@@ -37,6 +37,18 @@ export class State implements NoResultStatus {
             );
         }
 
+        const routesInClosest = closesByAveraged.map(guess => guess.guess).filter(isRouteDistance);
+        if (location.speed > this.onRouteSpeedCutoff && routesInClosest.length > 0) {
+            return new RouteState(
+                this.fullHistory,
+                this.history,
+                this.distanceCalculator,
+                location,
+                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance),
+                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance)
+            );
+        }
+
         const stops = closesByAveraged
             .filter(guess => guess.averagedDistance < location.accuracy / 2)
             .map(guess => guess.guess)
@@ -48,17 +60,6 @@ export class State implements NoResultStatus {
                 this.distanceCalculator,
                 location,
                 closesByAveraged.map(guess => guess.guess).filter(isStopDistance)
-            );
-        }
-
-        if (location.speed > this.onRouteSpeedCutoff) {
-            return new RouteState(
-                this.fullHistory,
-                this.history,
-                this.distanceCalculator,
-                location,
-                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance),
-                closesByAveraged.map(guess => guess.guess).filter(isRouteDistance)
             );
         }
 

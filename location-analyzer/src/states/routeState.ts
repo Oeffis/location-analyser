@@ -20,13 +20,14 @@ export class RouteState extends FilledState implements ResultStatus {
     }
 
     public getNext(location: GeoPosition): FilledState {
-        const closestPois = this.distanceCalculator.getUniquePOIsNear(location);
+        const closestPois = this.distanceCalculator
+            .getUniquePOIsNear(location)
+            .filter(this.directionFilter(location));
         this.fullHistory.append(closestPois);
 
         const possibilityIds = this.possibilities.map(possibility => possibility.poi.id);
         const rightDirectionRoutes = closestPois
             .filter(isRouteDistance)
-            .filter(this.directionFilter(location))
             .filter(poi => possibilityIds.includes(poi.poi.id));
         let closest = this.getClosestRoutesByCumulatedDistance(rightDirectionRoutes);
 
@@ -45,8 +46,7 @@ export class RouteState extends FilledState implements ResultStatus {
             );
         }
 
-        const rightDirectionPois = closestPois.filter(this.directionFilter(location));
-        const closestByCumulation = this.getClosestByAveragedDistance(rightDirectionPois).map(guess => guess.guess);
+        const closestByCumulation = this.getClosestByAveragedDistance(closestPois).map(guess => guess.guess);
         const stopsInClosest = closestByCumulation.filter(isStopDistance);
         if (stopsInClosest.length > 0) {
             return new StopState(
