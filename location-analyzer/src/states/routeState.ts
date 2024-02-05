@@ -1,6 +1,6 @@
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistance } from "../distanceCalculator.js";
-import { FilledState, GeoPosition, ResultStatus, isRouteDistance, isStopDistance } from "./states.js";
+import { DistanceCalculator, POIWithDistance, RouteWithDistance } from "../distanceCalculator.js";
+import { FilledState, GeoPosition, ResultStatus, isRouteDistance } from "./states.js";
 
 export class RouteState extends FilledState implements ResultStatus {
     public readonly possibilityIds = new Set<string>();
@@ -39,11 +39,5 @@ export class RouteState extends FilledState implements ResultStatus {
             closest = closest.filter(route => route.averagedDistance < (location.accuracy * 2));
         }
         return closest.map(route => route.guess);
-    }
-
-    protected override getPossibleStops(closestPois: POIWithDistance[]): StopWithDistance[] {
-        const closestByCumulation = this.getClosestByAveragedDistance(closestPois).map(guess => guess.guess);
-        const stopsInClosest = closestByCumulation.filter(isStopDistance);
-        return stopsInClosest;
     }
 }

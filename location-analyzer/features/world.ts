@@ -51,10 +51,10 @@ AfterAll(function () {
     console.log("\n\n");
     if (worsenedScores.length === 0) {
         improvedBaseScores.forEach(score => {
-            console.log(`🚀 Base Score of track ${score} has improved, was ${originalScores[parseInt(score)]?.base}%, is now ${scores[parseInt(score)]?.base}`);
+            console.log(`🚀 Base Score of track ${score} has improved, was ${originalScores[parseInt(score)]?.base}%, is now ${scores[parseInt(score)]?.base}%`);
         });
         improvedExtraScores.forEach(score => {
-            console.log(`🚀 Score allowing extra of track ${score} has improved, was ${originalScores[parseInt(score)]?.allowingExtra}%, is now ${scores[parseInt(score)]?.allowingExtra}`);
+            console.log(`🚀 Score allowing extra of track ${score} has improved, was ${originalScores[parseInt(score)]?.allowingExtra}%, is now ${scores[parseInt(score)]?.allowingExtra}%`);
         });
         writeFileSync("features/data/testTrackScores.json", JSON.stringify(scores, undefined, 4));
     } else {
