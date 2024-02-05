@@ -110,7 +110,7 @@ export class State implements NoResultStatus {
     }
 
     protected getClosestByAveragedDistance<T extends POIWithDistance>(rightDirectionPois: T[]): WithAveragedDistance<T>[] {
-        return (rightDirectionPois
+        return rightDirectionPois
             .map(guess => {
                 const currentDistance = guess.distance.value;
                 const history = this.fullHistory;
@@ -122,7 +122,6 @@ export class State implements NoResultStatus {
                     averagedDistance
                 };
             })
-            .sort((a, b) => a.averagedDistance - b.averagedDistance))
             .reduce((acc, guess) => {
                 if (acc.minDistance < guess.averagedDistance) return acc;
                 if (acc.minDistance === guess.averagedDistance) {
