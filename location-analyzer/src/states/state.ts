@@ -2,7 +2,7 @@ import { getDistance } from "geolib";
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, type POIWithDistance, type RouteWithDistance, type StopWithDistance } from "../distanceCalculator.js";
 import { TransitPOI } from "../routeMap.js";
-import { RouteState, StopState, UnknownState, byProximity, isGuessFor, isResultStatus, isRouteDistance, isStopDistance, type FilledState, type GeoPosition, type NoResultStatus, type ResultStatus } from "./states.js";
+import { RouteState, StopState, UnknownState, byProximity, isGuessFor, isRouteDistance, isStopDistance, type FilledState, type GeoPosition, type NoResultStatus, type ResultStatus } from "./states.js";
 
 export interface WithAveragedDistance<T extends POIWithDistance> {
     guess: T;
@@ -92,15 +92,30 @@ export class State implements NoResultStatus {
     }
 
     protected directionFilter(currentLocation: GeoPosition): (poi: POIWithDistance) => boolean {
-        if (!isResultStatus(this)) return () => true;
+        return (poi: POIWithDistance) => {
+            if (isStopDistance(poi)) return true;
+            const lastLocation = this.history[0]?.location;
+            if (lastLocation === undefined) return true;
 
-        const previousLocations = this.history.map(status => status.location);
-        const locationHistory = [...previousLocations, currentLocation];
+            const lastPoi = this.fullHistory
+                .last()
+                ?.find(isGuessFor(poi.poi)) as RouteWithDistance | undefined;
 
-        return new MatchingDirectionFilter(
-            locationHistory,
-            this.distanceCalculator.getUniquePOIsNear(this.location)
-        ).asFunction();
+            if (lastPoi === undefined) return true;
+
+            const atSameSection = poi.distance.section === lastPoi.distance.section;
+            if (atSameSection) {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                const sectionEnd = poi.poi.sections[poi.distance.consecutiveSection]![poi.distance.section + 1]!;
+                const lastDistanceToSectionEnd = getDistance(lastLocation, sectionEnd);
+                const currentDistanceToSectionEnd = getDistance(currentLocation, sectionEnd);
+                const wrongDirectionDistance = currentDistanceToSectionEnd - lastDistanceToSectionEnd;
+                const gracedWrongDirectionDistance = wrongDirectionDistance - currentLocation.accuracy - lastLocation.accuracy;
+                return gracedWrongDirectionDistance < 0;
+            }
+
+            return poi.distance.section > lastPoi.distance.section;
+        };
     }
 
     protected getNearbyPlatformsIn(pois: POIWithDistance[]): StopWithDistance[] {
@@ -152,45 +167,5 @@ export class State implements NoResultStatus {
             new DistanceCalculator(),
             []
         ).updatePOIs(pois);
-    }
-}
-
-class MatchingDirectionFilter {
-    protected readonly currentLocation: GeoPosition | undefined;
-    protected readonly lastLocation: GeoPosition | undefined;
-
-    public constructor(
-        protected readonly locationHistory: GeoPosition[],
-        protected readonly lastPoisWithDistance: POIWithDistance[]
-    ) {
-        this.currentLocation = locationHistory[locationHistory.length - 1];
-        this.lastLocation = locationHistory[locationHistory.length - 2];
-    }
-
-    public asFunction(): (poi: POIWithDistance) => boolean {
-        return this.apply.bind(this);
-    }
-
-    protected apply(poi: POIWithDistance): boolean {
-        if (isStopDistance(poi)) return true;
-        if (this.currentLocation === undefined) return true;
-        if (this.lastLocation === undefined) return true;
-
-        const lastPoi = this.lastPoisWithDistance
-            .find(lastPoi => lastPoi.poi.id === poi.poi.id) as RouteWithDistance | undefined;
-        if (lastPoi === undefined) return true;
-
-        const atSameSection = poi.distance.section === lastPoi.distance.section;
-        if (atSameSection) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            const sectionEnd = poi.poi.sections[poi.distance.consecutiveSection]![poi.distance.section + 1]!;
-            const lastDistanceToSectionEnd = getDistance(this.lastLocation, sectionEnd);
-            const currentDistanceToSectionEnd = getDistance(this.currentLocation, sectionEnd);
-            const wrongDirectionDistance = currentDistanceToSectionEnd - lastDistanceToSectionEnd;
-            const gracedWrongDirectionDistance = wrongDirectionDistance - this.currentLocation.accuracy - this.lastLocation.accuracy;
-            return gracedWrongDirectionDistance < 0;
-        }
-
-        return poi.distance.section > lastPoi.distance.section;
     }
 }
