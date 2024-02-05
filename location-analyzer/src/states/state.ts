@@ -26,10 +26,9 @@ export class State implements NoResultStatus {
             .filter(this.directionFilter(location));
         this.fullHistory.append(closestPois);
 
-        const closesByAveraged = this.getClosestByAveragedDistance(closestPois);
+        const routesInClosest = this.getPossibleRoutes(closestPois, location);
 
-        const routesInClosest = closesByAveraged.map(guess => guess.guess).filter(isRouteDistance);
-        if (location.speed > this.onRouteSpeedCutoff && routesInClosest.length > 0) {
+        if (routesInClosest.length > 0) {
             return new RouteState(
                 this.fullHistory,
                 this.history,
@@ -40,7 +39,8 @@ export class State implements NoResultStatus {
             );
         }
 
-        const stops = closesByAveraged
+        const closestStopsByAveraged = this.getClosestByAveragedDistance(closestPois);
+        const stops = closestStopsByAveraged
             .filter(guess => guess.averagedDistance < location.accuracy / 2)
             .map(guess => guess.guess)
             .filter(isStopDistance);
@@ -50,7 +50,7 @@ export class State implements NoResultStatus {
                 this.history,
                 this.distanceCalculator,
                 location,
-                closesByAveraged.map(guess => guess.guess).filter(isStopDistance)
+                closestStopsByAveraged.map(guess => guess.guess).filter(isStopDistance)
             );
         }
 
@@ -60,6 +60,18 @@ export class State implements NoResultStatus {
             this.distanceCalculator,
             location
         );
+    }
+
+    private getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): RouteWithDistance[] {
+        if (location.speed < this.onRouteSpeedCutoff) {
+            return [];
+        }
+
+        const closesRoutes = this.getClosestByAveragedDistance(closestPois);
+
+        return closesRoutes
+            .map(guess => guess.guess)
+            .filter(isRouteDistance);
     }
 
     protected directionFilter(currentLocation: GeoPosition): (poi: POIWithDistance) => boolean {
