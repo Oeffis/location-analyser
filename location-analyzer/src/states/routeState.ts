@@ -1,5 +1,5 @@
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, POIWithDistance, RouteWithDistance } from "../distanceCalculator.js";
+import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistance } from "../distanceCalculator.js";
 import { FilledState, GeoPosition, ResultStatus, StopState, UnknownState, isRouteDistance, isStopDistance } from "./states.js";
 
 export class RouteState extends FilledState implements ResultStatus {
@@ -37,8 +37,7 @@ export class RouteState extends FilledState implements ResultStatus {
             );
         }
 
-        const closestByCumulation = this.getClosestByAveragedDistance(closestPois).map(guess => guess.guess);
-        const stopsInClosest = closestByCumulation.filter(isStopDistance);
+        const stopsInClosest = this.getPossibleStops(closestPois);
         if (stopsInClosest.length > 0) {
             return new StopState(
                 this.fullHistory,
@@ -67,5 +66,11 @@ export class RouteState extends FilledState implements ResultStatus {
             closest = closest.filter(route => route.averagedDistance < (location.accuracy * 2));
         }
         return closest.map(route => route.guess);
+    }
+
+    protected getPossibleStops(closestPois: POIWithDistance[]): StopWithDistance[] {
+        const closestByCumulation = this.getClosestByAveragedDistance(closestPois).map(guess => guess.guess);
+        const stopsInClosest = closestByCumulation.filter(isStopDistance);
+        return stopsInClosest;
     }
 }

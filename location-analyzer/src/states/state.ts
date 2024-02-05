@@ -58,15 +58,6 @@ export class State implements NoResultStatus {
         );
     }
 
-    private getPossibleStops(closestPois: POIWithDistance[], location: GeoPosition): StopWithDistance[] {
-        const closestStopsByAveraged = this.getClosestByAveragedDistance(closestPois);
-        const stops = closestStopsByAveraged
-            .filter(guess => guess.averagedDistance < location.accuracy / 2)
-            .map(guess => guess.guess)
-            .filter(isStopDistance);
-        return stops;
-    }
-
     protected getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): RouteWithDistance[] {
         if (location.speed < this.onRouteSpeedCutoff) {
             return [];
@@ -77,6 +68,15 @@ export class State implements NoResultStatus {
         return closesRoutes
             .map(guess => guess.guess)
             .filter(isRouteDistance);
+    }
+
+    protected getPossibleStops(closestPois: POIWithDistance[], location: GeoPosition): StopWithDistance[] {
+        const closestStopsByAveraged = this.getClosestByAveragedDistance(closestPois);
+        const stops = closestStopsByAveraged
+            .filter(guess => guess.averagedDistance < location.accuracy / 2)
+            .map(guess => guess.guess)
+            .filter(isStopDistance);
+        return stops;
     }
 
     protected directionFilter(currentLocation: GeoPosition): (poi: POIWithDistance) => boolean {
