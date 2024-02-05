@@ -24,22 +24,15 @@ export class RouteState extends FilledState implements ResultStatus {
             .filter(this.directionFilter(location));
         this.fullHistory.append(closestPois);
 
-        const rightDirectionRoutes = closestPois
-            .filter(isRouteDistance)
-            .filter(poi => this.possibilityIds.has(poi.poi.id));
-        let closest = this.getClosestByAveragedDistance(rightDirectionRoutes);
+        const routes = this.getPossibleRoutes(closestPois, location);
 
-        if (location.speed < this.onRouteSpeedCutoff) {
-            closest = closest.filter(route => route.averagedDistance < (location.accuracy * 2));
-        }
-
-        if (closest.length !== 0) {
+        if (routes.length !== 0) {
             return new RouteState(
                 this.fullHistory,
                 this.history,
                 this.distanceCalculator,
                 location,
-                closest.map(route => route.guess),
+                routes,
                 this.possibilities
             );
         }
@@ -62,5 +55,17 @@ export class RouteState extends FilledState implements ResultStatus {
             this.distanceCalculator,
             location
         );
+    }
+
+    protected getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): RouteWithDistance[] {
+        const rightDirectionRoutes = closestPois
+            .filter(isRouteDistance)
+            .filter(poi => this.possibilityIds.has(poi.poi.id));
+        let closest = this.getClosestByAveragedDistance(rightDirectionRoutes);
+
+        if (location.speed < this.onRouteSpeedCutoff) {
+            closest = closest.filter(route => route.averagedDistance < (location.accuracy * 2));
+        }
+        return closest.map(route => route.guess);
     }
 }

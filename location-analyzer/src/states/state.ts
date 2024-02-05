@@ -67,7 +67,7 @@ export class State implements NoResultStatus {
         return stops;
     }
 
-    private getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): RouteWithDistance[] {
+    protected getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): RouteWithDistance[] {
         if (location.speed < this.onRouteSpeedCutoff) {
             return [];
         }
