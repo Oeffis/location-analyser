@@ -24,27 +24,27 @@ export class RouteState extends FilledState implements ResultStatus {
             .filter(this.directionFilter(location));
         this.fullHistory.append(closestPois);
 
-        const routes = this.getPossibleRoutes(closestPois, location);
+        const possibleRoutes = this.getPossibleRoutes(closestPois, location);
 
-        if (routes.length !== 0) {
+        if (possibleRoutes.length !== 0) {
             return new RouteState(
                 this.fullHistory,
                 this.history,
                 this.distanceCalculator,
                 location,
-                routes,
+                possibleRoutes,
                 this.possibilities
             );
         }
 
-        const stopsInClosest = this.getPossibleStops(closestPois);
-        if (stopsInClosest.length > 0) {
+        const possibleStops = this.getPossibleStops(closestPois);
+        if (possibleStops.length > 0) {
             return new StopState(
                 this.fullHistory,
                 this.history,
                 this.distanceCalculator,
                 location,
-                stopsInClosest
+                possibleStops
             );
         }
 

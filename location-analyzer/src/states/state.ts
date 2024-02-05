@@ -26,27 +26,27 @@ export class State implements NoResultStatus {
             .filter(this.directionFilter(location));
         this.fullHistory.append(closestPois);
 
-        const routesInClosest = this.getPossibleRoutes(closestPois, location);
+        const possibleRoutes = this.getPossibleRoutes(closestPois, location);
 
-        if (routesInClosest.length > 0) {
+        if (possibleRoutes.length > 0) {
             return new RouteState(
                 this.fullHistory,
                 this.history,
                 this.distanceCalculator,
                 location,
-                routesInClosest,
-                routesInClosest
+                possibleRoutes,
+                possibleRoutes
             );
         }
 
-        const stops = this.getPossibleStops(closestPois, location);
-        if (stops.length > 0) {
+        const possibleStops = this.getPossibleStops(closestPois, location);
+        if (possibleStops.length > 0) {
             return new StopState(
                 this.fullHistory,
                 this.history,
                 this.distanceCalculator,
                 location,
-                stops
+                possibleStops
             );
         }
 
