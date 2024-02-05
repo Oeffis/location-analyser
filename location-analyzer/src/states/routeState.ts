@@ -1,6 +1,6 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, POIWithDistance, RouteWithDistance, StopWithDistance } from "../distanceCalculator.js";
-import { FilledState, GeoPosition, ResultStatus, StopState, UnknownState, isRouteDistance, isStopDistance } from "./states.js";
+import { FilledState, GeoPosition, ResultStatus, isRouteDistance, isStopDistance } from "./states.js";
 
 export class RouteState extends FilledState implements ResultStatus {
     public readonly possibilityIds = new Set<string>();
@@ -18,7 +18,7 @@ export class RouteState extends FilledState implements ResultStatus {
         possibilities.forEach(possibility => this.possibilityIds.add(possibility.poi.id));
     }
 
-    public getNext(location: GeoPosition): FilledState {
+    public override getNext(location: GeoPosition): FilledState {
         const closestPois = this.distanceCalculator
             .getUniquePOIsNear(location)
             .filter(this.directionFilter(location));
@@ -26,37 +26,30 @@ export class RouteState extends FilledState implements ResultStatus {
 
         const possibleRoutes = this.getPossibleRoutes(closestPois, location);
 
-        if (possibleRoutes.length !== 0) {
-            return new RouteState(
-                this.fullHistory,
-                this.history,
-                this.distanceCalculator,
-                location,
-                possibleRoutes,
-                this.possibilities
-            );
+        if (possibleRoutes.length > 0) {
+            return this.makeRouteState(location, possibleRoutes);
         }
 
         const possibleStops = this.getPossibleStops(closestPois);
         if (possibleStops.length > 0) {
-            return new StopState(
-                this.fullHistory,
-                this.history,
-                this.distanceCalculator,
-                location,
-                possibleStops
-            );
+            return this.makeStopState(location, possibleStops);
         }
 
-        return new UnknownState(
+        return this.createUnknownState(location);
+    }
+
+    protected override makeRouteState(location: GeoPosition, possibleRoutes: RouteWithDistance[]): FilledState {
+        return new RouteState(
             this.fullHistory,
             this.history,
             this.distanceCalculator,
-            location
+            location,
+            possibleRoutes,
+            this.possibilities
         );
     }
 
-    protected getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): RouteWithDistance[] {
+    protected override getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): RouteWithDistance[] {
         const rightDirectionRoutes = closestPois
             .filter(isRouteDistance)
             .filter(poi => this.possibilityIds.has(poi.poi.id));
@@ -68,7 +61,7 @@ export class RouteState extends FilledState implements ResultStatus {
         return closest.map(route => route.guess);
     }
 
-    protected getPossibleStops(closestPois: POIWithDistance[]): StopWithDistance[] {
+    protected override getPossibleStops(closestPois: POIWithDistance[]): StopWithDistance[] {
         const closestByCumulation = this.getClosestByAveragedDistance(closestPois).map(guess => guess.guess);
         const stopsInClosest = closestByCumulation.filter(isStopDistance);
         return stopsInClosest;

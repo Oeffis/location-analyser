@@ -29,32 +29,44 @@ export class State implements NoResultStatus {
         const possibleRoutes = this.getPossibleRoutes(closestPois, location);
 
         if (possibleRoutes.length > 0) {
-            return new RouteState(
-                this.fullHistory,
-                this.history,
-                this.distanceCalculator,
-                location,
-                possibleRoutes,
-                possibleRoutes
-            );
+            return this.makeRouteState(location, possibleRoutes);
         }
 
         const possibleStops = this.getPossibleStops(closestPois, location);
         if (possibleStops.length > 0) {
-            return new StopState(
-                this.fullHistory,
-                this.history,
-                this.distanceCalculator,
-                location,
-                possibleStops
-            );
+            return this.makeStopState(location, possibleStops);
         }
 
+        return this.createUnknownState(location);
+    }
+
+    protected createUnknownState(location: GeoPosition): FilledState {
         return new UnknownState(
             this.fullHistory,
             this.history,
             this.distanceCalculator,
             location
+        );
+    }
+
+    protected makeStopState(location: GeoPosition, possibleStops: StopWithDistance[]): FilledState {
+        return new StopState(
+            this.fullHistory,
+            this.history,
+            this.distanceCalculator,
+            location,
+            possibleStops
+        );
+    }
+
+    protected makeRouteState(location: GeoPosition, possibleRoutes: RouteWithDistance[]): FilledState {
+        return new RouteState(
+            this.fullHistory,
+            this.history,
+            this.distanceCalculator,
+            location,
+            possibleRoutes,
+            possibleRoutes
         );
     }
 
