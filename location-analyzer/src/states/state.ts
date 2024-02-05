@@ -39,18 +39,14 @@ export class State implements NoResultStatus {
             );
         }
 
-        const closestStopsByAveraged = this.getClosestByAveragedDistance(closestPois);
-        const stops = closestStopsByAveraged
-            .filter(guess => guess.averagedDistance < location.accuracy / 2)
-            .map(guess => guess.guess)
-            .filter(isStopDistance);
+        const stops = this.getPossibleStops(closestPois, location);
         if (stops.length > 0) {
             return new StopState(
                 this.fullHistory,
                 this.history,
                 this.distanceCalculator,
                 location,
-                closestStopsByAveraged.map(guess => guess.guess).filter(isStopDistance)
+                stops
             );
         }
 
@@ -60,6 +56,15 @@ export class State implements NoResultStatus {
             this.distanceCalculator,
             location
         );
+    }
+
+    private getPossibleStops(closestPois: POIWithDistance[], location: GeoPosition): StopWithDistance[] {
+        const closestStopsByAveraged = this.getClosestByAveragedDistance(closestPois);
+        const stops = closestStopsByAveraged
+            .filter(guess => guess.averagedDistance < location.accuracy / 2)
+            .map(guess => guess.guess)
+            .filter(isStopDistance);
+        return stops;
     }
 
     private getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): RouteWithDistance[] {
