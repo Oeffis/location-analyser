@@ -18,26 +18,6 @@ export class RouteState extends FilledState implements ResultStatus {
         possibilities.forEach(possibility => this.possibilityIds.add(possibility.poi.id));
     }
 
-    public override getNext(location: GeoPosition): FilledState {
-        const closestPois = this.distanceCalculator
-            .getUniquePOIsNear(location)
-            .filter(this.directionFilter(location));
-        this.fullHistory.append(closestPois);
-
-        const possibleRoutes = this.getPossibleRoutes(closestPois, location);
-
-        if (possibleRoutes.length > 0) {
-            return this.makeRouteState(location, possibleRoutes);
-        }
-
-        const possibleStops = this.getPossibleStops(closestPois);
-        if (possibleStops.length > 0) {
-            return this.makeStopState(location, possibleStops);
-        }
-
-        return this.createUnknownState(location);
-    }
-
     protected override makeRouteState(location: GeoPosition, possibleRoutes: RouteWithDistance[]): FilledState {
         return new RouteState(
             this.fullHistory,
