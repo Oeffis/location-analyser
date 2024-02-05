@@ -119,10 +119,10 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
 
         const matched = status.guesses.filter(guess => {
             if (isStopDistance(guess)) {
-                return expected.some(rule => rule.vehicleOrStop === guess.poi.name);
+                return expected.some(rule => rule.vehicleOrStop === `${guess.poi.name} (${guess.poi.id})`);
             }
-            const targetString = `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}'`;
-            return expected.some(rule => rule.vehicleOrStop === targetString);
+            const actualString = `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}' (${guess.poi.id})`;
+            return expected.some(rule => rule.vehicleOrStop === actualString);
         });
 
         const allMatched = matched.length === status.guesses.length && matched.length === expected.length;
