@@ -106,13 +106,10 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
         const status = this.statusList[trackIndex] ?? { guesses: [] };
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        let expected = expectedRules.filter(rule => rule.startTime! <= trackSection["date-local"].slice(11, 19)! && rule.endTime! >= trackSection["date-local"].slice(11, 19)!);
-        if (expected.length === 0) continue;
-        if (expected.some(rule => rule.vehicleOrStop === "none")) {
-            if (expected.length > 1) {
-                throw new Error("You can't have 'none' and other rules at the same time");
-            }
-            expected = [];
+        const expected = expectedRules.filter(rule => rule.startTime! <= trackSection["date-local"].slice(11, 19)! && rule.endTime! >= trackSection["date-local"].slice(11, 19)!);
+        const noneExpected = expected.some(rule => rule.vehicleOrStop === "none");
+        if (noneExpected && expected.length > 1) {
+            throw new Error("You can't have 'none' and other rules at the same time");
         }
 
         const matched = status.guesses.filter(guess => {
@@ -123,14 +120,24 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
             return expected.some(rule => rule.vehicleOrStop === actualString);
         });
 
-        const allMatched = matched.length === status.guesses.length && matched.length === expected.length;
+        let allMatched = false;
+        if (!noneExpected) {
+            allMatched = matched.length === expected.length;
+        } else {
+            allMatched = status.guesses.length === 0;
+        }
         if (allMatched) {
             correct++;
         } else {
             wrong++;
         }
 
-        const allowingExtraCorrect = matched.length === expected.length && (expected.length > 0 || status.guesses.length === 0);
+        let allowingExtraCorrect = false;
+        if (!noneExpected) {
+            allowingExtraCorrect = matched.length === expected.length;
+        } else {
+            allowingExtraCorrect = status.guesses.length === 0;
+        }
         if (allowingExtraCorrect) {
             correctAllowingExtra++;
         } else {
@@ -150,7 +157,7 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
                 }
                 return `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}'`;
             }).join(", ") || "none",
-            expected: expected.map(rule => rule.vehicleOrStop).join(", ") || "none"
+            expected: expected.map(rule => rule.vehicleOrStop).join(", ") || "no expectations"
         });
     }
 
