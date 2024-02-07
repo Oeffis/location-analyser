@@ -104,13 +104,6 @@ export class OsmPlatformTransformer {
                 )));
 
         return [header, ...output];
-
-    }
-
-    private getWayOrThrow(wayId: number): Way {
-        const way = this.ways.get(wayId);
-        if (!way) throw new Error(`Way ${wayId} not found`);
-        return way;
     }
 
     private getNodeOrThrow(nodeId: number): Node {
