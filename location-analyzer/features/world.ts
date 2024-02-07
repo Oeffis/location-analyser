@@ -68,10 +68,10 @@ AfterAll(function () {
 });
 
 export class LocationAnalyzerWorld {
-    protected currentState = State.initial();
+    protected currentState = State.initial<Route, Stop>();
     public expectedRoutes: Partial<Route>[] = [];
     public routeOrderMatters = true;
-    public statusList: FilledState[] = [];
+    public statusList: FilledState<Route, Stop>[] = [];
     public track: TrackSection[] = [];
     public usedTrack?: number;
 
@@ -141,7 +141,7 @@ export class LocationAnalyzerWorld {
         return route!;
     }
 
-    public getStatus(): State {
+    public getStatus(): State<Route, Stop> {
         return this.statusList[this.statusList.length - 1] ?? this.currentState;
     }
 

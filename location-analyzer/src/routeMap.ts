@@ -2,35 +2,35 @@ import { GeoLocation, Route, Section, Stop } from "./index.js";
 
 export type TransitPOI = Route | Stop;
 
-export type POIReference = RouteReference | StopReference;
+export type POIReference<R, S> = RouteReference<R> | StopReference<S>;
 
-export interface StopReference {
-    poi: Stop;
+export interface StopReference<S> {
+    poi: S;
     start: GeoLocation;
     end?: GeoLocation;
 }
 
-export interface RouteReference {
-    poi: Route;
+export interface RouteReference<R> {
+    poi: R;
     consecutiveSection: number;
     section: number;
     start: GeoLocation;
     end: GeoLocation;
 }
 
-export class RouteMap {
-    protected coordinateMap = new Map<number, POIReference[]>();
+export class RouteMap<R extends Route, S extends Stop> {
+    protected coordinateMap = new Map<number, POIReference<R, S>[]>();
 
     constructor() {
         this.coordinateMap = new Map();
     }
 
-    public update(pois: TransitPOI[]): void {
+    public update(pois: (R | S)[]): void {
         this.coordinateMap = new Map();
         pois.forEach(route => this.add(route));
     }
 
-    public add(poi: TransitPOI): void {
+    public add(poi: R | S): void {
         if (isRoute(poi)) {
             this.addRoute(poi);
         } else {
@@ -38,11 +38,11 @@ export class RouteMap {
         }
     }
 
-    protected addRoute(route: Route): void {
+    protected addRoute(route: R): void {
         route.sections.forEach(consecutiveSection => this.addConsecutiveSection(consecutiveSection, route));
     }
 
-    protected addConsecutiveSection(consecutiveSection: Section[], route: Route): void {
+    protected addConsecutiveSection(consecutiveSection: Section[], route: R): void {
         if (consecutiveSection.length === 1) {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.addSection(consecutiveSection[0]!, consecutiveSection[0]!, route);
@@ -55,7 +55,7 @@ export class RouteMap {
         });
     }
 
-    protected addSection(section: Section, next: Section, route: Route): void {
+    protected addSection(section: Section, next: Section, route: R): void {
         const keys = GeoMapKey
             .fromSection(section, next)
             .map(key => key.numeric());
@@ -74,12 +74,12 @@ export class RouteMap {
                     latitude: next.lat,
                     longitude: next.lon
                 }
-            } as RouteReference);
+            } as RouteReference<R>);
             this.coordinateMap.set(key, routes);
         }
     }
 
-    protected addStop(stop: Stop): void {
+    protected addStop(stop: S): void {
         stop.boundaries.forEach((section, index, others) => {
             const next = others[index + 1];
             if (next === undefined) return;
@@ -87,7 +87,7 @@ export class RouteMap {
         });
     }
 
-    protected addStopBoundary(location: GeoLocation, next: GeoLocation, stop: Stop): void {
+    protected addStopBoundary(location: GeoLocation, next: GeoLocation, stop: S): void {
         const keys = GeoMapKey.fromStopBoundary(location, next);
         for (const key of keys) {
             const routes = this.coordinateMap.get(key.numeric()) ?? [];
@@ -95,12 +95,12 @@ export class RouteMap {
                 poi: stop,
                 start: location,
                 end: next
-            } as StopReference);
+            } as StopReference<S>);
             this.coordinateMap.set(key.numeric(), routes);
         }
     }
 
-    public getPOIsAtLocation(location: GeoLocation): POIReference[] {
+    public getPOIsAtLocation(location: GeoLocation): POIReference<R, S>[] {
         const references = [];
         const offsetMatrix: [number, number][] = [
             [-1, -1], [-1, 0], [-1, 1],
@@ -190,7 +190,7 @@ class GeoMapKey {
     }
 }
 
-export function isRouteRef(ref: POIReference): ref is RouteReference {
+export function isRouteRef<R extends Route, S extends Stop>(ref: POIReference<R, S>): ref is RouteReference<R> {
     return isRoute(ref.poi);
 }
 

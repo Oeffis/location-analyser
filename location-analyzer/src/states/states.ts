@@ -19,11 +19,11 @@ export function isGuessFor(poi: TransitPOI): (guess: POIWithDistance) => boolean
     return guess => guess.poi.id === poi.id;
 }
 
-export function isRouteDistance(poi: POIWithDistance): poi is WithDistance<Route> {
+export function isRouteDistance<R extends Route, S extends Stop>(poi: WithDistance<R | S>): poi is WithDistance<R> {
     return isRoute(poi.poi);
 }
 
-export function isStopDistance(poi: POIWithDistance): poi is WithDistance<Stop> {
+export function isStopDistance<R extends Route, S extends Stop>(poi: WithDistance<R | S>): poi is WithDistance<S> {
     return !isRoute(poi.poi);
 }
 

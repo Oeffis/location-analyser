@@ -3,21 +3,21 @@ import { getDistanceFromLine } from "./getDistanceFromLine.js";
 import { GeoPosition, Route, Stop } from "./index.js";
 import { POIReference, RouteMap, RouteReference, StopReference, TransitPOI, isRouteRef } from "./routeMap.js";
 
-export class DistanceCalculator {
+export class DistanceCalculator<R extends Route, S extends Stop> {
     protected pois = new Map<string, TransitPOI>();
-    protected routeMap = new RouteMap();
+    protected routeMap = new RouteMap<R, S>();
 
-    public getUniquePOIsNear(currentLocation: GeoPosition): POIWithDistance[] {
+    public getUniquePOIsNear(currentLocation: GeoPosition): (WithDistance<R> | WithDistance<S>)[] {
         return this.keepClosestOfEachPoi(this.getPOIsNear(currentLocation));
     }
 
-    public getPOIsNear(currentLocation: GeoPosition): POIWithDistance[] {
+    public getPOIsNear(currentLocation: GeoPosition): (WithDistance<R> | WithDistance<S>)[] {
         const nearbyPOIs = this.routeMap.getPOIsAtLocation(currentLocation);
         return nearbyPOIs.map(poi => this.withDistance(currentLocation, poi));
     }
 
-    protected keepClosestOfEachPoi(pois: POIWithDistance[]): POIWithDistance[] {
-        const closestOfEachPoi = new Map<string, POIWithDistance>();
+    protected keepClosestOfEachPoi(pois: (WithDistance<R> | WithDistance<S>)[]): (WithDistance<R> | WithDistance<S>)[] {
+        const closestOfEachPoi = new Map<string, WithDistance<R> | WithDistance<S>>();
         pois.forEach(poi => {
             const currentClosest = closestOfEachPoi.get(poi.poi.id);
             if (currentClosest === undefined) {
@@ -31,7 +31,7 @@ export class DistanceCalculator {
         return Array.from(closestOfEachPoi.values());
     }
 
-    protected withDistance(base: GeoPosition, reference: POIReference): POIWithDistance {
+    protected withDistance(base: GeoPosition, reference: POIReference<R, S>): WithDistance<R> | WithDistance<S> {
         if (isRouteRef(reference)) {
             return {
                 poi: reference.poi,
@@ -41,11 +41,11 @@ export class DistanceCalculator {
 
         return {
             poi: reference.poi,
-            distance: this.stopDistance(reference, base)
+            distance: this.stopDistance(reference, base) as DistanceTypeOf<S>
         };
     }
 
-    private routeDistance(reference: RouteReference, base: GeoPosition): SectionDistance {
+    private routeDistance(reference: RouteReference<R>, base: GeoPosition): SectionDistance {
         const start = reference.start;
         const end = reference.end;
         const distance = getDistanceFromLine(base, {
@@ -64,7 +64,7 @@ export class DistanceCalculator {
         };
     }
 
-    private stopDistance(stopReference: StopReference, base: GeoPosition): StopDistance {
+    private stopDistance(stopReference: StopReference<S>, base: GeoPosition): StopDistance {
         let distance: number;
         if (isPointInPolygon(base, stopReference.poi.boundaries)) {
             distance = 0;
@@ -90,7 +90,7 @@ export class DistanceCalculator {
         };
     }
 
-    public updatePOIs(pois: TransitPOI[]): void {
+    public updatePOIs(pois: (R | S)[]): void {
         this.routeMap.update(pois);
         this.pois = new Map(pois.map(poi => [poi.id, poi]));
     }

@@ -1,7 +1,6 @@
 import { getDistance } from "geolib";
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, WithDistance, type POIWithDistance } from "../distanceCalculator.js";
-import { TransitPOI } from "../routeMap.js";
 import { Route, RouteState, Stop, StopState, UnknownState, byProximity, isGuessFor, isRouteDistance, isStopDistance, type FilledState, type GeoPosition } from "./states.js";
 
 export interface WithAveragedDistance<T extends POIWithDistance> {
@@ -9,18 +8,18 @@ export interface WithAveragedDistance<T extends POIWithDistance> {
     averagedDistance: number;
 }
 
-export class State {
+export class State<R extends Route, S extends Stop> {
     protected readonly onRouteSpeedCutoff = 3;
 
     protected constructor(
         protected readonly fullHistory: Buffer<POIWithDistance[]>,
-        protected readonly history: Buffer<FilledState>,
-        protected readonly distanceCalculator: DistanceCalculator,
-        public readonly guesses: WithDistance<TransitPOI>[]
+        protected readonly history: Buffer<FilledState<R, S>>,
+        protected readonly distanceCalculator: DistanceCalculator<R, S>,
+        public readonly guesses: (WithDistance<R> | WithDistance<S>)[]
     ) {
     }
 
-    public getNext(location: GeoPosition): FilledState {
+    public getNext(location: GeoPosition): FilledState<R, S> {
         const closestPois = this.distanceCalculator
             .getUniquePOIsNear(location)
             .filter(this.directionFilter(location));
@@ -40,7 +39,7 @@ export class State {
         return this.createUnknownState(location);
     }
 
-    protected createUnknownState(location: GeoPosition): FilledState {
+    protected createUnknownState(location: GeoPosition): FilledState<R, S> {
         return new UnknownState(
             this.fullHistory,
             this.history,
@@ -49,7 +48,7 @@ export class State {
         );
     }
 
-    protected makeStopState(location: GeoPosition, possibleStops: WithDistance<Stop>[]): FilledState {
+    protected makeStopState(location: GeoPosition, possibleStops: WithDistance<S>[]): FilledState<R, S> {
         return new StopState(
             this.fullHistory,
             this.history,
@@ -59,7 +58,7 @@ export class State {
         );
     }
 
-    protected makeRouteState(location: GeoPosition, possibleRoutes: WithDistance<Route>[]): FilledState {
+    protected makeRouteState(location: GeoPosition, possibleRoutes: WithDistance<R>[]): FilledState<R, S> {
         return new RouteState(
             this.fullHistory,
             this.history,
@@ -70,25 +69,21 @@ export class State {
         );
     }
 
-    protected getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): WithDistance<Route>[] {
+    protected getPossibleRoutes(closestPois: WithDistance<R | S>[], location: GeoPosition): WithDistance<R>[] {
         if (location.speed < this.onRouteSpeedCutoff) {
             return [];
         }
 
-        const closesRoutes = this.getClosestByAveragedDistance(closestPois);
-
-        return closesRoutes
+        return this.getClosestByAveragedDistance(closestPois)
             .map(guess => guess.guess)
-            .filter(isRouteDistance);
+            .filter(isRouteDistance) as WithDistance<R>[];
     }
 
-    protected getPossibleStops(closestPois: POIWithDistance[], location: GeoPosition): WithDistance<Stop>[] {
-        const closestStopsByAveraged = this.getClosestByAveragedDistance(closestPois);
-        const stops = closestStopsByAveraged
+    protected getPossibleStops(closestPois: WithDistance<R | S>[], location: GeoPosition): WithDistance<S>[] {
+        return this.getClosestByAveragedDistance(closestPois)
             .filter(guess => guess.averagedDistance < location.accuracy / 2)
             .map(guess => guess.guess)
-            .filter(isStopDistance);
-        return stops;
+            .filter(isStopDistance) as WithDistance<S>[];
     }
 
     protected directionFilter(currentLocation: GeoPosition): (poi: POIWithDistance) => boolean {
@@ -118,10 +113,10 @@ export class State {
         };
     }
 
-    protected getNearbyPlatformsIn(pois: POIWithDistance[]): WithDistance<Stop>[] {
+    protected getNearbyPlatformsIn(pois: (WithDistance<R> | WithDistance<S>)[]): WithDistance<S>[] {
         return pois
             .filter(isStopDistance)
-            .sort(byProximity);
+            .sort(byProximity) as WithDistance<S>[];
     }
 
     protected getClosestByAveragedDistance<T extends POIWithDistance>(rightDirectionPois: T[]): WithAveragedDistance<T>[] {
@@ -151,7 +146,7 @@ export class State {
             .points;
     }
 
-    public updatePOIs(pois: TransitPOI[]): this {
+    public updatePOIs(pois: (R | S)[]): this {
         this.distanceCalculator.updatePOIs(pois);
         return this;
     }
@@ -160,10 +155,10 @@ export class State {
         return [];
     }
 
-    public static initial(pois: TransitPOI[] = []): State {
+    public static initial<R extends Route, S extends Stop>(pois: (R | S)[] = []): State<R, S> {
         return new State(
             new Buffer(10),
-            new Buffer(10),
+            new Buffer<FilledState<R, S>>(10),
             new DistanceCalculator(),
             []
         ).updatePOIs(pois);

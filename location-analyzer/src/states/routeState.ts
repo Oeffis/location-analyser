@@ -1,16 +1,16 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, POIWithDistance, WithDistance } from "../distanceCalculator.js";
-import { FilledState, GeoPosition, Route, isRouteDistance } from "./states.js";
+import { FilledState, GeoPosition, Route, Stop, isRouteDistance } from "./states.js";
 
-export class RouteState extends FilledState {
+export class RouteState<R extends Route, S extends Stop> extends FilledState<R, S> {
     public readonly possibilityIds = new Set<string>();
     public constructor(
         fullHistory: Buffer<POIWithDistance[]>,
-        history: Buffer<FilledState>,
-        distanceCalculator: DistanceCalculator,
+        history: Buffer<FilledState<R, S>>,
+        distanceCalculator: DistanceCalculator<R, S>,
         location: GeoPosition,
-        public readonly guesses: WithDistance<Route>[],
-        protected readonly possibilities: WithDistance<Route>[]
+        public readonly guesses: WithDistance<R>[],
+        protected readonly possibilities: WithDistance<R>[]
     ) {
         super(fullHistory, history, distanceCalculator, location, guesses);
         if (guesses.length === 0) throw new Error("RouteState needs at least one guess");
@@ -18,7 +18,7 @@ export class RouteState extends FilledState {
         possibilities.forEach(possibility => this.possibilityIds.add(possibility.poi.id));
     }
 
-    protected override makeRouteState(location: GeoPosition, possibleRoutes: WithDistance<Route>[]): FilledState {
+    protected override makeRouteState(location: GeoPosition, possibleRoutes: WithDistance<R>[]): FilledState<R, S> {
         return new RouteState(
             this.fullHistory,
             this.history,
@@ -29,7 +29,7 @@ export class RouteState extends FilledState {
         );
     }
 
-    protected override getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): WithDistance<Route>[] {
+    protected override getPossibleRoutes(closestPois: (WithDistance<R> | WithDistance<S>)[], location: GeoPosition): WithDistance<R>[] {
         const rightDirectionRoutes = closestPois
             .filter(isRouteDistance)
             .filter(poi => this.possibilityIds.has(poi.poi.id));
