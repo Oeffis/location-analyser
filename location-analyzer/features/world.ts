@@ -2,7 +2,7 @@ import { AfterAll, BeforeAll, setWorldConstructor } from "@cucumber/cucumber";
 import { assert } from "chai";
 import { parse } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
-import { GeoLocation, GeoPosition, ResultStatus, Route, RouteWithDistance, State, Status, StopWithDistance, TransitPOI } from "../src/index.js";
+import { FilledState, GeoLocation, GeoPosition, Route, State, Stop, TransitPOI, WithDistance } from "../src/index.js";
 import { getVrrRoutes } from "./getVrrRoutes.js";
 import { getVrrStops } from "./getVrrStops.js";
 
@@ -71,7 +71,7 @@ export class LocationAnalyzerWorld {
     protected currentState = State.initial();
     public expectedRoutes: Partial<Route>[] = [];
     public routeOrderMatters = true;
-    public statusList: ResultStatus[] = [];
+    public statusList: FilledState[] = [];
     public track: TrackSection[] = [];
     public usedTrack?: number;
 
@@ -130,7 +130,7 @@ export class LocationAnalyzerWorld {
 
     public getFirstRoute(): Route | undefined {
         const status = this.getStatus();
-        const route = status.guesses[0] as RouteWithDistance | undefined;
+        const route = status.guesses[0] as WithDistance<Route> | undefined;
         return route?.poi;
     }
 
@@ -141,11 +141,11 @@ export class LocationAnalyzerWorld {
         return route!;
     }
 
-    public getStatus(): Status {
+    public getStatus(): State {
         return this.statusList[this.statusList.length - 1] ?? this.currentState;
     }
 
-    public getNearestPlatform(): StopWithDistance {
+    public getNearestPlatform(): WithDistance<Stop> {
         const status = this.getStatus();
         const stop = status.nearbyPlatforms[0];
         assert.isDefined(stop, "No stop found");

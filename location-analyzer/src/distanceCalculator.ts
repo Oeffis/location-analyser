@@ -98,17 +98,8 @@ export class DistanceCalculator {
 
 export type DistanceTypeOf<T extends TransitPOI> = T extends Route ? SectionDistance : StopDistance;
 
-export type POIWithDistance = StopWithDistance | RouteWithDistance;
-
-export interface StopWithDistance {
-    poi: Stop;
-    distance: StopDistance;
-}
-
-export interface RouteWithDistance {
-    poi: Route;
-    distance: SectionDistance;
-}
+export interface WithDistance<T extends TransitPOI> { poi: T, distance: DistanceTypeOf<T> }
+export type POIWithDistance = WithDistance<Stop | Route>;
 
 interface SectionDistance {
     poiId: string;

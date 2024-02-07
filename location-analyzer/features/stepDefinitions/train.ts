@@ -1,8 +1,8 @@
 import { Given, Then, When } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
-import { Stop, isRouteDistance } from "@oeffis/location-analyzer";
 import { assert } from "chai";
+import { Stop, isRouteDistance, isStopDistance } from "../../src/index.js";
 import { Route as VrrRoute, getVrrRoutes } from "../getVrrRoutes.js";
 import { getVrrStops } from "../getVrrStops.js";
 
@@ -128,7 +128,9 @@ Then<LocationAnalyzerWorld>("one of the detected trains is the {string} to {stri
         if (isRouteDistance(poi)) {
             return `${poi.poi.ref} to ${poi.poi.to}`;
         }
-        return poi.poi.name;
+        if (isStopDistance(poi)) {
+            return poi.poi.name;
+        }
     }).join(", "));
 });
 

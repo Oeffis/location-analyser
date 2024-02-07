@@ -1,4 +1,4 @@
-import { POIWithDistance, RouteWithDistance, StopWithDistance } from "../distanceCalculator.js";
+import { POIWithDistance, WithDistance } from "../distanceCalculator.js";
 import { TransitPOI, isRoute } from "../routeMap.js";
 export * from "./state.js";
 
@@ -19,26 +19,12 @@ export function isGuessFor(poi: TransitPOI): (guess: POIWithDistance) => boolean
     return guess => guess.poi.id === poi.id;
 }
 
-export function isRouteDistance(poi: POIWithDistance): poi is RouteWithDistance {
+export function isRouteDistance(poi: POIWithDistance): poi is WithDistance<Route> {
     return isRoute(poi.poi);
 }
 
-export function isStopDistance(poi: POIWithDistance): poi is StopWithDistance {
+export function isStopDistance(poi: POIWithDistance): poi is WithDistance<Stop> {
     return !isRoute(poi.poi);
-}
-
-export function isResultStatus(status: Status): status is ResultStatus {
-    return Object.hasOwn(status, "location");
-}
-
-export type Status = NoResultStatus | ResultStatus;
-
-export type NoResultStatus = Omit<ResultStatus, "location">;
-
-export interface ResultStatus {
-    location: GeoPosition;
-    guesses: POIWithDistance[];
-    nearbyPlatforms: StopWithDistance[];
 }
 
 export interface Stop {

@@ -3,7 +3,7 @@ import { assert } from "chai";
 import { stringify } from "csv/sync";
 import { writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
-import { isStopDistance } from "../../src/index.js";
+import { isRouteDistance, isStopDistance } from "../../src/index.js";
 import { LocationAnalyzerWorld } from "../world.js";
 import { locationMap } from "./helpers/locationMap.js";
 
@@ -116,8 +116,10 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
             if (isStopDistance(guess)) {
                 return expected.some(rule => rule.vehicleOrStop === `${guess.poi.name} (${guess.poi.id})`);
             }
-            const actualString = `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}' (${guess.poi.id})`;
-            return expected.some(rule => rule.vehicleOrStop === actualString);
+            if (isRouteDistance(guess)) {
+                const actualString = `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}' (${guess.poi.id})`;
+                return expected.some(rule => rule.vehicleOrStop === actualString);
+            }
         });
 
         let allMatched = false;
@@ -155,7 +157,9 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
                 if (isStopDistance(guess)) {
                     return guess.poi.name;
                 }
-                return `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}'`;
+                if (isRouteDistance(guess)) {
+                    return `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}'`;
+                }
             }).join(", ") || "none",
             expected: expected.map(rule => rule.vehicleOrStop).join(", ") || "no expectations"
         });

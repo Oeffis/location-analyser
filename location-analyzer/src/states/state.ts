@@ -1,22 +1,22 @@
 import { getDistance } from "geolib";
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, type POIWithDistance, type RouteWithDistance, type StopWithDistance } from "../distanceCalculator.js";
+import { DistanceCalculator, WithDistance, type POIWithDistance } from "../distanceCalculator.js";
 import { TransitPOI } from "../routeMap.js";
-import { RouteState, StopState, UnknownState, byProximity, isGuessFor, isRouteDistance, isStopDistance, type FilledState, type GeoPosition, type NoResultStatus, type ResultStatus } from "./states.js";
+import { Route, RouteState, Stop, StopState, UnknownState, byProximity, isGuessFor, isRouteDistance, isStopDistance, type FilledState, type GeoPosition } from "./states.js";
 
 export interface WithAveragedDistance<T extends POIWithDistance> {
     guess: T;
     averagedDistance: number;
 }
 
-export class State implements NoResultStatus {
+export class State {
     protected readonly onRouteSpeedCutoff = 3;
 
     protected constructor(
         protected readonly fullHistory: Buffer<POIWithDistance[]>,
-        protected readonly history: Buffer<ResultStatus>,
+        protected readonly history: Buffer<FilledState>,
         protected readonly distanceCalculator: DistanceCalculator,
-        public readonly guesses: POIWithDistance[]
+        public readonly guesses: WithDistance<TransitPOI>[]
     ) {
     }
 
@@ -49,7 +49,7 @@ export class State implements NoResultStatus {
         );
     }
 
-    protected makeStopState(location: GeoPosition, possibleStops: StopWithDistance[]): FilledState {
+    protected makeStopState(location: GeoPosition, possibleStops: WithDistance<Stop>[]): FilledState {
         return new StopState(
             this.fullHistory,
             this.history,
@@ -59,7 +59,7 @@ export class State implements NoResultStatus {
         );
     }
 
-    protected makeRouteState(location: GeoPosition, possibleRoutes: RouteWithDistance[]): FilledState {
+    protected makeRouteState(location: GeoPosition, possibleRoutes: WithDistance<Route>[]): FilledState {
         return new RouteState(
             this.fullHistory,
             this.history,
@@ -70,7 +70,7 @@ export class State implements NoResultStatus {
         );
     }
 
-    protected getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): RouteWithDistance[] {
+    protected getPossibleRoutes(closestPois: POIWithDistance[], location: GeoPosition): WithDistance<Route>[] {
         if (location.speed < this.onRouteSpeedCutoff) {
             return [];
         }
@@ -82,7 +82,7 @@ export class State implements NoResultStatus {
             .filter(isRouteDistance);
     }
 
-    protected getPossibleStops(closestPois: POIWithDistance[], location: GeoPosition): StopWithDistance[] {
+    protected getPossibleStops(closestPois: POIWithDistance[], location: GeoPosition): WithDistance<Stop>[] {
         const closestStopsByAveraged = this.getClosestByAveragedDistance(closestPois);
         const stops = closestStopsByAveraged
             .filter(guess => guess.averagedDistance < location.accuracy / 2)
@@ -93,13 +93,13 @@ export class State implements NoResultStatus {
 
     protected directionFilter(currentLocation: GeoPosition): (poi: POIWithDistance) => boolean {
         return (poi: POIWithDistance) => {
-            if (isStopDistance(poi)) return true;
+            if (!isRouteDistance(poi)) return true;
             const lastLocation = this.history[0]?.location;
             if (lastLocation === undefined) return true;
 
             const lastPoi = this.fullHistory
                 .last()
-                ?.find(isGuessFor(poi.poi)) as RouteWithDistance | undefined;
+                ?.find(isGuessFor(poi.poi)) as WithDistance<Route> | undefined;
 
             if (lastPoi === undefined) return true;
 
@@ -118,7 +118,7 @@ export class State implements NoResultStatus {
         };
     }
 
-    protected getNearbyPlatformsIn(pois: POIWithDistance[]): StopWithDistance[] {
+    protected getNearbyPlatformsIn(pois: POIWithDistance[]): WithDistance<Stop>[] {
         return pois
             .filter(isStopDistance)
             .sort(byProximity);
@@ -156,7 +156,7 @@ export class State implements NoResultStatus {
         return this;
     }
 
-    public get nearbyPlatforms(): StopWithDistance[] {
+    public get nearbyPlatforms(): WithDistance<Stop>[] {
         return [];
     }
 

@@ -1,11 +1,11 @@
 import { Buffer } from "../buffer.js";
 import { DistanceCalculator, POIWithDistance } from "../distanceCalculator.js";
-import { FilledState, GeoPosition, ResultStatus } from "./states.js";
+import { FilledState, GeoPosition } from "./states.js";
 
 export class UnknownState extends FilledState {
     public constructor(
         fullHistory: Buffer<POIWithDistance[]>,
-        history: Buffer<ResultStatus>,
+        history: Buffer<FilledState>,
         distanceCalculator: DistanceCalculator,
         location: GeoPosition
     ) {
