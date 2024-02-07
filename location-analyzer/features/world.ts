@@ -2,9 +2,9 @@ import { AfterAll, BeforeAll, setWorldConstructor } from "@cucumber/cucumber";
 import { assert } from "chai";
 import { parse } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
-import { FilledState, GeoLocation, GeoPosition, Route, State, Stop, TransitPOI, WithDistance } from "../src/index.js";
-import { getVrrRoutes } from "./getVrrRoutes.js";
-import { getVrrStops } from "./getVrrStops.js";
+import { FilledState, GeoLocation, GeoPosition, State, WithDistance } from "../src/index.js";
+import { OsmRoute, getOsmRoutes } from "./getOsmRoutes.js";
+import { OsmStop, getOsmStops } from "./getOsmStops.js";
 
 type Coords = CoordPair | CoordPairWithAccuracyAndSpeed | GeoPosition | GeoLocation;
 type CoordPair = [number, number];
@@ -68,10 +68,10 @@ AfterAll(function () {
 });
 
 export class LocationAnalyzerWorld {
-    protected currentState = State.initial<Route, Stop>();
-    public expectedRoutes: Partial<Route>[] = [];
+    protected currentState = State.initial<OsmRoute, OsmStop>();
+    public expectedRoutes: Partial<OsmRoute>[] = [];
     public routeOrderMatters = true;
-    public statusList: FilledState<Route, Stop>[] = [];
+    public statusList: FilledState<OsmRoute, OsmStop>[] = [];
     public track: TrackSection[] = [];
     public usedTrack?: number;
 
@@ -108,44 +108,44 @@ export class LocationAnalyzerWorld {
         }));
     }
 
-    public updatePOIs(routes: TransitPOI[]): void {
+    public updatePOIs(routes: (OsmRoute | OsmStop)[]): void {
         this.currentState.updatePOIs(routes);
     }
 
     public async loadVrrRoutes(): Promise<void> {
-        this.updatePOIs(await getVrrRoutes());
+        this.updatePOIs(await getOsmRoutes());
     }
 
     public async loadVrrStops(): Promise<void> {
-        this.updatePOIs(await getVrrStops());
+        this.updatePOIs(await getOsmStops());
     }
 
     public async loadAllVrrData(): Promise<void> {
         const both = await Promise.all([
-            getVrrRoutes(),
-            getVrrStops()
+            getOsmRoutes(),
+            getOsmStops()
         ]);
         this.updatePOIs(both.flat());
     }
 
-    public getFirstRoute(): Route | undefined {
+    public getFirstRoute(): OsmRoute | undefined {
         const status = this.getStatus();
-        const route = status.guesses[0] as WithDistance<Route> | undefined;
+        const route = status.guesses[0] as WithDistance<OsmRoute> | undefined;
         return route?.poi;
     }
 
-    public getFirstRouteOrThrow(): Route {
+    public getFirstRouteOrThrow(): OsmRoute {
         const route = this.getFirstRoute();
         assert.isDefined(route, "No route found");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return route!;
     }
 
-    public getStatus(): State<Route, Stop> {
+    public getStatus(): State<OsmRoute, OsmStop> {
         return this.statusList[this.statusList.length - 1] ?? this.currentState;
     }
 
-    public getNearestPlatform(): WithDistance<Stop> {
+    public getNearestPlatform(): WithDistance<OsmStop> {
         const status = this.getStatus();
         const stop = status.nearbyPlatforms[0];
         assert.isDefined(stop, "No stop found");

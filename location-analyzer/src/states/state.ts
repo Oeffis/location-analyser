@@ -151,7 +151,7 @@ export class State<R extends Route, S extends Stop> {
         return this;
     }
 
-    public get nearbyPlatforms(): WithDistance<Stop>[] {
+    public get nearbyPlatforms(): WithDistance<S>[] {
         return [];
     }
 

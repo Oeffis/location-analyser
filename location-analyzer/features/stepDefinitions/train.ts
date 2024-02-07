@@ -2,9 +2,9 @@ import { Given, Then, When } from "@cucumber/cucumber";
 import { LocationAnalyzerWorld } from "../world";
 
 import { assert } from "chai";
-import { Stop, isRouteDistance, isStopDistance } from "../../src/index.js";
-import { Route as VrrRoute, getVrrRoutes } from "../getVrrRoutes.js";
-import { getVrrStops } from "../getVrrStops.js";
+import { isRouteDistance, isStopDistance } from "../../src/index.js";
+import { OsmRoute as VrrRoute, getOsmRoutes } from "../getOsmRoutes.js";
+import { OsmStop, getOsmStops } from "../getOsmStops.js";
 
 interface RawDataTable { rawTable: string[][] }
 
@@ -13,14 +13,14 @@ Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direct
     const TRAM_302_BUER_TO_LANGENDREER = "3720902989";
 
     // 302 serves this line twice in this direction, with different start locations. As this currently cannot be detected, we filter out these to the others will be detected.
-    const hasNoDuplicateAtThisLocation = (route: VrrRoute | Stop): boolean => ![
+    const hasNoDuplicateAtThisLocation = (route: VrrRoute | OsmStop): boolean => ![
         TRAM_302_LANGENDREER_TO_BUER,
         TRAM_302_BUER_TO_LANGENDREER
     ].includes(route.id);
 
     const routes = [
-        ...await getVrrStops(),
-        ...(await getVrrRoutes()).filter(hasNoDuplicateAtThisLocation)
+        ...await getOsmStops(),
+        ...(await getOsmRoutes()).filter(hasNoDuplicateAtThisLocation)
     ];
     this.updatePOIs(routes);
 });

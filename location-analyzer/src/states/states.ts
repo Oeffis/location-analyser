@@ -29,7 +29,6 @@ export function isStopDistance<R extends Route, S extends Stop>(poi: WithDistanc
 
 export interface Stop {
     id: string;
-    name: string;
     boundaries: GeoLocation[];
 }
 
@@ -46,9 +45,6 @@ export interface GeoLocation {
 
 export interface Route {
     id: string;
-    from: string;
-    to: string;
-    ref: string;
     sections: Section[][];
 }
 

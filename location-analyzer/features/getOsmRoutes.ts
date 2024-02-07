@@ -3,17 +3,18 @@ import { readFile } from "fs/promises";
 import { inflate } from "pako";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { Route } from "../src";
 
-let routesPromise: Promise<Route[]> | null = null;
+let routesPromise: Promise<OsmRoute[]> | null = null;
 
-export function getVrrRoutes(): Promise<Route[]> {
+export function getOsmRoutes(): Promise<OsmRoute[]> {
     if (!routesPromise) {
         routesPromise = loadFullRoutes();
     }
     return routesPromise;
 }
 
-async function loadFullRoutes(): Promise<Route[]> {
+async function loadFullRoutes(): Promise<OsmRoute[]> {
     const routes = await loadRoutes();
     const sections = await loadSections();
     let sectionIndex = 0;
@@ -41,12 +42,12 @@ async function loadSections(): Promise<Section[]> {
     return sectionLines.map(lineToSection);
 }
 
-async function loadRoutes(): Promise<Route[]> {
+async function loadRoutes(): Promise<OsmRoute[]> {
     const routeLines = await readZippedCsv("routes");
     return routeLines.map(lineToRoute);
 }
 
-export interface Route {
+export interface OsmRoute extends Route {
     id: string;
     from: string;
     to: string;
@@ -72,7 +73,7 @@ async function readZippedCsv(name: string): Promise<string[]> {
     return lines.slice(1);
 }
 
-function lineToRoute(line: string): Route {
+function lineToRoute(line: string): OsmRoute {
     return {
         id: line.split(",")[0]!,
         from: line.split(",")[1]!,

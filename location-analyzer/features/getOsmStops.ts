@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Stop } from "@oeffis/location-analyzer";
 import { parse } from "csv";
 import { readFile } from "fs/promises";
 import { inflate } from "pako";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
+import { Stop } from "../src";
 
-export async function getVrrStops(): Promise<Stop[]> {
+export async function getOsmStops(): Promise<OsmStop[]> {
     const platforms = await loadPlatforms();
     const platformBounds = await loadPlatformBounds();
 
@@ -25,14 +25,14 @@ export async function getVrrStops(): Promise<Stop[]> {
     return platforms;
 }
 
-async function loadPlatforms(): Promise<Stop[]> {
+async function loadPlatforms(): Promise<OsmStop[]> {
     const filename = fileURLToPath(import.meta.url);
     const currentDirname = dirname(filename);
     const path = join(currentDirname, "./data/platforms.csv.zlib");
     const zippedCsvPlatforms = await readFile(path);
     const csvPlatforms = inflate(zippedCsvPlatforms, { to: "string" });
 
-    return parse(csvPlatforms, { columns: true }).toArray() as Promise<Stop[]>;
+    return parse(csvPlatforms, { columns: true }).toArray() as Promise<OsmStop[]>;
 }
 
 async function loadPlatformBounds(): Promise<{ id: string, latitude: number, longitude: number }[]> {
@@ -42,4 +42,8 @@ async function loadPlatformBounds(): Promise<{ id: string, latitude: number, lon
     const zippedCsvPlatformBounds = await readFile(path);
     const csvPlatformBounds = inflate(zippedCsvPlatformBounds, { to: "string" });
     return parse(csvPlatformBounds, { columns: true }).toArray() as Promise<{ id: string, latitude: number, longitude: number }[]>;
+}
+
+export interface OsmStop extends Stop {
+    name: string;
 }
