@@ -29,8 +29,6 @@ Given<LocationAnalyzerWorld>("No location was set", function () {
     // This is the default
 });
 
-
-
 Given<LocationAnalyzerWorld>("I travel on the 302 from Kennedyplatz to Musiktheater station", function () {
     this.updatePosition(
         [51.514508, 7.094044, 4.812899933984365, 8.180849070785564],
