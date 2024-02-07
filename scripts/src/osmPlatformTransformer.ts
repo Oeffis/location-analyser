@@ -111,15 +111,6 @@ export class OsmPlatformTransformer {
         if (!node) throw new Error(`Node ${nodeId} not found`);
         return node;
     }
-
-    private async zipAndWrite(data: (string | number)[][], dataName: string): Promise<void> {
-        const csv = stringify(data);
-        const zippedData = deflate(csv);
-        await Promise.all([
-            writeFile(`../location-analyzer/features/data/${dataName}.csv.zlib`, zippedData),
-            writeFile(`../raw/no-git/${dataName}.csv`, csv)
-        ]);
-    }
 }
 
 export interface PlatformFilter {
