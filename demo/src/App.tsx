@@ -19,8 +19,7 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { Route, Section, State, Stop, isRouteDistance } from "@oeffis/location-analyzer";
-import { POIWithDistance } from "@oeffis/location-analyzer/dist/distanceCalculator";
+import { Route, Section, State, Stop, WithDistance, isRouteDistance } from "@oeffis/location-analyzer";
 import { parse } from "csv-parse/browser/esm/sync";
 import { getSpeed } from "geolib";
 import { inflate } from "pako";
@@ -31,10 +30,10 @@ setupIonicReact();
 
 const App: React.FC = () => {
   const positions = usePosition();
-  const [state, setState] = useState<State>(State.initial());
+  const [state, setState] = useState<State<OsmRoute, OsmStop>>(State.initial());
   poiPromise.then(pois => state.updatePOIs(pois)).catch(err => console.error(err));
 
-  function getName(poi: POIWithDistance): string {
+  function getName(poi: WithDistance<OsmRoute> | WithDistance<OsmStop>): string {
     if (isRouteDistance(poi)) {
       return poi.poi.from + " - " + poi.poi.to;
     }
@@ -164,13 +163,13 @@ const poiPromise = getPois().catch(error => {
   console.error(error);
   return [];
 });
-async function getPois(): Promise<(Route | Stop)[]> {
+async function getPois(): Promise<(OsmRoute | OsmStop)[]> {
   console.log("Loading POIs");
   const data = await Promise.all([loadFullRoutes(), getVrrStops()]);
   return data.flat();
 }
 
-export async function getVrrStops(): Promise<Stop[]> {
+export async function getVrrStops(): Promise<OsmStop[]> {
   const platforms = await loadPlatforms();
   const platformBounds = await loadPlatformBounds();
 
@@ -189,7 +188,7 @@ export async function getVrrStops(): Promise<Stop[]> {
   return platforms;
 }
 
-async function loadPlatforms(): Promise<Stop[]> {
+async function loadPlatforms(): Promise<OsmStop[]> {
   const response = await fetch("./platforms.csv.zlib");
   if (!response.ok) throw new Error(`Could not load platforms.csv.zlib`);
   const zippedCsvPlatforms = await response.arrayBuffer();
@@ -209,7 +208,7 @@ async function loadPlatformBounds(): Promise<{ id: string, latitude: number, lon
   return parse(csvPlatformBounds, { columns: true });
 }
 
-async function loadFullRoutes(): Promise<Route[]> {
+async function loadFullRoutes(): Promise<OsmRoute[]> {
   const routes = await loadRoutes();
   const sections = await loadSections();
   let sectionIndex = 0;
@@ -269,6 +268,16 @@ function lineToSection(line: string): Section & { consecutiveSection: number } {
     lat: Number(line.split(",")[3]),
     lon: Number(line.split(",")[4])
   };
+}
+
+interface OsmRoute extends Route {
+  from: string;
+  to: string;
+  ref: string;
+}
+
+interface OsmStop extends Stop {
+  name: string;
 }
 
 export default App;
