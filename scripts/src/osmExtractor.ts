@@ -2,6 +2,7 @@ import { createOSMStream } from "osm-pbf-parser-node";
 
 export class OsmExtractor {
     public constructor(
+        protected readonly filePath: string,
         protected readonly relationFilter: Filter<Relation>,
         protected readonly wayIdFilter: Filter<Member>,
         protected readonly additionalWaysFilter: Filter<Way>,
@@ -18,7 +19,6 @@ export class OsmExtractor {
 
         this.verifyWayCompleteness(wayIdsToKeep, ways);
         this.verifyNodeCompleteness(nodeIdsToKeep, nodes);
-        console.log(`All ${nodes.size} node found in ${ways.size} ways for ${relations.size} routes.`);
 
         return {
             relations,
@@ -91,13 +91,13 @@ export class OsmExtractor {
     }
 
     protected createStream(): AsyncGenerator<OSMType, void> {
-        return createOSMStream("../raw/no-git/Bochum.osm.pbf") as AsyncGenerator<OSMType, void>;
+        return createOSMStream(this.filePath) as AsyncGenerator<OSMType, void>;
     }
 
     protected verifyWayCompleteness(wayIdsToKeep: Set<number>, ways: Map<number, Way>): void {
         const missing = [...wayIdsToKeep].filter(id => !ways.has(id));
         if (missing.length > 0) {
-            throw new Error(`Missing ${missing.length} ways: ${missing.join(", ")}`);
+            console.warn(`${missing.length} of ${ways.size} ways missing (possibly out of area bounds)`);
         }
     }
 
@@ -105,11 +105,11 @@ export class OsmExtractor {
         const missing = [...nodeIdsToKeep].filter(id => !nodes.has(id));
         const areMissing = missing.length > 0;
         if (areMissing) {
-            throw new Error(`Missing ${missing.length} nodes: ${missing.join(", ")}`);
+            console.warn(`${missing.length} of ${nodes.size} nodes missing (possibly out of area bounds)`);
         }
     }
 
-    public static forTracks(): OsmExtractor {
+    public static forTracks(file: string): OsmExtractor {
         const routeTypes = [
             "bus",
             "trolleybus",
@@ -124,6 +124,7 @@ export class OsmExtractor {
             "funicular"
         ];
         return new OsmExtractor(
+            file,
             r => r.tags?.type === "route" && routeTypes.includes(r.tags.route ?? ""),
             m => m.type === "way" && m.role === "",
             () => false,
@@ -131,8 +132,9 @@ export class OsmExtractor {
         );
     }
 
-    public static forPlatforms(): OsmExtractor {
+    public static forPlatforms(file: string): OsmExtractor {
         return new OsmExtractor(
+            file,
             r => r.tags?.public_transport === "platform",
             m => m.type === "way" && m.role === "outer",
             w => w.tags?.public_transport === "platform",

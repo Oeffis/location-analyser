@@ -17,12 +17,24 @@ export class OsmPlatformTransformer {
         this.nodes = extraction.nodes;
     }
 
-    public async writeToFile(): Promise<void> {
+    public async writeToDir(outDir: string): Promise<void> {
         const { platforms, platformBounds } = this.getTransformed();
 
         await Promise.all([
-            this.zipAndWrite(platforms, "platforms"),
-            this.zipAndWrite(platformBounds, "platformBounds")
+            writeFile(`${outDir}/platforms.csv`, stringify(platforms)),
+            writeFile(`${outDir}/platformBounds.csv`, stringify(platformBounds))
+        ]);
+    }
+
+    public async writeCompressedToDir(outDir: string): Promise<void> {
+        const { platforms, platformBounds } = this.getTransformed();
+
+        const zippedPlatforms = deflate(stringify(platforms));
+        const zippedPlatformBounds = deflate(stringify(platformBounds));
+
+        await Promise.all([
+            writeFile(`${outDir}/platforms.csv.zlib`, zippedPlatforms),
+            writeFile(`${outDir}/platformBounds.csv.zlib`, zippedPlatformBounds)
         ]);
     }
 
@@ -80,22 +92,16 @@ export class OsmPlatformTransformer {
                 return nodes.map(node => [platformId, node.lat, node.lon]);
             }));
 
-        output = output.concat(Array.from(this.relations.values())
-            .filter(relation => relation.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(relation.id)))
-            .flatMap(relation => {
-                const platformId = relation.id;
+        const relationsAsArray = Array.from(this.relations.values())
+            .filter(relation => relation.tags?.public_transport === "platform" && (!filter?.platforms || filter.platforms.includes(relation.id)));
 
-                const sections = new PlatformBoundarySorter(relation, this.ways)
-                    .getConsecutiveSections();
-
-                if (sections.length === 0 || sections.length > 1) {
-                    throw new Error(`Relation ${relation.id} has ${sections.length} sections`);
-                }
-
-                const nodes = sections[0]?.map(nodeId => this.getNodeOrThrow(nodeId)) ?? [];
-
-                return nodes.map(node => [platformId, node.lat, node.lon]);
-            }));
+        output = output.concat(relationsAsArray
+            .flatMap(relation => new PlatformBoundarySorter(relation, this.ways)
+                .getConsecutiveSections()
+                .flatMap((cSection) => cSection
+                    .map(nodeId => this.getNodeOrThrow(nodeId))
+                    .map((node) => [relation.id, node.lat, node.lon])
+                )));
 
         return [header, ...output];
 

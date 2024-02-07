@@ -4,7 +4,7 @@ import { deflate } from "pako";
 import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";
 import { RouteSorter } from "./routeSorter";
 
-export class OsmTransformer {
+export class OsmRouteTransformer {
     private readonly relations: Map<number, Relation>;
     private readonly ways: Map<number, Way>;
     private readonly nodes: Map<number, Node>;
@@ -17,12 +17,24 @@ export class OsmTransformer {
         this.nodes = extraction.nodes;
     }
 
-    public async writeToFile(): Promise<void> {
+    public async writeToDir(outDir: string): Promise<void> {
         const { routes, sections } = this.getTransformed();
 
         await Promise.all([
-            this.zipAndWrite(routes, "routes"),
-            this.zipAndWrite(sections, "sections")
+            writeFile(`${outDir}/routes.csv`, stringify(routes)),
+            writeFile(`${outDir}/sections.csv`, stringify(sections))
+        ]);
+    }
+
+    public async writeCompressedToDir(outDir: string): Promise<void> {
+        const { routes, sections } = this.getTransformed();
+
+        const zippedRoutes = deflate(stringify(routes));
+        const zippedSections = deflate(stringify(sections));
+
+        await Promise.all([
+            writeFile(`${outDir}/routes.csv.zlib`, zippedRoutes),
+            writeFile(`${outDir}/sections.csv.zlib`, zippedSections)
         ]);
     }
 
@@ -64,15 +76,6 @@ export class OsmTransformer {
         const node = this.nodes.get(nodeId);
         if (!node) throw new Error(`Node ${nodeId} not found`);
         return node;
-    }
-
-    private async zipAndWrite(data: (string | number)[][], dataName: string): Promise<void> {
-        const csv = stringify(data);
-        const zippedData = deflate(csv);
-        await Promise.all([
-            writeFile(`../location-analyzer/features/data/${dataName}.csv.zlib`, zippedData),
-            writeFile(`../raw/no-git/${dataName}.csv`, csv)
-        ]);
     }
 }
 

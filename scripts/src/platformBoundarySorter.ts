@@ -11,16 +11,12 @@ export class PlatformBoundarySorter {
     }
 
     private getWaysInRelation(): Way[] {
-        const waysInRelation = this.relation
+        return this.relation
             .members
             .filter(member => member.type === "way" && member.role === "outer")
             .map(member => member.ref)
-            .map(wayId => this.ways.get(wayId));
-
-        if (waysInRelation.some(way => !way))
-            throw new Error(`Relation ${this.relation.tags?.name} has missing ways`);
-
-        return waysInRelation as Way[];
+            .map(wayId => this.ways.get(wayId))
+            .filter((way): way is Way => way !== undefined);
     }
 
     public getConsecutiveSections(): number[][] {
