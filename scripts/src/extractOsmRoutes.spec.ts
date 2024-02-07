@@ -3,7 +3,7 @@ import { beforeAll, expect, suite, test } from "vitest";
 import { ExtractionResult, Node, OsmExtractor, Relation, Way } from "./osmExtractor";
 import { OsmTransformer } from "./osmTransformer";
 
-suite("extractOsmData", () => {
+suite("extractOsmRoutes", () => {
     const RailRB43ToDorsten = 1998588;
     const RailRB43ToDortmundWithSingleNodeWay = 2455435;
     const Bus390LindenToHerneHasRoundabout = 16335332;
