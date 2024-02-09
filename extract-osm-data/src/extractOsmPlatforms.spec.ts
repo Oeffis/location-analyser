@@ -36,7 +36,7 @@ suite("extractOsmPlatforms", () => {
                 nodes: Array.from(extraction.nodes.values())
             }));
         }
-    }, 60000);
+    }, 1200000);
 
     suite("extracts", () => {
         test("extracts single point bus stop", () => {

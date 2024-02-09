@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
+import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
-import { defineConfig } from "vitest/config";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -35,8 +35,5 @@ export default defineConfig({
     ],
     esbuild: {
         platform: "node"
-    },
-    test: {
-        hookTimeout: 120000
     }
 });

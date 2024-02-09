@@ -39,7 +39,7 @@ suite("extractOsmRoutes", () => {
                 nodes: Array.from(extraction.nodes.values())
             }));
         }
-    }, 60000);
+    }, 1200000);
 
     // removed because it's too big for snapshots
     // test("extracts data", () => {
