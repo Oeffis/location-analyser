@@ -16,7 +16,7 @@ suite("extractOsmRoutes", () => {
     let extraction: ExtractionResult;
 
     beforeAll(async () => {
-        extractor = OsmExtractor.forTracks();
+        extractor = OsmExtractor.forTracks("./test-cache/Bochum.osm");
 
         try {
             const cachedExtraction = await readFile("./test-cache/extracted.json", "utf-8");

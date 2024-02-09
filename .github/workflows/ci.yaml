@@ -52,6 +52,8 @@ jobs:
         - name: Test OSM Data Extractor
           working-directory: ./extract-osm-data
           run: |
+            mkdir -p ./test-cache
+            curl -o ./test-cache/Bochum.osm https://download.bbbike.org/osm/bbbike/Bochum/Bochum.osm.pbf
             npm run test
 
         - name: Test Lib

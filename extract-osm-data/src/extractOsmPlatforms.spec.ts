@@ -13,7 +13,7 @@ suite("extractOsmPlatforms", () => {
     let extraction: ExtractionResult;
 
     beforeAll(async () => {
-        extractor = OsmExtractor.forPlatforms();
+        extractor = OsmExtractor.forPlatforms("./test-cache/Bochum.osm");
 
         try {
             const cachedExtraction = await readFile("./test-cache/extractedPlatforms.json", "utf-8");
