@@ -1,23 +1,27 @@
 import { getDistance, isPointInPolygon } from "geolib";
 import { getDistanceFromLine } from "./getDistanceFromLine.js";
 import { GeoPosition, Route, Stop } from "./index.js";
-import { POIReference, RouteMap, RouteReference, StopReference, TransitPOI, isRouteRef } from "./routeMap.js";
+import { POIReference, RouteMap, RouteReference, StopReference, isRouteRef } from "./routeMap.js";
+
+export interface POISource<R extends Route, S extends Stop> {
+    getPOIsAtLocation(location: GeoPosition): POIReference<R, S>[];
+}
 
 export class DistanceCalculator<R extends Route, S extends Stop> {
-    protected pois = new Map<string, TransitPOI>();
+    protected pois = new Map<string, R | S>();
     protected routeMap = new RouteMap<R, S>();
 
-    public getUniquePOIsNear(currentLocation: GeoPosition): (WithDistance<R> | WithDistance<S>)[] {
+    public getUniquePOIsNear(currentLocation: GeoPosition): (WithDistance<R | S>)[] {
         return this.keepClosestOfEachPoi(this.getPOIsNear(currentLocation));
     }
 
-    public getPOIsNear(currentLocation: GeoPosition): (WithDistance<R> | WithDistance<S>)[] {
+    public getPOIsNear(currentLocation: GeoPosition): (WithDistance<R | S>)[] {
         const nearbyPOIs = this.routeMap.getPOIsAtLocation(currentLocation);
         return nearbyPOIs.map(poi => this.withDistance(currentLocation, poi));
     }
 
-    protected keepClosestOfEachPoi(pois: (WithDistance<R> | WithDistance<S>)[]): (WithDistance<R> | WithDistance<S>)[] {
-        const closestOfEachPoi = new Map<string, WithDistance<R> | WithDistance<S>>();
+    protected keepClosestOfEachPoi(pois: (WithDistance<R | S>)[]): (WithDistance<R | S>)[] {
+        const closestOfEachPoi = new Map<string, WithDistance<R | S>>();
         pois.forEach(poi => {
             const currentClosest = closestOfEachPoi.get(poi.poi.id);
             if (currentClosest === undefined) {
@@ -31,7 +35,7 @@ export class DistanceCalculator<R extends Route, S extends Stop> {
         return Array.from(closestOfEachPoi.values());
     }
 
-    protected withDistance(base: GeoPosition, reference: POIReference<R, S>): WithDistance<R> | WithDistance<S> {
+    protected withDistance(base: GeoPosition, reference: POIReference<R, S>): WithDistance<R | S> {
         if (isRouteRef(reference)) {
             return {
                 poi: reference.poi,
@@ -41,8 +45,8 @@ export class DistanceCalculator<R extends Route, S extends Stop> {
 
         return {
             poi: reference.poi,
-            distance: this.stopDistance(reference, base) as DistanceTypeOf<S>
-        };
+            distance: this.stopDistance(reference, base)
+        } as WithDistance<R | S>;
     }
 
     private routeDistance(reference: RouteReference<R>, base: GeoPosition): SectionDistance {
@@ -96,10 +100,7 @@ export class DistanceCalculator<R extends Route, S extends Stop> {
     }
 }
 
-export type DistanceTypeOf<T extends TransitPOI> = T extends Route ? SectionDistance : StopDistance;
-
-export interface WithDistance<T extends TransitPOI> { poi: T, distance: DistanceTypeOf<T> }
-export type POIWithDistance = WithDistance<Stop | Route>;
+export interface WithDistance<T extends (Route | Stop)> { poi: T, distance: T extends Route ? SectionDistance : StopDistance; }
 
 interface SectionDistance {
     poiId: string;

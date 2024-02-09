@@ -1,6 +1,4 @@
-import { GeoLocation, Route, Section, Stop } from "./index.js";
-
-export type TransitPOI = Route | Stop;
+import { GeoLocation, POISource, Route, Section, Stop } from "./index.js";
 
 export type POIReference<R, S> = RouteReference<R> | StopReference<S>;
 
@@ -18,7 +16,7 @@ export interface RouteReference<R> {
     end: GeoLocation;
 }
 
-export class RouteMap<R extends Route, S extends Stop> {
+export class RouteMap<R extends Route, S extends Stop> implements POISource<R, S>{
     protected coordinateMap = new Map<number, POIReference<R, S>[]>();
 
     constructor() {
@@ -194,12 +192,12 @@ export function isRouteRef<R extends Route, S extends Stop>(ref: POIReference<R,
     return isRoute(ref.poi);
 }
 
-export function isRoute(poi: TransitPOI): poi is Route {
+export function isRoute<R extends Route, S extends Stop>(poi: R | S): poi is R {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     return (poi as Route).sections !== undefined;
 }
 
-export function isStop(poi: TransitPOI): poi is Stop {
+export function isStop<R extends Route, S extends Stop>(poi: R | S): poi is S {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     return (poi as Stop).boundaries !== undefined;
 }

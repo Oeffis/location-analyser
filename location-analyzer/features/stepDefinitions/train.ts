@@ -3,7 +3,7 @@ import { LocationAnalyzerWorld } from "../world";
 
 import { assert } from "chai";
 import { isRouteDistance, isStopDistance } from "../../src/index.js";
-import { OsmRoute as VrrRoute, getOsmRoutes } from "../getOsmRoutes.js";
+import { OsmRoute, getOsmRoutes } from "../getOsmRoutes.js";
 import { OsmStop, getOsmStops } from "../getOsmStops.js";
 
 interface RawDataTable { rawTable: string[][] }
@@ -13,7 +13,7 @@ Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direct
     const TRAM_302_BUER_TO_LANGENDREER = "3720902989";
 
     // 302 serves this line twice in this direction, with different start locations. As this currently cannot be detected, we filter out these to the others will be detected.
-    const hasNoDuplicateAtThisLocation = (route: VrrRoute | OsmStop): boolean => ![
+    const hasNoDuplicateAtThisLocation = (route: OsmRoute | OsmStop): boolean => ![
         TRAM_302_LANGENDREER_TO_BUER,
         TRAM_302_BUER_TO_LANGENDREER
     ].includes(route.id);
@@ -119,16 +119,16 @@ Then<LocationAnalyzerWorld>("the detected train is the {string} to {string}", fu
 
 Then<LocationAnalyzerWorld>("one of the detected trains is the {string} to {string}", function (line: string, destination: string) {
     const exists = this.getStatus().guesses.some((poi) => {
-        if (isRouteDistance(poi)) {
+        if (isRouteDistance<OsmRoute, OsmStop>(poi)) {
             return poi.poi.ref === line && poi.poi.to === destination;
         }
         return false;
     });
     assert.isTrue(exists, `The train ${line} to ${destination} is not detected, but should be. Options were ` + this.getStatus().guesses.map((poi) => {
-        if (isRouteDistance(poi)) {
+        if (isRouteDistance<OsmRoute, OsmStop>(poi)) {
             return `${poi.poi.ref} to ${poi.poi.to}`;
         }
-        if (isStopDistance(poi)) {
+        if (isStopDistance<OsmRoute, OsmStop>(poi)) {
             return poi.poi.name;
         }
     }).join(", "));
@@ -150,11 +150,11 @@ Then<LocationAnalyzerWorld>("the following lines are detected", function (table:
     const status = this.getStatus();
     const allFound = expectedLines.every(expectedLine =>
         status.guesses.some((poi) =>
-            isRouteDistance(poi)
+            isRouteDistance<OsmRoute, OsmStop>(poi)
             && poi.poi.ref === expectedLine.line && poi.poi.to === expectedLine.destination));
 
     assert.isTrue(allFound, `Not all lines were detected. Options were ` + status.guesses.map((poi) => {
-        if (isRouteDistance(poi)) {
+        if (isRouteDistance<OsmRoute, OsmStop>(poi)) {
             return `${poi.poi.ref} to ${poi.poi.to}`;
         }
     }).join(",\n"));

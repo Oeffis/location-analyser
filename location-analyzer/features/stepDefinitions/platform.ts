@@ -1,6 +1,8 @@
 import { Then } from "@cucumber/cucumber";
 import { assert } from "chai";
 import { isStopDistance } from "../../src/index.js";
+import { OsmRoute } from "../getOsmRoutes.js";
+import { OsmStop } from "../getOsmStops.js";
 import { LocationAnalyzerWorld } from "../world.js";
 import { locationMap } from "./helpers/locationMap.js";
 
@@ -43,7 +45,7 @@ Then<LocationAnalyzerWorld>("the ids of the nearest platforms are:", function (d
 
 Then<LocationAnalyzerWorld>("the stop {string} is not guessed", function (stopName: string) {
     const exists = this.getStatus().guesses
-        .filter(isStopDistance)
+        .filter(isStopDistance<OsmRoute, OsmStop>)
         .some(stop => stop.poi.name === stopName);
     assert.isFalse(exists, `The stop ${stopName} is detected, but should not be.`);
 });

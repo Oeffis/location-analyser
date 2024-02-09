@@ -1,14 +1,14 @@
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, POIWithDistance, WithDistance } from "../distanceCalculator.js";
+import { DistanceCalculator, WithDistance } from "../distanceCalculator.js";
 import { GeoPosition, Route, State, Stop } from "./states.js";
 
 export abstract class FilledState<R extends Route, S extends Stop> extends State<R, S> {
     public constructor(
-        fullHistory: Buffer<POIWithDistance[]>,
+        fullHistory: Buffer<WithDistance<R | S>[]>,
         history: Buffer<FilledState<R, S>>,
         distanceCalculator: DistanceCalculator<R, S>,
         public readonly location: GeoPosition,
-        public readonly guesses: (WithDistance<R> | WithDistance<S>)[]
+        public readonly guesses: (WithDistance<R | S>)[]
     ) {
         super(fullHistory, history, distanceCalculator, guesses);
         this.history.append(this);

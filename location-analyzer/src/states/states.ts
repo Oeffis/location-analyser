@@ -1,5 +1,5 @@
-import { POIWithDistance, WithDistance } from "../distanceCalculator.js";
-import { TransitPOI, isRoute } from "../routeMap.js";
+import { WithDistance } from "../distanceCalculator.js";
+import { isRoute } from "../routeMap.js";
 export * from "./state.js";
 
 export * from "./filledState.js";
@@ -7,15 +7,15 @@ export * from "./routeState.js";
 export * from "./stopState.js";
 export * from "./unknownState.js";
 
-export function byProximity(a: POIWithDistance, b: POIWithDistance): number {
+export function byProximity<R extends Route, S extends Stop>(a: WithDistance<R | S>, b: WithDistance<R | S>): number {
     return a.distance.value - b.distance.value;
 }
 
-export function isCloserThan(maxDistance: number): (poi: POIWithDistance) => boolean {
+export function isCloserThan<R extends Route, S extends Stop>(maxDistance: number): (poi: WithDistance<R | S>) => boolean {
     return poi => poi.distance.value <= maxDistance;
 }
 
-export function isGuessFor(poi: TransitPOI): (guess: POIWithDistance) => boolean {
+export function isGuessFor<R extends Route, S extends Stop>(poi: R | S): (guess: WithDistance<R | S>) => boolean {
     return guess => guess.poi.id === poi.id;
 }
 

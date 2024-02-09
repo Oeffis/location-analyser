@@ -3,7 +3,9 @@ import { assert } from "chai";
 import { stringify } from "csv/sync";
 import { writeFileSync } from "fs";
 import { computeDestinationPoint } from "geolib";
-import { isRouteDistance, isStopDistance } from "../../src/index.js";
+import { WithDistance, isRouteDistance, isStopDistance } from "../../src/index.js";
+import { OsmRoute } from "../getOsmRoutes.js";
+import { OsmStop } from "../getOsmStops.js";
 import { LocationAnalyzerWorld } from "../world.js";
 import { locationMap } from "./helpers/locationMap.js";
 
@@ -103,7 +105,7 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
     for (let trackIndex = 0; trackIndex < this.track.length; trackIndex++) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const trackSection = this.track[trackIndex]!;
-        const status = this.statusList[trackIndex] ?? { guesses: [] };
+        const status = this.statusList[trackIndex] ?? { guesses: [] as WithDistance<OsmRoute | OsmStop>[] };
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const expected = expectedRules.filter(rule => rule.startTime! <= trackSection["date-local"].slice(11, 19)! && rule.endTime! >= trackSection["date-local"].slice(11, 19)!);
@@ -113,10 +115,10 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
         }
 
         const matched = status.guesses.filter(guess => {
-            if (isStopDistance(guess)) {
+            if (isStopDistance<OsmRoute, OsmStop>(guess)) {
                 return expected.some(rule => rule.vehicleOrStop === `${guess.poi.name} (${guess.poi.id})`);
             }
-            if (isRouteDistance(guess)) {
+            if (isRouteDistance<OsmRoute, OsmStop>(guess)) {
                 const actualString = `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}' (${guess.poi.id})`;
                 return expected.some(rule => rule.vehicleOrStop === actualString);
             }
@@ -154,10 +156,10 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
             latitude: trackSection.latitude,
             longitude: trackSection.longitude,
             result: status.guesses.map(guess => {
-                if (isStopDistance(guess)) {
+                if (isStopDistance<OsmRoute, OsmStop>(guess)) {
                     return guess.poi.name;
                 }
-                if (isRouteDistance(guess)) {
+                if (isRouteDistance<OsmRoute, OsmStop>(guess)) {
                     return `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}'`;
                 }
             }).join(", ") || "none",
