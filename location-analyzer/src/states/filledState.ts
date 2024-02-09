@@ -1,6 +1,5 @@
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, WithDistance } from "../distanceCalculator.js";
-import { GeoPosition, Route, State, Stop } from "./states.js";
+import { DistanceCalculator, GeoPosition, Route, State, Stop, WithDistance } from "../index.js";
 
 export abstract class FilledState<R extends Route, S extends Stop> extends State<R, S> {
     public constructor(

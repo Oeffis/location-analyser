@@ -1,6 +1,6 @@
 import { getDistance } from "geolib";
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, POISource, Route, RouteMap, RouteState, Stop, StopState, UnknownState, WithDistance, byProximity, isGuessFor, isRouteDistance, isStopDistance, type FilledState, type GeoPosition } from "../index.js";
+import { DistanceCalculator, POISource, Route, RouteMap, RouteState, Stop, StopState, UnknownState, WithDistance, isRouteDistance, isStopDistance, type FilledState, type GeoPosition } from "../index.js";
 
 export interface WithAveragedDistance<R extends Route, S extends Stop, T extends WithDistance<R | S>> {
     guess: T;
@@ -93,7 +93,7 @@ export class State<R extends Route, S extends Stop> {
 
             const lastPoi = this.fullHistory
                 .last()
-                ?.find(isGuessFor(poi.poi)) as WithDistance<Route> | undefined;
+                ?.find(this.isGuessFor(poi.poi)) as WithDistance<Route> | undefined;
 
             if (lastPoi === undefined) return true;
 
@@ -112,10 +112,18 @@ export class State<R extends Route, S extends Stop> {
         };
     }
 
+    protected isGuessFor<R extends Route, S extends Stop>(poi: R | S): (guess: WithDistance<R | S>) => boolean {
+        return guess => guess.poi.id === poi.id;
+    }
+
     protected getNearbyPlatformsIn(pois: (WithDistance<R | S>)[]): WithDistance<S>[] {
         return pois
             .filter(isStopDistance)
-            .sort(byProximity) as WithDistance<S>[];
+            .sort(this.byProximity.bind(this)) as WithDistance<S>[];
+    }
+
+    protected byProximity<R extends Route, S extends Stop>(a: WithDistance<R | S>, b: WithDistance<R | S>): number {
+        return a.distance.value - b.distance.value;
     }
 
     protected getClosestByAveragedDistance<T extends WithDistance<R | S>>(rightDirectionPois: T[]): WithAveragedDistance<R, S, T>[] {
@@ -123,8 +131,8 @@ export class State<R extends Route, S extends Stop> {
             .map(guess => {
                 const currentDistance = guess.distance.value;
                 const history = this.fullHistory;
-                const previousDistance = history[history.length - 1]?.find(isGuessFor(guess.poi))?.distance.value ?? currentDistance;
-                const prePreviousDistance = history[history.length - 2]?.find(isGuessFor(guess.poi))?.distance.value ?? previousDistance;
+                const previousDistance = history[history.length - 1]?.find(this.isGuessFor(guess.poi))?.distance.value ?? currentDistance;
+                const prePreviousDistance = history[history.length - 2]?.find(this.isGuessFor(guess.poi))?.distance.value ?? previousDistance;
                 const averagedDistance = (currentDistance + previousDistance + prePreviousDistance) / 3;
                 return {
                     guess,

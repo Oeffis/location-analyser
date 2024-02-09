@@ -93,14 +93,14 @@ export class DistanceCalculator<R extends Route, S extends Stop> {
 
 export interface WithDistance<T extends (Route | Stop)> { poi: T, distance: T extends Route ? SectionDistance : StopDistance; }
 
-interface SectionDistance {
+export interface SectionDistance {
     poiId: string;
     consecutiveSection: number;
     section: number;
     value: number;
 }
 
-interface StopDistance {
+export interface StopDistance {
     poiId: string;
     value: number;
 }

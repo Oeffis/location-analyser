@@ -1,6 +1,5 @@
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, WithDistance } from "../distanceCalculator.js";
-import { FilledState, GeoPosition, Route, Stop, isRouteDistance } from "./states.js";
+import { DistanceCalculator, FilledState, GeoPosition, Route, Stop, WithDistance, isRouteDistance } from "../index.js";
 
 export class RouteState<R extends Route, S extends Stop> extends FilledState<R, S> {
     public readonly possibilityIds = new Set<string>();
