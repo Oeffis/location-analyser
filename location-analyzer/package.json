@@ -19,6 +19,7 @@
     "build:watch": "vite build --watch",
     "lint": "eslint \"src/**/*.ts\" --fix",
     "test": "cucumber-js",
+    "test:watch": "npx nodemon -e \"ts,feature\" --exec \"npm run test\"",
     "test:mutation": "stryker run"
   },
   "repository": {
