@@ -1,0 +1,7 @@
+{
+    "name": "oeffis-detector-features",
+    "type": "module",
+    "dependencies": {
+        "@public-transit-detector/detector": "file://.."
+    }
+}

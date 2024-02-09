@@ -4,6 +4,6 @@
         "pois"
     ],
     "eslint.workingDirectories": [
-        "location-analyzer"
+        "detector"
     ]
 }

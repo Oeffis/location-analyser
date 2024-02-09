@@ -1,7 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "@oeffis/location-analyzer": "file:../location-analyzer",
+    "@public-transit-detector/detector": "file:../detector",
     "@types/node": "^20.9.0",
     "@types/pako": "^2.0.3",
     "@types/yargs": "^17.0.32",

@@ -19,11 +19,11 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { Route, RouteMap, Section, State, Stop, WithDistance, isRouteDistance } from "@oeffis/location-analyzer";
 import { parse } from "csv-parse/browser/esm/sync";
 import { getSpeed } from "geolib";
 import { inflate } from "pako";
 import { useEffect, useState } from "react";
+import { Route, RouteMap, Section, State, Stop, WithDistance, isRouteDistance } from "../../detector/dist";
 import "./theme/variables.css";
 
 setupIonicReact();
@@ -72,7 +72,7 @@ const App: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Location-Analyzer Demo</IonTitle>
+          <IonTitle>detector Demo</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">

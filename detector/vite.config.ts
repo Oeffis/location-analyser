@@ -6,7 +6,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: "src/index.ts",
-      name: "@oeffis/location-analyzer",
+      name: "@public-transit-detector/detector",
       formats: ["es", "umd"]
     }
   },

@@ -1,15 +1,14 @@
 {
-  "name": "location-analyzer",
+  "name": "detector",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "author": "",
   "license": "ISC",
   "workspaces": [
-    "location-analyzer",
+    "detector",
     "demo",
-    "scripts",
-    "location-analyzer/features"
+    "extract-osm-data"
   ],
   "overrides": {
     "vite": {

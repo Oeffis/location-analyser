@@ -25,12 +25,12 @@ jobs:
             npm ci
 
         - name: Lint Location Analyzer
-          working-directory: ./location-analyzer
+          working-directory: ./detector
           run: |
             npm run lint -- --max-warnings 0 --no-fix
 
         - name: Build Location Analyzer
-          working-directory: ./location-analyzer
+          working-directory: ./detector
           run: |
             npm run build
 
@@ -50,7 +50,7 @@ jobs:
             npm run build
 
         - name: Test Lib
-          working-directory: ./location-analyzer
+          working-directory: ./detector
           run: |
             npm run test:mutation
 
@@ -58,10 +58,10 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: mutation-report
-            path: location-analyzer/reports/mutation
+            path: detector/reports/mutation
           
         - name: Upload Build
           uses: actions/upload-artifact@v4
           with:
             name: build
-            path: location-analyzer/dist
+            path: detector/dist

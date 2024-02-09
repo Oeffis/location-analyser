@@ -1,18 +1,18 @@
 {
-  "name": "@oeffis/location-analyzer",
+  "name": "@public-transit-detector/detector",
   "version": "0.0.1",
   "description": "Analyses location data to detect proximity to public transit stops and trains. Can be used to learn from user behavior to predict enter/exit stops and trips.",
-  "main": "dist/location-analyzer.js",
+  "main": "dist/detector.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/location-analyzer.js",
-      "require": "./dist/location-analyzer.umd.cjs"
+      "import": "./dist/detector.js",
+      "require": "./dist/detector.umd.cjs"
     },
     "./dist/index.d.ts": "./dist/index.d.ts",
-    "./dist/location-analyzer.js": "./dist/location-analyzer.js",
-    "./dist/location-analyzer.umd.cjs": "./dist/location-analyzer.umd.cjs"
+    "./dist/detector.js": "./dist/detector.js",
+    "./dist/detector.umd.cjs": "./dist/detector.umd.cjs"
   },
   "scripts": {
     "build": "vite build",
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Oeffis/location-analyser.git"
+    "url": "git+https://github.com/public-transit-detector/public-transit-detector.git"
   },
   "keywords": [
     "public transit",
@@ -37,9 +37,9 @@
   "author": "Tim Vahlbrock",
   "license": "AGPL-3.0-or-later",
   "bugs": {
-    "url": "https://github.com/Oeffis/location-analyser/issues"
+    "url": "https://github.com/public-transit-detector/public-transit-detector/issues"
   },
-  "homepage": "https://github.com/Oeffis/location-analyser#readme",
+  "homepage": "https://github.com/public-transit-detector/public-transit-detector#readme",
   "devDependencies": {
     "@cucumber/cucumber": "^10.1.0",
     "@rollup/plugin-typescript": "^11.1.5",
