@@ -1,8 +1,6 @@
 import { getDistance } from "geolib";
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, POISource, WithDistance } from "../distanceCalculator.js";
-import { RouteMap } from "../routeMap.js";
-import { Route, RouteState, Stop, StopState, UnknownState, byProximity, isGuessFor, isRouteDistance, isStopDistance, type FilledState, type GeoPosition } from "./states.js";
+import { DistanceCalculator, POISource, Route, RouteMap, RouteState, Stop, StopState, UnknownState, WithDistance, byProximity, isGuessFor, isRouteDistance, isStopDistance, type FilledState, type GeoPosition } from "../index.js";
 
 export interface WithAveragedDistance<R extends Route, S extends Stop, T extends WithDistance<R | S>> {
     guess: T;

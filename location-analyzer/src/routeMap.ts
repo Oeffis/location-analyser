@@ -1,20 +1,4 @@
-import { GeoLocation, POISource, Route, Section, Stop } from "./index.js";
-
-export type POIReference<R, S> = RouteReference<R> | StopReference<S>;
-
-export interface StopReference<S> {
-    poi: S;
-    start: GeoLocation;
-    end?: GeoLocation;
-}
-
-export interface RouteReference<R> {
-    poi: R;
-    consecutiveSection: number;
-    section: number;
-    start: GeoLocation;
-    end: GeoLocation;
-}
+import { GeoLocation, POIReference, POISource, Route, RouteReference, Section, Stop, StopReference } from "./index.js";
 
 export class RouteMap<R extends Route, S extends Stop> implements POISource<R, S>{
     protected coordinateMap = new Map<number, POIReference<R, S>[]>();

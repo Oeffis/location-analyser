@@ -1,11 +1,6 @@
 import { getDistance, isPointInPolygon } from "geolib";
 import { getDistanceFromLine } from "./getDistanceFromLine.js";
-import { GeoPosition, Route, Stop } from "./index.js";
-import { POIReference, RouteReference, StopReference, isRouteRef } from "./routeMap.js";
-
-export interface POISource<R extends Route, S extends Stop> {
-    getPOIsAtLocation(location: GeoPosition): POIReference<R, S>[];
-}
+import { GeoPosition, POIReference, POISource, Route, RouteReference, Stop, StopReference, isRouteRef } from "./index.js";
 
 export class DistanceCalculator<R extends Route, S extends Stop> {
     protected pois = new Map<string, R | S>();
