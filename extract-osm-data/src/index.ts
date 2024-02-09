@@ -56,3 +56,7 @@ async function extractPlatforms(argv: { inFile: string; outDir: string | undefin
 
     console.log("Done");
 }
+
+export * from "./osmExtractor";
+export * from "./osmPlatformTransformer";
+export * from "./osmRouteTransformer";

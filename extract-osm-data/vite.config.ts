@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import typescript from "@rollup/plugin-typescript";
 import { defineConfig } from "vite";
+import dts from "vite-plugin-dts";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,6 +8,7 @@ export default defineConfig({
         lib: {
             entry: "src/index.ts",
             name: "@public-transit-detector/extract-osm-data",
+            fileName: "index",
             formats: ["es", "umd"]
         },
         rollupOptions: {
@@ -28,12 +29,8 @@ export default defineConfig({
         }
     },
     plugins: [
-        typescript({
-            tsconfig: "./tsconfig.json",
-            declaration: true,
-            declarationDir: "./dist",
-            exclude: ["**/*.spec.ts"],
-            emitDeclarationOnly: true
+        dts({
+            rollupTypes: true
         })
     ],
     esbuild: {

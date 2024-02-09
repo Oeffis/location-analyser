@@ -2,7 +2,7 @@
   "name": "@public-transit-detector/detector",
   "version": "0.0.1",
   "description": "Analyses location data to detect proximity to public transit stops and trains. Can be used to learn from user behavior to predict enter/exit stops and trips.",
-  "main": "dist/detector.js",
+  "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "files": [
@@ -10,12 +10,12 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/detector.js",
-      "require": "./dist/detector.umd.cjs"
+      "import": "./dist/index.js",
+      "require": "./dist/index.umd.cjs"
     },
     "./dist/index.d.ts": "./dist/index.d.ts",
-    "./dist/detector.js": "./dist/detector.js",
-    "./dist/detector.umd.cjs": "./dist/detector.umd.cjs"
+    "./dist/detector.js": "./dist/index.js",
+    "./dist/detector.umd.cjs": "./dist/index.umd.cjs"
   },
   "repository": {
     "type": "git",
@@ -65,6 +65,6 @@
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2",
-    "vite": "^5.0.9"
+    "vite": "^5.1.1"
   }
 }
