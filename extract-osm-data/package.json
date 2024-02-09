@@ -6,6 +6,9 @@
   "bin": "dist/extract-osm-data.js",
   "types": "dist/index.d.ts",
   "type": "module",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "import": "./dist/extract-osm-data.js",

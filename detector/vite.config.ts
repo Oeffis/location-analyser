@@ -14,7 +14,7 @@ export default defineConfig({
     typescript({
       tsconfig: "./tsconfig.json",
       declaration: true,
-      declarationDir: "./dist"
+      outDir: "./dist/index.d.ts"
     })
   ]
 });
