@@ -7,6 +7,6 @@
     "strictNullChecks": true
   },
   "include": [
-    "vitest.config.ts"
+    "vite.config.ts"
   ]
 }
