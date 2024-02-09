@@ -2,8 +2,8 @@
   "name": "@public-transit-detector/extract-osm-data",
   "version": "0.0.1",
   "description": "Extracts public transit data from a PBF file and writes it to a CSV file",
-  "main": "dist/extract-osm-data.js",
-  "bin": "dist/extract-osm-data.js",
+  "main": "dist/index.js",
+  "bin": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "files": [
@@ -11,12 +11,12 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/extract-osm-data.js",
-      "require": "./dist/extract-osm-data.umd.cjs"
+      "import": "./dist/index.js",
+      "require": "./dist/index.umd.cjs"
     },
     "./dist/index.d.ts": "./dist/index.d.ts",
-    "./dist/extract-osm-data.js": "./dist/extract-osm-data.js",
-    "./dist/extract-osm-data.umd.cjs": "./dist/extract-osm-data.umd.cjs"
+    "./dist/index.js": "./dist/index.js",
+    "./dist/index.umd.cjs": "./dist/index.umd.cjs"
   },
   "repository": {
     "type": "git",
