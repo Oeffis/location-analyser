@@ -1,5 +1,5 @@
-import typescript from "@rollup/plugin-typescript";
 import { defineConfig } from "vite";
+import dts from "vite-plugin-dts";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -7,14 +7,13 @@ export default defineConfig({
     lib: {
       entry: "src/index.ts",
       name: "@public-transit-detector/detector",
+      fileName: "index",
       formats: ["es", "umd"]
     }
   },
   plugins: [
-    typescript({
-      tsconfig: "./tsconfig.json",
-      declaration: true,
-      outDir: "./dist/index.d.ts"
+    dts({
+      rollupTypes: true
     })
   ]
 });
