@@ -55,6 +55,11 @@ jobs:
             npm run test
 
         - name: Test Lib
+            working-directory: ./detector
+            run: |
+              npm run test
+
+        - name: Test Lib (Mutation)
           working-directory: ./detector
           run: |
             npm run test:mutation
