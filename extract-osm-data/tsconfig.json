@@ -3,5 +3,7 @@
     "include": [
         "./src/**/*.ts"
     ],
-    "compilerOptions": {}
+    "compilerOptions": {
+        "incremental": false
+    }
 }

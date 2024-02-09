@@ -14,14 +14,6 @@
     "./dist/detector.js": "./dist/detector.js",
     "./dist/detector.umd.cjs": "./dist/detector.umd.cjs"
   },
-  "scripts": {
-    "build": "vite build",
-    "build:watch": "vite build --watch",
-    "lint": "eslint \"src/**/*.ts\" --fix",
-    "test": "cucumber-js",
-    "test:watch": "npx nodemon -e \"ts,feature\" --exec \"npm run test\"",
-    "test:mutation": "stryker run"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/public-transit-detector/public-transit-detector.git"
@@ -31,15 +23,25 @@
     "transit",
     "location",
     "location services",
-    "gps",
-    "ble"
+    "gps"
   ],
   "author": "Tim Vahlbrock",
   "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/public-transit-detector/public-transit-detector/issues"
   },
-  "homepage": "https://github.com/public-transit-detector/public-transit-detector#readme",
+  "homepage": "https://github.com/public-transit-detector/public-transit-detector/detector/#readme",
+  "scripts": {
+    "build": "rm -rf extract-osm-data && vite build",
+    "build:watch": "vite build --watch",
+    "lint": "eslint \"src/**/*.ts\" --fix",
+    "test": "cucumber-js",
+    "test:watch": "npx nodemon -e \"ts,feature\" --exec \"npm run test\"",
+    "test:mutation": "stryker run"
+  },
+  "dependencies": {
+    "geolib": "^3.3.4"
+  },
   "devDependencies": {
     "@cucumber/cucumber": "^10.1.0",
     "@rollup/plugin-typescript": "^11.1.5",
@@ -61,8 +63,5 @@
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.2.2",
     "vite": "^5.0.9"
-  },
-  "dependencies": {
-    "geolib": "^3.3.4"
   }
 }

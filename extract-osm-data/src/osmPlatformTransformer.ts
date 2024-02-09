@@ -1,4 +1,4 @@
-import { stringify } from "csv/sync";
+import { stringify } from "csv-stringify/sync";
 import { writeFile } from "fs/promises";
 import { deflate } from "pako";
 import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";

@@ -9,7 +9,8 @@
         "strictNullChecks": true,
         "lib": [
             "ES2023"
-        ]
+        ],
+        "incremental": false
     },
     "references": [
         {
