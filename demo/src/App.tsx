@@ -165,11 +165,11 @@ const poiPromise = getPois().catch(error => {
 });
 async function getPois(): Promise<(OsmRoute | OsmStop)[]> {
   console.log("Loading POIs");
-  const data = await Promise.all([loadFullRoutes(), getVrrStops()]);
+  const data = await Promise.all([getOsmRoutes(), getOsmStops()]);
   return data.flat();
 }
 
-export async function getVrrStops(): Promise<OsmStop[]> {
+export async function getOsmStops(): Promise<OsmStop[]> {
   const platforms = await loadPlatforms();
   const platformBounds = await loadPlatformBounds();
 
@@ -208,7 +208,7 @@ async function loadPlatformBounds(): Promise<{ id: string, latitude: number, lon
   return parse(csvPlatformBounds, { columns: true });
 }
 
-async function loadFullRoutes(): Promise<OsmRoute[]> {
+async function getOsmRoutes(): Promise<OsmRoute[]> {
   const routes = await loadRoutes();
   const sections = await loadSections();
   let sectionIndex = 0;

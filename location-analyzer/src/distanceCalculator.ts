@@ -1,7 +1,7 @@
 import { getDistance, isPointInPolygon } from "geolib";
 import { getDistanceFromLine } from "./getDistanceFromLine.js";
 import { GeoPosition, Route, Stop } from "./index.js";
-import { POIReference, RouteMap, RouteReference, StopReference, isRouteRef } from "./routeMap.js";
+import { POIReference, RouteReference, StopReference, isRouteRef } from "./routeMap.js";
 
 export interface POISource<R extends Route, S extends Stop> {
     getPOIsAtLocation(location: GeoPosition): POIReference<R, S>[];
@@ -9,14 +9,15 @@ export interface POISource<R extends Route, S extends Stop> {
 
 export class DistanceCalculator<R extends Route, S extends Stop> {
     protected pois = new Map<string, R | S>();
-    protected routeMap = new RouteMap<R, S>();
+
+    public constructor(protected dataSource: POISource<R, S>) { }
 
     public getUniquePOIsNear(currentLocation: GeoPosition): (WithDistance<R | S>)[] {
         return this.keepClosestOfEachPoi(this.getPOIsNear(currentLocation));
     }
 
     public getPOIsNear(currentLocation: GeoPosition): (WithDistance<R | S>)[] {
-        const nearbyPOIs = this.routeMap.getPOIsAtLocation(currentLocation);
+        const nearbyPOIs = this.dataSource.getPOIsAtLocation(currentLocation);
         return nearbyPOIs.map(poi => this.withDistance(currentLocation, poi));
     }
 
@@ -92,11 +93,6 @@ export class DistanceCalculator<R extends Route, S extends Stop> {
             poiId: stopReference.poi.id,
             value: distance
         };
-    }
-
-    public updatePOIs(pois: (R | S)[]): void {
-        this.routeMap.update(pois);
-        this.pois = new Map(pois.map(poi => [poi.id, poi]));
     }
 }
 

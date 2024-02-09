@@ -1,6 +1,7 @@
 import { getDistance } from "geolib";
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, WithDistance } from "../distanceCalculator.js";
+import { DistanceCalculator, POISource, WithDistance } from "../distanceCalculator.js";
+import { RouteMap } from "../routeMap.js";
 import { Route, RouteState, Stop, StopState, UnknownState, byProximity, isGuessFor, isRouteDistance, isStopDistance, type FilledState, type GeoPosition } from "./states.js";
 
 export interface WithAveragedDistance<R extends Route, S extends Stop, T extends WithDistance<R | S>> {
@@ -146,21 +147,25 @@ export class State<R extends Route, S extends Stop> {
             .points;
     }
 
-    public updatePOIs(pois: (R | S)[]): this {
-        this.distanceCalculator.updatePOIs(pois);
-        return this;
-    }
-
     public get nearbyPlatforms(): WithDistance<S>[] {
         return [];
     }
 
-    public static initial<R extends Route, S extends Stop>(pois: (R | S)[] = []): State<R, S> {
+    public static initial<R extends Route, S extends Stop>(geoMapOrPois: POISource<R, S> | (R | S)[]): State<R, S> {
+        let geoMap: POISource<R, S> | undefined;
+        if (Array.isArray(geoMapOrPois)) {
+            geoMap = new RouteMap<R, S>()
+                .update(geoMapOrPois);
+        } else {
+            geoMap = geoMapOrPois;
+        }
+
+        const distanceCalculator = new DistanceCalculator(geoMap);
         return new State(
             new Buffer(10),
             new Buffer<FilledState<R, S>>(10),
-            new DistanceCalculator(),
+            distanceCalculator,
             []
-        ).updatePOIs(pois);
+        );
     }
 }

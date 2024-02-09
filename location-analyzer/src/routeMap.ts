@@ -23,9 +23,10 @@ export class RouteMap<R extends Route, S extends Stop> implements POISource<R, S
         this.coordinateMap = new Map();
     }
 
-    public update(pois: (R | S)[]): void {
+    public update(pois: (R | S)[]): this {
         this.coordinateMap = new Map();
         pois.forEach(route => this.add(route));
+        return this;
     }
 
     public add(poi: R | S): void {
