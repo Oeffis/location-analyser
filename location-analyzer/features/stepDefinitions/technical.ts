@@ -5,14 +5,14 @@ Given<LocationAnalyzerWorld>("I do not configure any stops initially", function 
     this.updatePOIs([]);
 });
 
-Given<LocationAnalyzerWorld>("I add the VRR stops", function () {
-    return this.loadVrrStops();
+Given<LocationAnalyzerWorld>("I add the OSM stops", function () {
+    return this.loadOsmStops();
 });
 
-Given<LocationAnalyzerWorld>("I use a location analyzer with the VRR routes and stops", function () {
-    return this.loadAllVrrData();
+Given<LocationAnalyzerWorld>("I use a location analyzer with the OSM routes and stops", function () {
+    return this.loadAllOsmData();
 });
 
-Given<LocationAnalyzerWorld>("I use a location analyzer with the VRR data", async function () {
-    return this.loadAllVrrData();
+Given<LocationAnalyzerWorld>("I use a location analyzer with the OSM data", async function () {
+    return this.loadAllOsmData();
 });

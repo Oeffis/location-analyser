@@ -26,15 +26,15 @@ Given<LocationAnalyzerWorld>("the 302 travels on a separate track in each direct
 });
 
 Given<LocationAnalyzerWorld>("the RB43 travels on a single track between Buer Süd and Zoo", function () {
-    return this.loadAllVrrData();
+    return this.loadAllOsmData();
 });
 
 Given<LocationAnalyzerWorld>("the S9 to Wuppertal leaves the area between Gladback and Essen", async function () {
-    return this.loadAllVrrData();
+    return this.loadAllOsmData();
 });
 
 Given<LocationAnalyzerWorld>("the Lines 399 and 342 split at the start of the Neidenburger Straße", async function () {
-    return this.loadAllVrrData();
+    return this.loadAllOsmData();
 });
 
 Given<LocationAnalyzerWorld>("I traveled from the Westfälische Hochschule to the Neidenburger Straße", function () {
@@ -47,11 +47,11 @@ Given<LocationAnalyzerWorld>("I traveled from the Westfälische Hochschule to th
 });
 
 Given<LocationAnalyzerWorld>("the RE2 stops at platform 7 of Gelsenkirchen Hbf", async function () {
-    return this.loadAllVrrData();
+    return this.loadAllOsmData();
 });
 
 Given<LocationAnalyzerWorld>("the 302 travels along the Musiktheater im Revier, where a Bus Stop is North of the track", async function () {
-    return this.loadAllVrrData();
+    return this.loadAllOsmData();
 });
 
 When<LocationAnalyzerWorld>("I am on the 302 to Buer Rathaus North of Veltins Arena", function () {

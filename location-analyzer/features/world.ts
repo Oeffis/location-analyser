@@ -112,15 +112,15 @@ export class LocationAnalyzerWorld {
         this.currentState.updatePOIs(routes);
     }
 
-    public async loadVrrRoutes(): Promise<void> {
+    public async loadOsmRoutes(): Promise<void> {
         this.updatePOIs(await getOsmRoutes());
     }
 
-    public async loadVrrStops(): Promise<void> {
+    public async loadOsmStops(): Promise<void> {
         this.updatePOIs(await getOsmStops());
     }
 
-    public async loadAllVrrData(): Promise<void> {
+    public async loadAllOsmData(): Promise<void> {
         const both = await Promise.all([
             getOsmRoutes(),
             getOsmStops()

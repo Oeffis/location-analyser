@@ -4,7 +4,7 @@ Feature: Nearby Platforms Detection
     I want to be able to detect nearby platforms
 
     Background:
-        Given I use a location analyzer with the VRR data
+        Given I use a location analyzer with the OSM data
 
     Scenario: Detects the platform when exactly at the bus stop
         Given I am at 'GE Westfälische Hochschule'
@@ -39,7 +39,7 @@ Feature: Nearby Platforms Detection
 
     Scenario: Stops are added later
         Given I do not configure any stops initially
-        But I add the VRR stops
+        But I add the OSM stops
         And I am at 'GE Westfälische Hochschule'
         Then the id of the nearest platform is '379638461'
 
