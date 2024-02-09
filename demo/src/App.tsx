@@ -19,7 +19,7 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { Route, Section, State, Stop, WithDistance, isRouteDistance } from "@oeffis/location-analyzer";
+import { Route, RouteMap, Section, State, Stop, WithDistance, isRouteDistance } from "@oeffis/location-analyzer";
 import { parse } from "csv-parse/browser/esm/sync";
 import { getSpeed } from "geolib";
 import { inflate } from "pako";
@@ -30,14 +30,15 @@ setupIonicReact();
 
 const App: React.FC = () => {
   const positions = usePosition();
-  const [state, setState] = useState<State<OsmRoute, OsmStop>>(State.initial());
-  poiPromise.then(pois => state.updatePOIs(pois)).catch(err => console.error(err));
+  const routeMap = new RouteMap<OsmRoute, OsmStop>();
+  const [state, setState] = useState<State<OsmRoute, OsmStop>>(State.initial(routeMap));
+  poiPromise.then(pois => routeMap.update(pois)).catch(err => console.error(err));
 
-  function getName(poi: WithDistance<OsmRoute> | WithDistance<OsmStop>): string {
-    if (isRouteDistance(poi)) {
+  function getName(poi: WithDistance<OsmRoute | OsmStop>): string {
+    if (isRouteDistance<OsmRoute, OsmStop>(poi)) {
       return poi.poi.from + " - " + poi.poi.to;
     }
-    return poi.poi.name;
+    return (poi.poi as OsmStop).name;
   }
 
   useEffect(() => {
@@ -85,7 +86,7 @@ const App: React.FC = () => {
         </p>)}
         <h1>Guesses</h1>
         {state.guesses.map(guess => (<p key={guess.poi.id}>
-          {isRouteDistance(guess) ? "Route" : "Stop"}
+          {isRouteDistance<OsmRoute, OsmStop>(guess) ? "Route" : "Stop"}
           ID: {guess.poi.id}<br />
           Name: {getName(guess)}<br />
           Distance: {guess.distance.value}m<br />
@@ -236,7 +237,7 @@ async function loadSections(): Promise<(Section & { consecutiveSection: number }
   return sectionLines.map(lineToSection);
 }
 
-async function loadRoutes(): Promise<Route[]> {
+async function loadRoutes(): Promise<OsmRoute[]> {
   const routeLines = await readZippedCsv("routes");
   return routeLines.map(lineToRoute);
 }
@@ -250,7 +251,7 @@ async function readZippedCsv(name: string): Promise<string[]> {
   return lines.slice(1);
 }
 
-function lineToRoute(line: string): Route {
+function lineToRoute(line: string): OsmRoute {
   return {
     id: line.split(",")[0]!,
     from: line.split(",")[1]!,
