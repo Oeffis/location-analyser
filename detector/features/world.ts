@@ -2,7 +2,7 @@ import { AfterAll, BeforeAll, setWorldConstructor } from "@cucumber/cucumber";
 import { assert } from "chai";
 import { parse } from "csv/sync";
 import { readFileSync, writeFileSync } from "fs";
-import { FilledState, GeoLocation, GeoPosition, RouteMap, State, WithDistance } from "../src/index.js";
+import { FilledState, GeoLocation, GeoPosition, State, TileMap, WithDistance } from "../src/index.js";
 import { OsmRoute, getOsmRoutes } from "./getOsmRoutes.js";
 import { OsmStop, getOsmStops } from "./getOsmStops.js";
 
@@ -68,7 +68,7 @@ AfterAll(function () {
 });
 
 export class LocationAnalyzerWorld {
-    protected geoMap = new RouteMap<OsmRoute, OsmStop>();
+    protected geoMap = new TileMap<OsmRoute, OsmStop>();
     protected currentState = State.initial<OsmRoute, OsmStop>(this.geoMap);
     public expectedRoutes: Partial<OsmRoute>[] = [];
     public routeOrderMatters = true;
