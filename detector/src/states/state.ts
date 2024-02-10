@@ -131,8 +131,8 @@ export class State<R extends Route, S extends Stop> {
             .map(guess => {
                 const currentDistance = guess.distance.value;
                 const history = this.fullHistory;
-                const previousDistance = history[history.length - 1]?.find(this.isGuessFor(guess.poi))?.distance.value ?? currentDistance;
-                const prePreviousDistance = history[history.length - 2]?.find(this.isGuessFor(guess.poi))?.distance.value ?? previousDistance;
+                const previousDistance = history[history.length - 2]?.find(this.isGuessFor(guess.poi))?.distance.value ?? currentDistance;
+                const prePreviousDistance = history[history.length - 3]?.find(this.isGuessFor(guess.poi))?.distance.value ?? previousDistance;
                 const averagedDistance = (currentDistance + previousDistance + prePreviousDistance) / 3;
                 return {
                     guess,
