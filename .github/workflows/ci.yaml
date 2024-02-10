@@ -39,6 +39,11 @@ jobs:
           run: |
             npm run lint -- --max-warnings 0 --no-fix
 
+        - name: Build OSM Data Extractor
+          working-directory: ./extract-osm-data
+          run: |
+            npm run build
+
         - name: Lint Demo
           working-directory: ./demo
           run: |
