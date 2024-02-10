@@ -26,7 +26,7 @@ exports[`extractOsmPlatforms > extracts > extracts outer section of a train stat
     "layer": "2",
     "level": "2",
     "local_ref": "4;5",
-    "name": "Gelsenkirchen Hbf",
+    "name": "Gelsenkirchen Hauptbahnhof",
     "public_transport": "platform",
     "railway": "platform",
     "ref": "4;5",
@@ -124,8 +124,8 @@ exports[`extractOsmPlatforms > extracts > extracts outer section of a train stat
 exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 9`] = `
 {
   "id": 454217533,
-  "lat": 51.5058412,
-  "lon": 7.1064241,
+  "lat": 51.5058366,
+  "lon": 7.1064281,
   "type": "node",
 }
 `;
@@ -133,8 +133,8 @@ exports[`extractOsmPlatforms > extracts > extracts outer section of a train stat
 exports[`extractOsmPlatforms > extracts > extracts outer section of a train station platform 10`] = `
 {
   "id": 454217534,
-  "lat": 51.5057852,
-  "lon": 7.1064546,
+  "lat": 51.5057919,
+  "lon": 7.1064519,
   "type": "node",
 }
 `;
@@ -492,13 +492,13 @@ exports[`extractOsmPlatforms > transforms > transforms platforms 1`] = `
     ],
     [
       4250656,
-      51.5058412,
-      7.1064241,
+      51.5058366,
+      7.1064281,
     ],
     [
       4250656,
-      51.5057852,
-      7.1064546,
+      51.5057919,
+      7.1064519,
     ],
     [
       4250656,
