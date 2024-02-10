@@ -1,6 +1,6 @@
 import { getDistance } from "geolib";
 import { Buffer } from "../buffer.js";
-import { DistanceCalculator, POISource, Route, RouteMap, RouteState, Stop, StopState, UnknownState, WithDistance, isRouteDistance, isStopDistance, type FilledState, type GeoPosition } from "../index.js";
+import { DistanceCalculator, POISource, Route, RouteState, Stop, StopState, TileMap, UnknownState, WithDistance, isRouteDistance, isStopDistance, type FilledState, type GeoPosition } from "../index.js";
 
 export interface WithAveragedDistance<R extends Route, S extends Stop, T extends WithDistance<R | S>> {
     guess: T;
@@ -160,7 +160,7 @@ export class State<R extends Route, S extends Stop> {
     public static initial<R extends Route, S extends Stop>(geoMapOrPois: POISource<R, S> | (R | S)[]): State<R, S> {
         let geoMap: POISource<R, S> | undefined;
         if (Array.isArray(geoMapOrPois)) {
-            geoMap = new RouteMap<R, S>()
+            geoMap = new TileMap<R, S>()
                 .update(geoMapOrPois);
         } else {
             geoMap = geoMapOrPois;

@@ -1,6 +1,6 @@
 import { GeoLocation, POIReference, POISource, Route, RouteReference, Section, Stop, StopReference } from "./index.js";
 
-export class RouteMap<R extends Route, S extends Stop> implements POISource<R, S>{
+export class TileMap<R extends Route, S extends Stop> implements POISource<R, S>{
     protected coordinateMap = new Map<number, POIReference<R, S>[]>();
 
     constructor() {
