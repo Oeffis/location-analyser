@@ -1,6 +1,6 @@
-import { mkdir, readFile, writeFile } from "fs/promises";
+import { readFile } from "fs/promises";
 import { beforeAll, expect, suite, test } from "vitest";
-import { ExtractionResult, Node, OsmExtractor, Relation, Way } from "./osmExtractor";
+import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";
 import { OsmRouteTransformer } from "./osmRouteTransformer";
 
 suite("extractOsmRoutes", () => {
@@ -12,34 +12,18 @@ suite("extractOsmRoutes", () => {
     const MonorailH1WithSingleWayConsecutiveSectionAtStart = 1901043;
     const MonorailH1WithSingleWayConsecutiveSectionAtEnd = 93947;
 
-    let extractor: OsmExtractor;
     let extraction: ExtractionResult;
 
     beforeAll(async () => {
-        extractor = OsmExtractor.forTracks("./test-cache/Bochum.osm");
+        const extractionFixture = await readFile("./fixtures/extractedRoutes.json", "utf-8");
+        const parsedExtractionFixture = JSON.parse(extractionFixture) as { relations: Relation[]; ways: Way[]; nodes: Node[] };
 
-        try {
-            const cachedExtraction = await readFile("./test-cache/extracted.json", "utf-8");
-            console.log("using cached extraction");
-
-            const parsedCachedExtraction = JSON.parse(cachedExtraction) as { relations: Relation[]; ways: Way[]; nodes: Node[] };
-            extraction = {
-                relations: new Map(parsedCachedExtraction.relations.map((relation: Relation) => [relation.id, relation])),
-                ways: new Map(parsedCachedExtraction.ways.map((way: Way) => [way.id, way])),
-                nodes: new Map(parsedCachedExtraction.nodes.map((node: Node) => [node.id, node]))
-            };
-        } catch (e) {
-            console.warn("no cached extraction found, extracting from OSM");
-            console.error(e);
-            extraction = await extractor.extract();
-            await mkdir("./test-cache", { recursive: true });
-            await writeFile("./test-cache/extracted.json", JSON.stringify({
-                relations: Array.from(extraction.relations.values()),
-                ways: Array.from(extraction.ways.values()),
-                nodes: Array.from(extraction.nodes.values())
-            }));
-        }
-    }, 1200000);
+        extraction = {
+            relations: new Map(parsedExtractionFixture.relations.map((relation: Relation) => [relation.id, relation])),
+            ways: new Map(parsedExtractionFixture.ways.map((way: Way) => [way.id, way])),
+            nodes: new Map(parsedExtractionFixture.nodes.map((node: Node) => [node.id, node]))
+        };
+    });
 
     // removed because it's too big for snapshots
     // test("extracts data", () => {
