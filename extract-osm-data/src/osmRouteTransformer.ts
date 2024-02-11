@@ -1,22 +1,11 @@
 import { stringify } from "csv-stringify/sync";
 import { writeFile } from "fs/promises";
 import { deflate } from "pako";
-import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";
+import { Node } from "./osmExtractor";
+import { OsmTransformer } from "./osmTransformer";
 import { WaySorter } from "./waySorter";
 
-export class OsmRouteTransformer {
-    private readonly relations: Map<number, Relation>;
-    private readonly ways: Map<number, Way>;
-    private readonly nodes: Map<number, Node>;
-
-    public constructor(
-        extraction: ExtractionResult
-    ) {
-        this.relations = extraction.relations;
-        this.ways = extraction.ways;
-        this.nodes = extraction.nodes;
-    }
-
+export class OsmRouteTransformer extends OsmTransformer {
     public async writeToDir(outDir: string): Promise<void> {
         const { routes, sections } = this.getTransformed();
 
