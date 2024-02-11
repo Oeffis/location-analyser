@@ -1,6 +1,6 @@
 import { Relation, Way } from "./osmExtractor";
 
-export class RouteSorter {
+export class WaySorter {
     private remainingWays: Way[];
 
     public constructor(

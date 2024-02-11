@@ -2,7 +2,7 @@ import { stringify } from "csv-stringify/sync";
 import { writeFile } from "fs/promises";
 import { deflate } from "pako";
 import { ExtractionResult, Node, Relation, Way } from "./osmExtractor";
-import { RouteSorter } from "./routeSorter";
+import { WaySorter } from "./waySorter";
 
 export class OsmRouteTransformer {
     private readonly relations: Map<number, Relation>;
@@ -62,7 +62,7 @@ export class OsmRouteTransformer {
         const header = ["routeId", "consecutiveSection", "section", "lat", "lon"];
         const relationsAsArray = Array.from(this.relations.values())
             .filter(relation => !filter?.routes || filter.routes.includes(relation.id));
-        const sections = relationsAsArray.flatMap(relation => new RouteSorter(relation, this.ways)
+        const sections = relationsAsArray.flatMap(relation => new WaySorter(relation, this.ways)
             .getConsecutiveSections()
             .flatMap((cSection, cSectionIndex) => cSection
                 .map(nodeId => this.getNodeOrThrow(nodeId))
