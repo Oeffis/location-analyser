@@ -1,7 +1,6 @@
 import { stringify } from "csv-stringify/sync";
 import { writeFile } from "fs/promises";
 import { deflate } from "pako";
-import { Node } from "./osmExtractor";
 import { OsmTransformer } from "./osmTransformer";
 import { WaySorter } from "./waySorter";
 
@@ -59,12 +58,6 @@ export class OsmRouteTransformer extends OsmTransformer {
             )
         );
         return [header, ...sections];
-    }
-
-    private getNodeOrThrow(nodeId: number): Node {
-        const node = this.nodes.get(nodeId);
-        if (!node) throw new Error(`Node ${nodeId} not found`);
-        return node;
     }
 }
 
