@@ -2,6 +2,7 @@ import { parse } from "path";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { OsmExtractor } from "./osmExtractor";
+import { OsmPlatformTransformer } from "./osmPlatformTransformer";
 import { OsmRouteTransformer } from "./osmRouteTransformer";
 
 async function run(): Promise<void> {
@@ -47,7 +48,7 @@ async function extractPlatforms(argv: { inFile: string; outDir: string | undefin
     const extraction = await extractor.extract();
 
     console.log("Done extracting, transforming");
-    const transformer = new OsmRouteTransformer(extraction);
+    const transformer = new OsmPlatformTransformer(extraction);
     if (argv.uncompressedOutFile) {
         await transformer.writeToDir(argv.outDir ?? parse(argv.inFile).name);
     } else {
