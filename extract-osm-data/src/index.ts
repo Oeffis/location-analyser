@@ -34,7 +34,7 @@ async function extractRoutes(argv: { inFile: string; outDir: string | undefined;
     console.log("Done extracting, transforming");
     const transformer = new OsmRouteTransformer(extraction);
     if (argv.uncompressedOutFile) {
-        await transformer.writeToDir(argv.outDir ?? parse(argv.inFile).name);
+        await transformer.writeToDir(argv.outDir ?? parse(argv.inFile).dir);
     } else {
         await transformer.writeCompressedToDir(argv.outDir ?? parse(argv.inFile).dir);
     }
@@ -50,7 +50,7 @@ async function extractPlatforms(argv: { inFile: string; outDir: string | undefin
     console.log("Done extracting, transforming");
     const transformer = new OsmPlatformTransformer(extraction);
     if (argv.uncompressedOutFile) {
-        await transformer.writeToDir(argv.outDir ?? parse(argv.inFile).name);
+        await transformer.writeToDir(argv.outDir ?? parse(argv.inFile).dir);
     } else {
         await transformer.writeCompressedToDir(argv.outDir ?? parse(argv.inFile).dir);
     }
