@@ -126,7 +126,7 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
 
         let allMatched = false;
         if (!noneExpected) {
-            allMatched = matched.length === expected.length;
+            allMatched = matched.length === expected.length && status.guesses.length === expected.length;
         } else {
             allMatched = status.guesses.length === 0;
         }
