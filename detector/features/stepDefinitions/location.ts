@@ -157,10 +157,10 @@ function checkTrack(this: LocationAnalyzerWorld, data: RawDataTable): void {
             longitude: trackSection.longitude,
             result: status.guesses.map(guess => {
                 if (isStopDistance<OsmRoute, OsmStop>(guess)) {
-                    return guess.poi.name;
+                    return guess.poi.name + " (" + guess.poi.id + ")";
                 }
                 if (isRouteDistance<OsmRoute, OsmStop>(guess)) {
-                    return `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}'`;
+                    return `${guess.poi.ref} - '${guess.poi.from}' => '${guess.poi.to}' (${guess.poi.id})`;
                 }
             }).join(", ") || "none",
             expected: expected.map(rule => rule.vehicleOrStop).join(", ") || "no expectations"
