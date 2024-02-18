@@ -51,7 +51,6 @@ async function parseTimeSpents(data) {
 
       const match = body.match(TIME_SPENT_REGEX);
 
-
       if (!match.groups) {
         console.log(match.groups);
       }
@@ -151,12 +150,22 @@ async function main() {
   // const perIssueAndLogin = await aggregatePerIssueAndLogin(parseTimeSpentsData);
   const perLogin = await aggregatePerLogin(parseTimeSpentsData);
   const perIssue = await aggregatePerIssue(parseTimeSpentsData);
+  const perIssueAndLogin = await aggregatePerIssueAndLogin(parseTimeSpentsData);
 
   const csvPerLogin = 'login,timeSpentInMinutes\n' + Object.entries(perLogin).map(([login, timeSpentInMinutes]) => `${login},${timeSpentInMinutes}`).join('\n');
   const csvPerIssue = 'issue,timeSpentInMinutes\n' + Object.entries(perIssue).map(([issue, timeSpentInMinutes]) => `${issue},${timeSpentInMinutes}`).join('\n');
+  const csvPerIssueAndLogin = 'login,issue,timeSpentInMinutes\n' +
+    Object.entries(perIssueAndLogin).map(([login, issues]) =>
+      Object.entries(issues)
+        .sort(([_issueA, entryA], [_issueB, entryB]) => (entryB.amount - entryA.amount))
+        .map(([issue, entry]) =>
+          `${login},${issue},"${entry.title}",${entry.amount}`
+        ).join('\n')
+    ).join('\n');
 
   writeFileSync('perLogin.csv', csvPerLogin);
   writeFileSync('perIssue.csv', csvPerIssue);
+  writeFileSync('perIssueAndLogin.csv', csvPerIssueAndLogin);
 }
 
 main()
