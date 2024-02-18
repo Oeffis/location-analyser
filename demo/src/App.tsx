@@ -19,7 +19,7 @@ import "@ionic/react/css/text-transformation.css";
 
 /* Theme variables */
 import { Geolocation, Position } from "@capacitor/geolocation";
-import { Route, RouteMap, Section, State, Stop, WithDistance, isRouteDistance } from "@public-transit-detector/detector";
+import { Route, Section, State, Stop, TileMap, WithDistance, isRouteDistance } from "@public-transit-detector/detector";
 import { parse } from "csv-parse/browser/esm/sync";
 import { getSpeed } from "geolib";
 import { inflate } from "pako";
@@ -30,7 +30,7 @@ setupIonicReact();
 
 const App: React.FC = () => {
   const positions = usePosition();
-  const routeMap = new RouteMap<OsmRoute, OsmStop>();
+  const routeMap = new TileMap<OsmRoute, OsmStop>();
   const [state, setState] = useState<State<OsmRoute, OsmStop>>(State.initial(routeMap));
   poiPromise.then(pois => routeMap.update(pois)).catch(err => console.error(err));
 
